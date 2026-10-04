@@ -1,0 +1,30 @@
+# Go
+/backend/api-service-golang/api-service-golang
+*.exe
+*.test
+*.out
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.env
+frontend/.env.local
+
+# Terraform / infra
+infra/**/.terraform/
+infra/**/*.tfstate
+infra/**/*.tfstate.*
+infra/**/*.tfvars
+infra/**/.terraform.lock.hcl
+
+# Claude Code — configuração pessoal, não compartilhada
+.claude/settings.local.json
+
+# OS / editor
+.DS_Store
+*.swp
+
+# AI
+AGENTS.md
+.claude/
