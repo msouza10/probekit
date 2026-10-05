@@ -2,16 +2,16 @@
 
 @theme {
   /* Raw design tokens — see ../design.md */
-  --color-blue-cornflower: #6798ff;
-  --color-page-ink: #0a0a0a;
-  --color-card-carbon: #1e1e1e;
-  --color-deep-coal: #141414;
+  --color-blue-cornflower: #8bb5ff;
+  --color-page-ink: #0b111b;
+  --color-card-carbon: #151f2d;
+  --color-deep-coal: #101925;
   --color-onyx: #000000;
-  --color-steel-border: #313131;
-  --color-graphite: #454545;
-  --color-fog: #7c7c7c;
-  --color-ash: #a7a7a7;
-  --color-snow: #ffffff;
+  --color-steel-border: #29374a;
+  --color-graphite: #40516a;
+  --color-fog: #94a3b8;
+  --color-ash: #b2bfd0;
+  --color-snow: #f0f4fa;
   --color-signal-red: #e5484d;
   --color-signal-red-surface: #2a1214;
 
@@ -95,18 +95,94 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-inter);
-    /* Grid wireframe motif — see design.md "Grid Wireframe Motif": a
-       low-contrast 48px blueprint grid, the system's one repeated motif. */
+    min-width: 320px;
     background-image:
-      repeating-linear-gradient(
-        to right,
-        var(--color-card-carbon) 0 1px,
-        transparent 1px 48px
-      ),
-      repeating-linear-gradient(
-        to bottom,
-        var(--color-card-carbon) 0 1px,
-        transparent 1px 48px
-      );
+      radial-gradient(ellipse at 80% 0%, #20375480 0%, transparent 48%),
+      radial-gradient(ellipse at 0% 45%, #173b3e30 0%, transparent 45%);
+    background-repeat: no-repeat;
+    -webkit-font-smoothing: antialiased;
   }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 2rem;
+    color-scheme: dark;
+  }
+  ::selection {
+    background: #8bb5ff40;
+    color: #fff;
+  }
+  button,
+  a,
+  input {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button:not(:disabled),
+  a {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 4px;
+  }
+  p {
+    line-height: 1.7;
+  }
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 4.4vw, 3.75rem);
+  line-height: 1.12;
+  letter-spacing: -0.055em;
+}
+
+.tool-card {
+  background: linear-gradient(145deg, #182434, #111b28);
+  box-shadow: 0 1px 0 #ffffff05 inset;
+}
+.tool-card:hover {
+  border-color: #526c8f;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 32px -24px #000;
+}
+@media (max-width: 639px) {
+  .site-header {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .site-header > div:first-child {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+  .site-header > div:last-child {
+    display: none;
+  }
+  .site-header [data-slot="navigation-menu-content"] {
+    max-width: calc(100vw - 2rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .tool-card:hover {
+    transform: none;
+  }
+}
+
+.hero-cta {
+  color: var(--color-page-ink);
 }
