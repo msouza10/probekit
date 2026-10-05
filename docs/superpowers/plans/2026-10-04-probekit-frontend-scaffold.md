@@ -176,11 +176,11 @@ Expected: succeeds.
 - [ ] **Step 15: Commit**
 
 ```bash
-git add frontend package.json package-lock.json 2>/dev/null
+git add frontend
 git commit -m "chore(frontend): scaffold Vite + React + TypeScript with test harness"
 ```
 
-(`package.json`/`package-lock.json` at the repo root are gitignored on purpose — see `.gitignore`'s `# AI` section — so the `2>/dev/null` just swallows git's "did not match any files" notice for them; only `frontend/` actually gets committed here.)
+(Only `frontend/` is committed here — a root-level `package.json`/`package-lock.json` would be from unrelated tooling and is gitignored on purpose; this task never touches the repo root.)
 
 ---
 

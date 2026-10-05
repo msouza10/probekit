@@ -26,10 +26,10 @@ O frontend e a infraestrutura de publicação ainda estão na fase de planejamen
 ## Estrutura
 
 ```
-backend/api-service-golang/   API em Go e testes automatizados
-frontend/                    planejamento do frontend
-infra/oci-vm/                espaço reservado para infraestrutura como código
-docs/superpowers/specs/      especificações de funcionalidades e arquitetura
+backend/api-service-golang/   API em Go (ping, DNS lookup)
+frontend/                     React + Vite + TypeScript — ver frontend/README.md
+infra/oci-vm/                 infraestrutura como código (ainda não iniciado)
+docs/superpowers/specs/       specs de design de cada feature
 ```
 
 ## Executar localmente
