@@ -133,6 +133,7 @@ func Ping() http.Handler {
 			MinRtt:         stats.MinRtt.String(),
 			AvgRtt:         stats.AvgRtt.String(),
 			MaxRtt:         stats.MaxRtt.String(),
+			StdDevRtt:      stats.StdDevRtt.String(),
 		}
 
 		utils.SetJSON(w, http.StatusOK, res)

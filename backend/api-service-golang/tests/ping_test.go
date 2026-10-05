@@ -32,6 +32,7 @@ type pingSuccessBody struct {
 	MinRtt      string  `json:"min_rtt"`
 	AvgRtt      string  `json:"avg_rtt"`
 	MaxRtt      string  `json:"max_rtt"`
+	Jitter      string  `json:"jitter"`
 }
 
 // TestPing cobre a rota /api/ping de ponta a ponta: método inválido,
@@ -218,7 +219,7 @@ func TestPing(t *testing.T) {
 			t.Errorf("PacketsSent = %d, want %d (default count)", body.PacketsSent, 5)
 		}
 
-		for field, value := range map[string]string{"min_rtt": body.MinRtt, "avg_rtt": body.AvgRtt, "max_rtt": body.MaxRtt} {
+		for field, value := range map[string]string{"min_rtt": body.MinRtt, "avg_rtt": body.AvgRtt, "max_rtt": body.MaxRtt, "jitter": body.Jitter} {
 			if _, err := time.ParseDuration(value); err != nil {
 				t.Errorf("%s = %q não é uma duration legível válida: %v", field, value, err)
 			}
