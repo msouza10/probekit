@@ -29,6 +29,17 @@ describe("AnimatedRoutes", () => {
     ).toBeInTheDocument()
   })
 
+  it("renders the Sobre page at /sobre", () => {
+    render(
+      <MemoryRouter initialEntries={["/sobre"]}>
+        <AnimatedRoutes />
+      </MemoryRouter>,
+    )
+    expect(
+      screen.getByRole("heading", { name: /sobre o probekit/i }),
+    ).toBeInTheDocument()
+  })
+
   it("does not leave two pages mounted after navigating between routes in sequence", () => {
     render(
       <MemoryRouter initialEntries={["/ping"]}>

@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from "react-router-dom"
 import DnsLookup from "./pages/DnsLookup"
 import Home from "./pages/Home"
 import Ping from "./pages/Ping"
+import Sobre from "./pages/Sobre"
 
 const pageTransition = {
   initial: { opacity: 0, y: 8 },
@@ -26,6 +27,7 @@ export function AnimatedRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/ping" element={<Ping />} />
           <Route path="/dns-lookup" element={<DnsLookup />} />
+          <Route path="/sobre" element={<Sobre />} />
         </Routes>
       </motion.div>
     </AnimatePresence>
