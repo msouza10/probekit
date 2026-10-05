@@ -30,7 +30,14 @@ func Lookup() http.Handler {
 		}
 
 		// A / AAAA
-		addrs, _ := net.LookupHost(domain)
+		addrs, err := net.LookupHost(domain)
+		if err != nil {
+			utils.SetJSON(w, http.StatusBadRequest, utils.ErrorResponse{
+				Error: "Domain not found",
+				Code:  "domain_not_found",
+			})
+			return
+		}
 
 		// CNAME
 		cname, _ := net.LookupCNAME(domain)
@@ -41,6 +48,17 @@ func Lookup() http.Handler {
 
 		// IP
 		ipRecords, _ := net.LookupIP(domain)
+		
+		// Block private ip address
+		for _, ip := range ipRecords {
+			if utils.IsBlockedIP(ip) {
+				utils.SetJSON(w, http.StatusBadRequest, utils.ErrorResponse{
+					Error: "Private ip address is not allowed",
+					Code:  "private_ip_not_allowed",
+				})
+				return
+			}
+		}
 
 		ipList := make([]string, 0, len(ipRecords))
 

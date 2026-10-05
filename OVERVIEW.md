@@ -27,6 +27,7 @@ O projeto também será um laboratório pessoal de DevOps, com infraestrutura co
 - Hospedar o frontend simultaneamente em várias clouds não é requisito inicial.
 - Terraform e GitHub Actions fazem parte da abordagem DevOps.
 - A infraestrutura deve respeitar o free tier; provedores, limites e mecanismos de controle ainda serão definidos.
+- Gestão de tasks/backlog via **Azure Boards**, conectado ao repositório GitHub (código/CI/CD continuam só no GitHub — Azure Boards é usado apenas pra work items/sprints, via integração oficial GitHub ↔ Azure Boards).
 
 ## Responsabilidades
 
@@ -43,15 +44,21 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 - ✅ Validação de IP privado/reservado (RFC1918, loopback, link-local/metadata, incluindo hostnames que resolvem pra essas faixas).
 - ✅ Contrato de erro padronizado (`{"error", "code"}`).
 - ✅ Suite de testes automatizados (23 casos) cobrindo validação, erros e sucesso.
-- ⏳ Jitter não está no retorno ainda (só latência min/média/máxima e perda de pacotes).
-- ❌ Rate limiting por IP de origem.
+- ✅ Jitter (`stats.StdDevRtt` da lib, exposto como `jitter` na resposta).
+- ✅ Rate limiting por IP de origem (ver abaixo).
 
 **Backend — `/api/dns-lookup`:**
 - ✅ Resolve A, AAAA, CNAME, MX (com prioridade), TXT, NS; suporte opcional a SRV.
 - ✅ Contrato de erro padronizado, consistente com `/api/ping`.
-- ⏳ Validação de IP privado ainda não aplicada nessa rota (o spec pede pras duas).
-- ❌ Testes automatizados ainda não escritos.
-- ❌ Rate limiting por IP de origem.
+- ✅ Validação de IP privado/reservado, igual ao `/api/ping`.
+- ✅ Suite de testes automatizados cobrindo validação, erros e sucesso.
+- ✅ Rate limiting por IP de origem (ver abaixo).
+
+**Rate limiting (`/api/ping` e `/api/dns-lookup`):**
+- ✅ `utils.RateLimiter`: janela fixa de 5 minutos, 50 requisições/IP, aplicado via middleware em `main.go`, compartilhado entre as duas rotas.
+- ✅ Testes automatizados do `RateLimiter` em isolamento (permite até o limite, bloqueia depois, IPs independentes).
+- ⏳ O middleware em si (dentro de `main()`) não é testável automaticamente hoje — só a lógica do `RateLimiter`; validado manualmente ponta a ponta.
+- ⏳ Sem limpeza periódica de IPs antigos ainda (mapas crescem indefinidamente) — aceitável na escala atual do projeto.
 
 **Frontend:** não iniciado.
 
@@ -74,8 +81,5 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 
 ## Próximos passos
 
-1. Validação de IP privado no `/api/dns-lookup` e testes automatizados pra essa rota.
-2. Rate limiting por IP de origem (`/api/ping` e `/api/dns-lookup`).
-3. Escolher a stack e o primeiro provedor de hospedagem.
-4. Começar o frontend (páginas `/ping` e `/dns-lookup`, 4 estados visuais).
-5. Fluxo de publicação reproduzível (Terraform + GitHub Actions).
+1. Começar o frontend (páginas `/ping` e `/dns-lookup`, 4 estados visuais), com React + Vite + TypeScript.
+2. Fluxo de publicação reproduzível (Terraform + GitHub Actions, VM OCI + Cloudflare Pages).

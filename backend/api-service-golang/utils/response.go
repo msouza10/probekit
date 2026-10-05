@@ -47,6 +47,7 @@ type PingResponse struct {
 	MinRtt      string  `json:"min_rtt"`
 	AvgRtt      string  `json:"avg_rtt"`
 	MaxRtt      string  `json:"max_rtt"`
+	StdDevRtt   string  `json:"jitter"`
 }
 
 func SetJSON(w http.ResponseWriter, status int, res interface{}) {
