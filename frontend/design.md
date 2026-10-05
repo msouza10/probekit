@@ -1,4 +1,5 @@
 # Probekit — Style Reference
+
 > blueprint control room at midnight.
 
 **Theme:** dark
@@ -9,24 +10,25 @@ Probekit's design language is a dark command center: near-black canvas, subtle g
 
 ## Tokens — Colors
 
-| Name | Value | Token | Role |
-|------|-------|-------|------|
-| Blue Cornflower | `#6798ff` | `--color-blue-cornflower` | Accent for announcement bar, feature icons, active states, and data highlight strokes |
-| Page Ink | `#0a0a0a` | `--color-page-ink` | Primary page background — the dark canvas that everything sits on |
-| Card Carbon | `#1e1e1e` | `--color-card-carbon` | Card surfaces, button backgrounds, and key borders that delineate panels |
-| Deep Coal | `#141414` | `--color-deep-coal` | Alternate surface level for nested cards and section backgrounds |
-| Onyx | `#000000` | `--color-onyx` | Pure black used in SVG illustration fills and contrast anchors |
-| Steel Border | `#313131` | `--color-steel-border` | Hairline borders on image frames and subtle dividers |
-| Graphite | `#454545` | `--color-graphite` | Mid-tone borders on outline buttons and input frames |
-| Fog | `#7c7c7c` | `--color-fog` | Disabled or de-emphasized button text |
-| Ash | `#a7a7a7` | `--color-ash` | Secondary body text, borders on muted elements, icon strokes |
-| Snow | `#ffffff` | `--color-snow` | Primary text, primary filled button background, icon fills, nav links |
-| Signal Red | `#e5484d` | `--color-signal-red` | **Exception to the single-accent rule** — error/failure state only: icon, border, and text on failed operations (e.g. ping/DNS lookup failures). Never used decoratively. |
-| Signal Red Surface | `#2a1214` | `--color-signal-red-surface` | Dark red-tinted panel background for error/alert surfaces, following the same tone-shift logic as Card Carbon/Deep Coal — used only behind Signal Red content. |
+| Name               | Value     | Token                        | Role                                                                                                                                                                      |
+| ------------------ | --------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Blue Cornflower    | `#6798ff` | `--color-blue-cornflower`    | Accent for announcement bar, feature icons, active states, and data highlight strokes                                                                                     |
+| Page Ink           | `#0a0a0a` | `--color-page-ink`           | Primary page background — the dark canvas that everything sits on                                                                                                         |
+| Card Carbon        | `#1e1e1e` | `--color-card-carbon`        | Card surfaces, button backgrounds, and key borders that delineate panels                                                                                                  |
+| Deep Coal          | `#141414` | `--color-deep-coal`          | Alternate surface level for nested cards and section backgrounds                                                                                                          |
+| Onyx               | `#000000` | `--color-onyx`               | Pure black used in SVG illustration fills and contrast anchors                                                                                                            |
+| Steel Border       | `#313131` | `--color-steel-border`       | Hairline borders on image frames and subtle dividers                                                                                                                      |
+| Graphite           | `#454545` | `--color-graphite`           | Mid-tone borders on outline buttons and input frames                                                                                                                      |
+| Fog                | `#7c7c7c` | `--color-fog`                | Disabled or de-emphasized button text                                                                                                                                     |
+| Ash                | `#a7a7a7` | `--color-ash`                | Secondary body text, borders on muted elements, icon strokes                                                                                                              |
+| Snow               | `#ffffff` | `--color-snow`               | Primary text, primary filled button background, icon fills, nav links                                                                                                     |
+| Signal Red         | `#e5484d` | `--color-signal-red`         | **Exception to the single-accent rule** — error/failure state only: icon, border, and text on failed operations (e.g. ping/DNS lookup failures). Never used decoratively. |
+| Signal Red Surface | `#2a1214` | `--color-signal-red-surface` | Dark red-tinted panel background for error/alert surfaces, following the same tone-shift logic as Card Carbon/Deep Coal — used only behind Signal Red content.            |
 
 ## Tokens — Typography
 
 ### Inter — All UI and editorial text. Weight 400 for body and meta, 500 for nav and button labels, 600 for headings. Display sizes (56–64px) carry heavy negative tracking to feel engineered and compact. · `--font-inter`
+
 - **Substitute:** Inter is freely available on Google Fonts
 - **Weights:** 400, 500, 600
 - **Sizes:** 14, 16, 20, 24, 40, 56, 64
@@ -36,6 +38,7 @@ Probekit's design language is a dark command center: near-black canvas, subtle g
 - **Role:** All UI and editorial text. Weight 400 for body and meta, 500 for nav and button labels, 600 for headings. Display sizes (56–64px) carry heavy negative tracking to feel engineered and compact.
 
 ### JetBrains Mono — Monospaced labels for section eyebrows (e.g. "HOW IT WORKS"), BETA tags, and small data codes. Wide positive tracking (0.071–0.083em) gives these labels a technical, instrument-panel feel. · `--font-jetbrains-mono`
+
 - **Substitute:** JetBrains Mono via Google Fonts
 - **Weights:** 400
 - **Sizes:** 12, 14
@@ -46,16 +49,16 @@ Probekit's design language is a dark command center: near-black canvas, subtle g
 
 ### Type Scale
 
-| Role | Family | Weight | Size | Line Height | Letter Spacing | Token |
-|------|--------|--------|------|-------------|----------------|-------|
-| caption | — | — | 12px | 1.4 | 0.85px | `--text-caption` |
-| body-sm | — | — | 14px | 1.5 | -0.17px | `--text-body-sm` |
-| body | — | — | 16px | 1.5 | -0.19px | `--text-body` |
-| subheading | — | — | 20px | 1.4 | -0.42px | `--text-subheading` |
-| heading-sm | — | — | 24px | 1.33 | -0.5px | `--text-heading-sm` |
-| heading | — | — | 40px | 1.2 | -0.84px | `--text-heading` |
-| heading-lg | — | — | 56px | 1.14 | -2.02px | `--text-heading-lg` |
-| display | — | — | 64px | 1.13 | -2.3px | `--text-display` |
+| Role       | Family | Weight | Size | Line Height | Letter Spacing | Token               |
+| ---------- | ------ | ------ | ---- | ----------- | -------------- | ------------------- |
+| caption    | —      | —      | 12px | 1.4         | 0.85px         | `--text-caption`    |
+| body-sm    | —      | —      | 14px | 1.5         | -0.17px        | `--text-body-sm`    |
+| body       | —      | —      | 16px | 1.5         | -0.19px        | `--text-body`       |
+| subheading | —      | —      | 20px | 1.4         | -0.42px        | `--text-subheading` |
+| heading-sm | —      | —      | 24px | 1.33        | -0.5px         | `--text-heading-sm` |
+| heading    | —      | —      | 40px | 1.2         | -0.84px        | `--text-heading`    |
+| heading-lg | —      | —      | 56px | 1.14        | -2.02px        | `--text-heading-lg` |
+| display    | —      | —      | 64px | 1.13        | -2.3px         | `--text-display`    |
 
 ## Tokens — Spacing & Shapes
 
@@ -65,25 +68,25 @@ Probekit's design language is a dark command center: near-black canvas, subtle g
 
 ### Spacing Scale
 
-| Name | Value | Token |
-|------|-------|-------|
-| 8 | 8px | `--spacing-8` |
-| 16 | 16px | `--spacing-16` |
-| 24 | 24px | `--spacing-24` |
-| 32 | 32px | `--spacing-32` |
-| 40 | 40px | `--spacing-40` |
-| 64 | 64px | `--spacing-64` |
-| 96 | 96px | `--spacing-96` |
-| 200 | 200px | `--spacing-200` |
+| Name | Value | Token           |
+| ---- | ----- | --------------- |
+| 8    | 8px   | `--spacing-8`   |
+| 16   | 16px  | `--spacing-16`  |
+| 24   | 24px  | `--spacing-24`  |
+| 32   | 32px  | `--spacing-32`  |
+| 40   | 40px  | `--spacing-40`  |
+| 64   | 64px  | `--spacing-64`  |
+| 96   | 96px  | `--spacing-96`  |
+| 200  | 200px | `--spacing-200` |
 
 ### Border Radius
 
 | Element | Value |
-|---------|-------|
-| tags | 4px |
-| cards | 8px |
-| inputs | 8px |
-| buttons | 8px |
+| ------- | ----- |
+| tags    | 4px   |
+| cards   | 8px   |
+| inputs  | 8px   |
+| buttons | 8px   |
 
 ### Layout
 
@@ -95,61 +98,73 @@ Probekit's design language is a dark command center: near-black canvas, subtle g
 ## Components
 
 ### White Filled Button (Primary)
+
 **Role:** Primary action — the most prominent CTA on a page
 
 White background (#ffffff), near-black text (#0a0a0a), 8px radius, 16px horizontal / 10px vertical padding. Inter 500 at 14px. Used for "Contact sales" and "Try Probekit free" in high-priority positions. No border, no shadow.
 
 ### Dark Outlined Button (Secondary)
+
 **Role:** Secondary action paired beside a primary
 
 Transparent or #0a0a0a background, 1px border at #454545, white text (#ffffff), 8px radius, 16px / 10px padding. Inter 500 at 14px. The lower-emphasis counterpart to the white filled button.
 
 ### Ghost Nav Button
+
 **Role:** Top-bar utility actions like "Log in"
 
 No background, no border, white text at 14px Inter 500. Sits inline with nav items. Padding matches nav height rhythm.
 
 ### Stat Card
+
 **Role:** Highlights a single metric in the "How it works" section
 
 #1e1e1 background, 1px border at #1e1e1 (or transparent — separation comes from surface tone), 8px radius, 24px padding. A small #6798ff icon sits above a 40px Inter 600 metric value in white, followed by a 14px label in #a7a7a7. No shadow, no hover lift.
 
 ### Section Eyebrow Label
+
 **Role:** Small uppercase label above section headlines (e.g. "HOW IT WORKS")
 
 JetBrains Mono 400 at 12px, white or #a7a7a7 text, letter-spacing 0.85px. No background, sits directly above headline with 16-24px gap.
 
 ### Product Preview Card
+
 **Role:** Inset mockup of the Probekit dashboard inside the hero
 
 #1e1e1 surface with 8px radius, contains a real product UI rendering with charts, tables, and colored data bars. Acts as a flat, borderless visual element — no shadow or frame chrome.
 
 ### BETA Tag
+
 **Role:** Marks features in early release (e.g. "AI Docs BETA")
 
 Inline text tag, no background, #a7a7a7 text at 12px Inter 400, with "BETA" uppercase in JetBrains Mono 400 at 12px. Sits beside the feature name with 8px gap.
 
 ### Logo Strip Item
+
 **Role:** Customer logo in the trust bar
 
 Greyscale SVG, roughly 80px wide, 8-16px gap between items. Logos sit on transparent background at ~60% opacity to stay subordinate to the page.
 
 ### Footer Link Column
+
 **Role:** Site map columns in the footer
 
 Column header in 12px Inter 500 uppercase at #a7a7a7 (letter-spacing ~0.5px). Links below in 14px Inter 400 white, 8-12px vertical gap between links. No bullet markers.
 
 ### Social Icon Button
+
 **Role:** LinkedIn, X, Instagram, YouTube in footer
 
 24px square, white stroke or fill, no background, no border, no hover chrome — flat icon-on-dark.
 
 ### Announcement Bar
+
 **Role:** Top-of-page promo strip
 
 Full-width #6798ff blue background, white text at 14px Inter 500, centered content with a small dismiss icon on the right. 8px vertical padding.
 
 ### Rating Badge
+
 **Role:** G2 and Capterra star ratings below the logo strip
 
 5 white stars at 12-14px, followed by "4.5/5 · 62" or similar in 12px Inter 400 #a7a7a7. Inline horizontal layout with 16px gap.
@@ -157,6 +172,7 @@ Full-width #6798ff blue background, white text at 14px Inter 500, centered conte
 ## Do's and Don'ts
 
 ### Do
+
 - Use 8px radius for all buttons, cards, and inputs — the only deviation is 4px for small tags and inline chips.
 - Set page background to #0a0a0a and reserve #1e1e1 exclusively for card and button surfaces so the surface hierarchy reads through tone alone.
 - Use #6798ff only for functional accents: announcement bars, feature icons, active nav states, and data highlight strokes — never as a background fill for content blocks.
@@ -166,6 +182,7 @@ Full-width #6798ff blue background, white text at 14px Inter 500, centered conte
 - Default to white filled buttons for primary actions and dark outlined (1px #454545) for secondary — never use the blue accent on a button background.
 
 ### Don't
+
 - Do not introduce a second chromatic color — the system is monochrome with a single blue accent, **except** Signal Red (`#e5484d`), reserved exclusively for error/failure states (icon, border, text, and the dark-red `Signal Red Surface` panel background) — never used decoratively or for anything else.
 - Do not use shadows or elevation to separate surfaces — rely on tone shifts between #0a0a0a, #141414, and #1e1e1e.
 - Do not use gradients on any surface, button, or background.
@@ -176,12 +193,12 @@ Full-width #6798ff blue background, white text at 14px Inter 500, centered conte
 
 ## Surfaces
 
-| Level | Name | Value | Purpose |
-|-------|------|-------|---------|
-| 0 | Canvas | `#0a0a0a` | Page background |
-| 1 | Section | `#141414` | Alternate band or inset section background |
-| 2 | Card | `#1e1e1` | Card, button fill, and bordered component surface |
-| 3 | Raised Edge | `#313131` | Image frames and fine separators |
+| Level | Name        | Value     | Purpose                                           |
+| ----- | ----------- | --------- | ------------------------------------------------- |
+| 0     | Canvas      | `#0a0a0a` | Page background                                   |
+| 1     | Section     | `#141414` | Alternate band or inset section background        |
+| 2     | Card        | `#1e1e1`  | Card, button fill, and bordered component surface |
+| 3     | Raised Edge | `#313131` | Image frames and fine separators                  |
 
 ## Elevation
 
@@ -198,6 +215,7 @@ Pages are max-width 1200px centered with generous side padding. The hero uses an
 ## Agent Prompt Guide
 
 **Quick Color Reference**
+
 - text: #ffffff (primary), #a7a7a7 (secondary), #7c7c7c (disabled)
 - background: #0a0a0a (page), #1e1e1e (card/button)
 - border: #1e1e1e (subtle), #454545 (outlined button), #313131 (image frame)
@@ -205,6 +223,7 @@ Pages are max-width 1200px centered with generous side padding. The hero uses an
 - primary action: #1e1e1e (filled action)
 
 **Example Component Prompts**
+
 1. Create a Primary Action Button: #1e1e1e background, #ffffff text, 9999px radius, compact pill padding. Use this filled treatment for the main CTA.
 2. Build a 3-column stat row: each cell is a #1e1e1e card with 8px radius and 24px padding. Inside, a #6798ff icon (16px, stroke) sits above a 40px Inter 600 white metric value, followed by a 14px Inter 400 #a7a7a7 label.
 3. Build a top navigation bar: #0a0a0a background, logo on the left, nav links in 14px Inter 500 #ffffff, spaced 24px apart, centered. On the right, a ghost "Log in" text link and a white filled "Contact sales" button (8px radius, 16px/10px padding). Height 64px.
@@ -243,8 +262,12 @@ A subtle 1px grid pattern at #1e1e1e sits behind the dark canvas across hero and
   --color-signal-red-surface: #2a1214;
 
   /* Typography — Font Families */
-  --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-jetbrains-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-inter:
+    "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  --font-jetbrains-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
 
   /* Typography — Scale */
   --text-caption: 12px;
@@ -332,8 +355,12 @@ A subtle 1px grid pattern at #1e1e1e sits behind the dark canvas across hero and
   --color-signal-red-surface: #2a1214;
 
   /* Typography */
-  --font-inter: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-jetbrains-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-inter:
+    "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  --font-jetbrains-mono:
+    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    monospace;
 
   /* Typography — Scale */
   --text-caption: 12px;
@@ -383,39 +410,42 @@ A subtle 1px grid pattern at #1e1e1e sits behind the dark canvas across hero and
 shadcn/ui components expect a fixed set of semantic CSS variable names (`--background`, `--primary`, etc.), not this system's descriptive token names. This block maps the tokens above onto that contract, so `npx shadcn add <component>` produces components that already match the Probekit visual language. Probekit is dark-only (no light/dark toggle in scope), so there is a single `:root` block — no `.dark` override.
 
 Two mappings need a judgment call beyond a direct lookup, flagged inline below:
+
 - **`--accent`**: shadcn uses this as a subtle hover/active background (e.g. menu item hover), but the Do's/Don'ts rule forbids Blue Cornflower as a content-block background fill. Resolution: `--accent` stays a neutral surface tone (Card Carbon) for backgrounds; Blue Cornflower is exposed separately via `--accent-foreground`-adjacent use in icons/active-state text and `--ring`, consistent with its documented role.
 - **`--secondary`**: the Dovetail/Probekit "Secondary" button is outlined (transparent + border), not filled, but shadcn's default secondary variant is a filled low-emphasis surface. Resolution: map `--secondary` to Card Carbon as a reasonable filled fallback for components that need it (e.g. secondary Badge); the actual outlined button style is a custom Button variant layered on top, not shadcn's stock `secondary`.
 
 ```css
 :root {
-  --background: var(--color-page-ink);          /* #0a0a0a */
-  --foreground: var(--color-snow);               /* #ffffff */
+  --background: var(--color-page-ink); /* #0a0a0a */
+  --foreground: var(--color-snow); /* #ffffff */
 
-  --card: var(--color-card-carbon);              /* #1e1e1e */
+  --card: var(--color-card-carbon); /* #1e1e1e */
   --card-foreground: var(--color-snow);
 
   --popover: var(--color-card-carbon);
   --popover-foreground: var(--color-snow);
 
-  --primary: var(--color-snow);                  /* white filled button */
+  --primary: var(--color-snow); /* white filled button */
   --primary-foreground: var(--color-page-ink);
 
-  --secondary: var(--color-card-carbon);         /* see note above */
+  --secondary: var(--color-card-carbon); /* see note above */
   --secondary-foreground: var(--color-snow);
 
-  --muted: var(--color-deep-coal);               /* #141414 */
-  --muted-foreground: var(--color-ash);          /* #a7a7a7 */
+  --muted: var(--color-deep-coal); /* #141414 */
+  --muted-foreground: var(--color-ash); /* #a7a7a7 */
 
-  --accent: var(--color-card-carbon);            /* see note above — not blue */
+  --accent: var(--color-card-carbon); /* see note above — not blue */
   --accent-foreground: var(--color-snow);
 
   --destructive: var(--color-signal-red);
   --destructive-foreground: var(--color-snow);
 
-  --border: var(--color-steel-border);           /* #313131 */
-  --input: var(--color-graphite);                /* #454545 — input frame border */
-  --ring: var(--color-blue-cornflower);          /* focus ring — the one place blue drives UI state */
+  --border: var(--color-steel-border); /* #313131 */
+  --input: var(--color-graphite); /* #454545 — input frame border */
+  --ring: var(
+    --color-blue-cornflower
+  ); /* focus ring — the one place blue drives UI state */
 
-  --radius: 0.5rem;                               /* 8px, matches cards/buttons/inputs */
+  --radius: 0.5rem; /* 8px, matches cards/buttons/inputs */
 }
 ```

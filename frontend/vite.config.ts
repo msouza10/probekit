@@ -4,7 +4,10 @@ import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vitest/config"
 
-const srcDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "./src")
+const srcDir = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "./src",
+)
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],

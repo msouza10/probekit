@@ -10,7 +10,7 @@ describe("Card", () => {
           <CardTitle>Ping</CardTitle>
         </CardHeader>
         <CardContent>Check latency to a host</CardContent>
-      </Card>
+      </Card>,
     )
     expect(screen.getByText("Ping")).toBeInTheDocument()
     expect(screen.getByText("Check latency to a host")).toBeInTheDocument()

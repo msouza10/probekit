@@ -13,7 +13,7 @@ describe("AnimatedRoutes", () => {
     render(
       <MemoryRouter initialEntries={["/ping"]}>
         <AnimatedRoutes />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
     expect(screen.getByRole("heading", { name: /ping/i })).toBeInTheDocument()
   })
@@ -22,9 +22,11 @@ describe("AnimatedRoutes", () => {
     render(
       <MemoryRouter initialEntries={["/dns-lookup"]}>
         <AnimatedRoutes />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
-    expect(screen.getByRole("heading", { name: /dns lookup/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: /dns lookup/i }),
+    ).toBeInTheDocument()
   })
 
   it("does not leave two pages mounted after navigating between routes in sequence", () => {
@@ -32,7 +34,7 @@ describe("AnimatedRoutes", () => {
       <MemoryRouter initialEntries={["/ping"]}>
         <NavigateButton to="/dns-lookup" />
         <AnimatedRoutes />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
 
     fireEvent.click(screen.getByRole("button", { name: /go to \/dns-lookup/i }))

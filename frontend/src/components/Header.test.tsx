@@ -8,7 +8,7 @@ describe("Header", () => {
     render(
       <MemoryRouter>
         <Header />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
     const link = screen.getByRole("link", { name: /probekit/i })
     expect(link).toHaveAttribute("href", "/")

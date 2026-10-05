@@ -35,8 +35,11 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 )
+
+const MotionButton = motion.create("button")
+const MotionSlot = motion.create(Slot.Root)
 
 function Button({
   className,
@@ -51,8 +54,7 @@ function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
   }) {
-  const Comp = asChild ? Slot.Root : "button"
-  const MotionComp = motion.create(Comp)
+  const MotionComp = asChild ? MotionSlot : MotionButton
 
   return (
     <MotionComp

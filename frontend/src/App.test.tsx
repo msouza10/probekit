@@ -8,8 +8,10 @@ describe("App", () => {
     render(
       <MemoryRouter>
         <App />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
-    expect(screen.getByRole("heading", { level: 1, name: /probekit/i })).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { level: 1, name: /probekit/i }),
+    ).toBeInTheDocument()
   })
 })

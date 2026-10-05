@@ -9,11 +9,11 @@ describe("Home", () => {
     render(
       <MemoryRouter>
         <Home />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
 
     const links = tools.map((tool) =>
-      screen.getByRole("link", { name: new RegExp(tool.name, "i") })
+      screen.getByRole("link", { name: new RegExp(tool.name, "i") }),
     )
 
     expect(links).toHaveLength(tools.length)

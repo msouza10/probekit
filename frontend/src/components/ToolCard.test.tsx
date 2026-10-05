@@ -8,11 +8,14 @@ describe("ToolCard", () => {
     render(
       <MemoryRouter>
         <ToolCard name="Ping" description="Measure latency" href="/ping" />
-      </MemoryRouter>
+      </MemoryRouter>,
     )
     expect(screen.getByText("Ping")).toBeInTheDocument()
     expect(screen.getByText("Measure latency")).toBeInTheDocument()
     expect(screen.getByText(/em breve/i)).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: /ping/i })).toHaveAttribute("href", "/ping")
+    expect(screen.getByRole("link", { name: /ping/i })).toHaveAttribute(
+      "href",
+      "/ping",
+    )
   })
 })
