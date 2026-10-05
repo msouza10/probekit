@@ -1,8 +1,11 @@
+import { MotionConfig } from "motion/react"
+import { AnimatedRoutes } from "./AnimatedRoutes"
+
 function App() {
   return (
-    <main>
-      <h1>Probekit</h1>
-    </main>
+    <MotionConfig reducedMotion="user">
+      <AnimatedRoutes />
+    </MotionConfig>
   )
 }
 
