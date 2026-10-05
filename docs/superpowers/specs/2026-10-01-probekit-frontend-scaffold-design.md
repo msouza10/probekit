@@ -16,6 +16,9 @@ Ter um site estático publicável, navegável, com uma página inicial que liste
 - Roteamento entre páginas (ex: `react-router`).
 - Página inicial (`/`) listando os cartões/links das ferramentas (ping, DNS lookup), mesmo que cliquem em páginas ainda vazias/"em breve".
 - Layout base (cabeçalho, estrutura de página) reutilizável pelas páginas de ferramentas futuras.
+- Estilização com Tailwind CSS; tokens de design centralizados no tema do Tailwind (ver `frontend/design.md` para a referência visual e o mapeamento de tema).
+- Componentes de UI via shadcn/ui (gera componentes Radix UI + Tailwind direto no repositório, sem virar dependência de pacote) — base para os primitivos reutilizáveis (botão, card, tabs, tooltip etc.).
+- Animações com Motion (ex-Framer Motion): micro-interações nos primitivos de UI, transição entre rotas, animação de dados numéricos/barras nas páginas de ferramentas.
 - Configuração de build (`vite build`) gerando artefato estático.
 - Lint/format básico (ex: ESLint + Prettier) para manter consistência no código que o assistente for gerando.
 
@@ -31,14 +34,20 @@ Ter um site estático publicável, navegável, com uma página inicial que liste
 - Estrutura de pastas sugerida:
   ```
   frontend/
+    design.md       # referência visual (tokens de cor/tipografia/espaçamento) + mapeamento de tema shadcn
     src/
-      pages/        # Home, Ping, DnsLookup (placeholders por enquanto)
-      components/   # layout compartilhado, cartão de ferramenta
-      App.tsx        # rotas
+      components/
+        ui/          # primitivos gerados via shadcn/ui (Button, Card, Badge, Input, Tabs, Tooltip...)
+                      # sem lógica de negócio; estilizados com Tailwind, Radix UI por baixo
+        ToolCard.tsx  # e outros componentes de feature, compostos a partir de ui/
+      pages/          # Home, Ping, DnsLookup (placeholders por enquanto)
+      App.tsx         # rotas + AnimatePresence (transição entre páginas)
       main.tsx
   ```
 - Página inicial renderiza uma lista de "cartões de ferramenta" a partir de uma lista estática simples (nome, descrição curta, rota) — isso facilita adicionar novas ferramentas depois sem reestruturar a página.
 - TypeScript desde o início, para dar uma base mais segura ao crescer o catálogo de ferramentas.
+- Componentes de `components/ui/` vêm do CLI do shadcn (`npx shadcn add <componente>`), usando o tema do Tailwind definido a partir de `frontend/design.md`; customização visual fica nesses arquivos gerados, não em overrides espalhados pelas páginas.
+- Animações de hover/tap nos primitivos de `ui/` (ex: `Button`, `Card`) e `AnimatePresence` em `App.tsx` para transição de rota já fazem parte do scaffold, mesmo antes das páginas de ferramentas existirem — assim a base de animação já está pronta quando o spec de ping/DNS for implementado.
 
 ## Testes
 
