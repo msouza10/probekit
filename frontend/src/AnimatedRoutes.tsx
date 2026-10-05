@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react"
 import { Route, Routes, useLocation } from "react-router-dom"
 import DnsLookup from "./pages/DnsLookup"
 import Home from "./pages/Home"
+import NotFound from "./pages/NotFound"
 import Ping from "./pages/Ping"
 import Sobre from "./pages/Sobre"
 
@@ -28,6 +29,7 @@ export function AnimatedRoutes() {
           <Route path="/ping" element={<Ping />} />
           <Route path="/dns-lookup" element={<DnsLookup />} />
           <Route path="/sobre" element={<Sobre />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
     </AnimatePresence>

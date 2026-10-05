@@ -13,5 +13,9 @@ describe("App", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: /probekit/i }),
     ).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: /probekit/i })).toHaveAttribute(
+      "href",
+      "/",
+    )
   })
 })

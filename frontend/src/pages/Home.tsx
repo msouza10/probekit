@@ -5,9 +5,7 @@ function Home() {
   return (
     <main className="flex flex-col gap-12 py-16">
       <div className="flex max-w-[65ch] flex-col gap-4">
-        <h1 className="text-heading font-semibold text-foreground">
-          Probekit
-        </h1>
+        <h1 className="text-heading font-semibold text-foreground">Probekit</h1>
         <p className="text-body text-muted-foreground">
           Uma caixa de ferramentas técnicas na web, construída aos poucos e
           aberta pra qualquer pessoa usar — sem conta, sem complicação.

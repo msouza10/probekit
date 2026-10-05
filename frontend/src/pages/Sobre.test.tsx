@@ -8,6 +8,8 @@ describe("Sobre", () => {
     expect(
       screen.getByRole("heading", { level: 1, name: /sobre o probekit/i }),
     ).toBeInTheDocument()
-    expect(screen.getByText(/caixa de ferramentas técnicas/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(/caixa de ferramentas técnicas/i),
+    ).toBeInTheDocument()
   })
 })

@@ -40,6 +40,17 @@ describe("AnimatedRoutes", () => {
     ).toBeInTheDocument()
   })
 
+  it("renders the NotFound page for an unknown route", () => {
+    render(
+      <MemoryRouter initialEntries={["/this-route-does-not-exist"]}>
+        <AnimatedRoutes />
+      </MemoryRouter>,
+    )
+    expect(
+      screen.getByRole("heading", { name: /página não encontrada/i }),
+    ).toBeInTheDocument()
+  })
+
   it("does not leave two pages mounted after navigating between routes in sequence", () => {
     render(
       <MemoryRouter initialEntries={["/ping"]}>

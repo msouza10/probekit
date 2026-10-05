@@ -11,7 +11,7 @@ import { tools } from "@/lib/tools"
 
 export function Header() {
   return (
-    <header className="flex items-center justify-between border-b border-border px-8 py-4">
+    <header className="flex items-center justify-between border-b border-border py-4">
       <Link to="/" className="text-body font-medium text-foreground">
         Probekit
       </Link>

@@ -8,7 +8,7 @@ Propósito, decisões e progresso detalhado em [`OVERVIEW.md`](./OVERVIEW.md). S
 
 ```
 backend/api-service-golang/   API em Go (ping, DNS lookup)
-frontend/                     frontend (ainda não iniciado)
+frontend/                     React + Vite + TypeScript — ver frontend/README.md
 infra/oci-vm/                 infraestrutura como código (ainda não iniciado)
 docs/superpowers/specs/       specs de design de cada feature
 ```
