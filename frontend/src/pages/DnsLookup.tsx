@@ -106,9 +106,7 @@ export function DnsLookup() {
             Origem: {ORIGIN_REGION}
           </span>
         </div>
-        <h1 className="text-heading sm:text-heading-lg font-semibold tracking-tight text-foreground">
-          DNS Lookup
-        </h1>
+        <h1 className="page-title text-foreground">DNS Lookup</h1>
         <p className="max-w-[70ch] text-body text-muted-foreground">
           Consulte e inspecione a zona de registros DNS de qualquer domínio.
           Retorna registros A, AAAA, CNAME, MX, TXT, NS e suporte a SRV a partir

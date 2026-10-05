@@ -39,11 +39,11 @@ export function ToolCard({
       : Terminal
 
   return (
-    <Card className="tool-card group relative flex flex-col justify-between overflow-hidden border-border bg-card transition-all duration-200 hover:border-steel-border/80">
+    <Card className="tool-card group relative flex h-full flex-col justify-between overflow-hidden border-border bg-card transition-all duration-200 hover:border-steel-border/80">
       <div>
         <CardHeader className="flex flex-row items-center justify-between gap-3 flex-wrap space-y-0 pb-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-steel-border bg-deep-coal text-blue-cornflower transition-colors duration-200 group-hover:border-blue-cornflower/50 group-hover:bg-deep-coal/80">
+            <div className="tool-icon flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-steel-border bg-deep-coal text-blue-cornflower transition-colors duration-200 group-hover:border-blue-cornflower/50 group-hover:bg-deep-coal/80">
               <IconComponent className="h-5 w-5" />
             </div>
             <div>

@@ -17,9 +17,7 @@ export function Sobre() {
           <Terminal className="h-3.5 w-3.5" />
           <span>MANIFESTO & ARQUITETURA</span>
         </div>
-        <h1 className="text-heading sm:text-heading-lg font-semibold tracking-[-0.03em] text-foreground">
-          Sobre o Probekit
-        </h1>
+        <h1 className="page-title text-foreground">Sobre o Probekit</h1>
         <p className="max-w-[70ch] text-body-lg text-muted-foreground leading-relaxed">
           O Probekit é uma caixa de ferramentas técnicas pensada pra resolver
           tarefas reais — rede, arquivos, texto, cron e outros utilitários — de
@@ -78,7 +76,7 @@ export function Sobre() {
           <span className="font-mono text-caption uppercase tracking-wider text-blue-cornflower">
             // INFRAESTRUTURA COMO CÓDIGO
           </span>
-          <h2 className="text-heading-sm font-semibold text-snow">
+          <h2 className="section-title text-snow">
             Laboratório Pessoal de DevOps
           </h2>
           <p className="max-w-[70ch] text-body-sm text-muted-foreground">
@@ -122,7 +120,7 @@ export function Sobre() {
               React 19 + Tailwind v4
             </span>
             <span className="text-caption text-fog">
-              Vite, Motion, componentes shadcn/ui e tipografia Inter / Mono.
+              Vite, Motion, componentes shadcn/ui e tipografia JetBrains Mono.
             </span>
           </div>
 

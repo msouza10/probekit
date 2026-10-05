@@ -1,129 +1,231 @@
-import { Link } from "react-router-dom"
-import { Activity, Globe, Network, Search } from "lucide-react"
+import { useState } from "react"
+import { Link, NavLink, useNavigate } from "react-router-dom"
+import { Dialog, Popover } from "radix-ui"
 import {
-  NavigationMenu,
-  NavigationMenuContent,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
+  Activity,
+  ArrowRight,
+  ChevronDown,
+  Globe,
+  Search,
+  X,
+} from "lucide-react"
 import { tools } from "@/lib/tools"
+import { ThemeToggle } from "./ThemeToggle"
 import { GithubIcon } from "./icons/GithubIcon"
 
+const normalize = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+const implementedTools = tools.filter((tool) => tool.status !== "Planejado")
+
 export function Header() {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+  const [query, setQuery] = useState("")
+  const navigate = useNavigate()
+  const results = tools.filter((tool) =>
+    normalize(
+      [tool.name, tool.description, tool.category, ...(tool.tags ?? [])].join(
+        " ",
+      ),
+    ).includes(normalize(query.trim())),
+  )
+  function openTool(href: string) {
+    setSearchOpen(false)
+    navigate(href)
+  }
+
   return (
-    <header className="site-header relative z-20 flex items-center justify-between border-b border-border py-4">
-      {/* Brand & Nav */}
-      <div className="flex items-center gap-6">
+    <header className="site-header sticky top-0 z-40 flex items-center justify-between border-b border-border">
+      <div className="flex items-center gap-8">
         <Link
           to="/"
-          className="group flex items-center gap-2.5 text-body font-semibold text-foreground transition-opacity hover:opacity-90"
+          className="flex items-center gap-2.5 font-semibold text-foreground"
           aria-label="Probekit início"
         >
-          <div className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-steel-border bg-deep-coal text-blue-cornflower transition-colors group-hover:border-blue-cornflower/60">
-            <Activity className="h-4 w-4" />
-            <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-cornflower opacity-75"></span>
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-cornflower"></span>
-            </span>
-          </div>
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-cornflower/25 bg-blue-cornflower/10 text-blue-cornflower">
+            <Activity className="h-5 w-5" />
+          </span>
           <span className="text-subheading tracking-tight">Probekit</span>
-          <span className="rounded border border-steel-border/50 bg-deep-coal px-1.5 py-0.5 font-mono text-[10px] tracking-wider text-ash">
-            BETA
-          </span>
         </Link>
-
-        {/* Navigation */}
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger className="bg-transparent text-body-sm text-ash hover:bg-card hover:text-snow">
-                Ferramentas
-              </NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <ul className="grid w-[280px] gap-1 p-2 bg-card border border-steel-border shadow-xl">
-                  {tools.map((tool) => (
-                    <li key={tool.href}>
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to={tool.href}
-                          className="group flex items-center justify-between rounded-md p-2 transition-colors hover:bg-deep-coal"
-                        >
-                          <div className="flex items-center gap-2.5">
-                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded border border-steel-border bg-page-ink text-blue-cornflower group-hover:border-blue-cornflower/40">
-                              {tool.iconName === "Globe" ? (
-                                <Globe className="h-3.5 w-3.5" />
-                              ) : tool.iconName === "Network" ? (
-                                <Network className="h-3.5 w-3.5" />
-                              ) : (
-                                <Activity className="h-3.5 w-3.5" />
-                              )}
-                            </div>
-                            <span className="text-body-sm font-medium text-snow group-hover:text-blue-cornflower">
-                              {tool.name}
-                            </span>
-                          </div>
-                          {tool.status && (
-                            <span className="rounded border border-steel-border/70 px-1 font-mono text-[9px] text-fog">
-                              {tool.status}
-                            </span>
-                          )}
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                  ))}
-                </ul>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-
-            <NavigationMenuItem>
-              <NavigationMenuLink asChild>
-                <Link
-                  to="/sobre"
-                  className="rounded-md px-3 py-2 text-body-sm text-ash transition-colors hover:bg-card hover:text-snow"
-                >
-                  Sobre
-                </Link>
-              </NavigationMenuLink>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-      </div>
-
-      {/* Right controls */}
-      <div className="flex items-center gap-3">
-        {/* Active Probe Node Pill */}
-        <div className="hidden items-center gap-2 rounded-full border border-steel-border bg-deep-coal/80 px-3 py-1 text-[12px] sm:flex">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60"></span>
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
-          </span>
-          <span className="font-mono text-[11px] text-ash">
-            us-ashburn-1 <span className="text-fog">•</span> 12ms
-          </span>
-        </div>
-
-        {/* Quick Search trigger anchor */}
-        <a
-          href="/#ferramentas"
-          className="flex h-9 items-center gap-2 rounded-md border border-steel-border bg-card px-2.5 text-caption text-ash transition-colors hover:border-graphite hover:text-snow"
-          title="Buscar ferramentas"
+        <nav
+          className="header-nav flex items-center gap-1"
+          aria-label="Navegação principal"
         >
-          <Search className="h-3.5 w-3.5" />
-          <span className="hidden sm:inline">Buscar</span>
-          <kbd className="hidden rounded bg-deep-coal px-1.5 py-0.5 font-mono text-[10px] text-fog sm:inline">
-            /
-          </kbd>
-        </a>
-
-        {/* GitHub Link */}
+          <Popover.Root open={menuOpen} onOpenChange={setMenuOpen}>
+            <Popover.Trigger
+              className="header-nav-link flex items-center gap-2"
+              aria-label="Ferramentas"
+            >
+              Ferramentas{" "}
+              <ChevronDown
+                className={`h-3.5 w-3.5 transition-transform ${menuOpen ? "rotate-180" : ""}`}
+              />
+            </Popover.Trigger>
+            <Popover.Portal>
+              <Popover.Content
+                align="start"
+                sideOffset={16}
+                collisionPadding={16}
+                className="tools-popover"
+                aria-label="Menu de ferramentas"
+              >
+                <p className="px-3 pb-3 text-[11px] uppercase tracking-widest text-fog">
+                  Diagnósticos
+                </p>
+                {implementedTools.map((tool) => {
+                  const Icon = tool.iconName === "Globe" ? Globe : Activity
+                  return (
+                    <Link
+                      key={tool.href}
+                      to={tool.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="tool-menu-link group"
+                    >
+                      <span className="tool-menu-icon">
+                        <Icon className="h-5 w-5" />
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-medium text-foreground">
+                          {tool.name}
+                        </span>
+                        <span className="mt-1 block text-xs text-muted-foreground">
+                          {tool.name === "Ping"
+                            ? "Latência e perda de pacotes"
+                            : "Registros e resolução de domínios"}
+                        </span>
+                      </span>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-fog transition-transform group-hover:translate-x-1" />
+                    </Link>
+                  )
+                })}
+                <div className="mt-3 border-t border-border px-3 pt-3">
+                  <p className="mb-3 text-xs leading-relaxed text-fog">
+                    CIDR, SSL e outros utilitários estão no roadmap.
+                  </p>
+                  <a
+                    href="/#ferramentas"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center justify-between py-2 text-xs text-blue-cornflower"
+                  >
+                    Explorar catálogo <ArrowRight className="h-4 w-4" />
+                  </a>
+                </div>
+              </Popover.Content>
+            </Popover.Portal>
+          </Popover.Root>
+          <NavLink to="/sobre" className="header-nav-link">
+            Sobre
+          </NavLink>
+        </nav>
+      </div>
+      <div className="flex items-center gap-2">
+        <Dialog.Root
+          open={searchOpen}
+          onOpenChange={(open) => {
+            setSearchOpen(open)
+            if (open) setQuery("")
+          }}
+        >
+          <Dialog.Trigger
+            aria-label="Buscar ferramentas"
+            className="header-search flex h-10 items-center gap-2 rounded-lg border border-border px-3 text-xs text-muted-foreground hover:border-graphite hover:text-foreground"
+          >
+            <Search className="h-4 w-4" />
+            <span className="hidden sm:inline">Buscar ferramenta…</span>
+          </Dialog.Trigger>
+          <Dialog.Portal>
+            <Dialog.Overlay className="search-overlay" />
+            <Dialog.Content className="search-dialog">
+              <Dialog.Title className="sr-only">
+                Buscar ferramentas
+              </Dialog.Title>
+              <Dialog.Description className="sr-only">
+                Pesquise por nome, categoria ou protocolo. Use Tab para navegar
+                pelos resultados e Enter para abrir.
+              </Dialog.Description>
+              <form
+                className="flex items-center gap-3 border-b border-border p-4"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  const first = results.find(
+                    (tool) => tool.status !== "Planejado",
+                  )
+                  if (first) openTool(first.href)
+                }}
+              >
+                <Search className="h-5 w-5 shrink-0 text-blue-cornflower" />
+                <input
+                  aria-label="Pesquisar ferramentas"
+                  placeholder="Nome, protocolo ou categoria…"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
+                  className="min-w-0 flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-fog"
+                />
+                <Dialog.Close
+                  aria-label="Fechar busca"
+                  className="rounded-md p-2 text-fog hover:bg-card hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </Dialog.Close>
+              </form>
+              <div className="max-h-[min(55svh,420px)] overflow-y-auto p-3">
+                <p role="status" className="px-3 py-2 text-xs text-fog">
+                  {results.length}{" "}
+                  {results.length === 1
+                    ? "ferramenta encontrada"
+                    : "ferramentas encontradas"}
+                </p>
+                {results.map((tool) =>
+                  tool.status === "Planejado" ? (
+                    <div
+                      key={tool.href}
+                      className="flex items-center justify-between gap-3 rounded-lg px-3 py-3 text-xs text-fog"
+                    >
+                      <span>{tool.name}</span>
+                      <span className="shrink-0 text-[10px]">Planejado</span>
+                    </div>
+                  ) : (
+                    <button
+                      key={tool.href}
+                      type="button"
+                      onClick={() => openTool(tool.href)}
+                      className="tool-menu-link w-full text-left"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm text-foreground">
+                          {tool.name}
+                        </span>
+                        <span className="mt-1 block text-xs text-fog">
+                          {tool.category} · {tool.tags?.slice(0, 2).join(" / ")}
+                        </span>
+                      </span>
+                      <ArrowRight className="h-4 w-4 text-blue-cornflower" />
+                    </button>
+                  ),
+                )}
+                {results.length === 0 && (
+                  <p className="px-3 py-8 text-center text-sm text-muted-foreground">
+                    Nenhuma ferramenta encontrada. Tente “DNS”, “ping” ou
+                    “latência”.
+                  </p>
+                )}
+              </div>
+              <p className="border-t border-border px-6 py-3 text-[11px] text-fog">
+                Enter para abrir · Esc para fechar
+              </p>
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+        <ThemeToggle />
         <a
           href="https://github.com/msouza10/probekit"
           target="_blank"
           rel="noreferrer"
           aria-label="Código fonte no GitHub"
-          className="flex h-9 w-9 items-center justify-center rounded-md border border-steel-border bg-card text-ash transition-colors hover:border-graphite hover:text-snow"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-card hover:text-foreground"
         >
           <GithubIcon className="h-4 w-4" />
         </a>

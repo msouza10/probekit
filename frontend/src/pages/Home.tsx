@@ -1,3 +1,5 @@
+import { motion, useReducedMotion } from "motion/react"
+import { Reveal } from "@/components/Reveal"
 import { useState } from "react"
 import { ArrowDown, CheckCircle2, Search } from "lucide-react"
 import { ToolCard } from "@/components/ToolCard"
@@ -5,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { tools } from "@/lib/tools"
 
 export function Home() {
+  const reducedMotion = useReducedMotion()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("Todas")
 
@@ -24,23 +27,30 @@ export function Home() {
   })
 
   return (
-    <main className="home-page flex flex-col gap-14 py-10 sm:gap-20 sm:py-20">
+    <main className="home-page flex flex-col gap-14 pb-10 sm:gap-20 sm:pb-20">
       {/* Hero Section */}
-      <section className="hero-section mx-auto flex w-full max-w-3xl flex-col items-center gap-8 text-center">
-        <div className="flex items-center gap-3 font-mono text-caption tracking-[0.16em] text-blue-cornflower">
-          <span className="h-px w-8 bg-blue-cornflower" />
-          SUA REDE, EM PERSPECTIVA
+      <section className="hero-section relative mx-auto flex w-full max-w-4xl flex-col items-center justify-center gap-8 text-center">
+        <div className="type-eyebrow flex items-center gap-3 text-blue-cornflower">
+          <span
+            aria-hidden="true"
+            className="h-px w-5 shrink-0 bg-blue-cornflower sm:w-8"
+          />
+          <span>SUA REDE, EM PERSPECTIVA</span>
+          <span
+            aria-hidden="true"
+            className="h-px w-5 shrink-0 bg-blue-cornflower sm:w-8"
+          />
         </div>
 
         {/* Headline & Subhead */}
         <div className="w-full">
           <div className="flex min-w-0 flex-col items-center gap-6">
-            <h1 className="hero-title font-semibold text-foreground">
+            <h1 className="hero-title text-foreground">
               Menos dúvidas.
               <br />
               <span className="text-blue-cornflower">Mais diagnóstico.</span>
             </h1>
-            <p className="max-w-[46ch] text-body leading-relaxed text-muted-foreground">
+            <p className="hero-description max-w-[48ch] text-muted-foreground">
               Entenda o que acontece na sua rede. Meça latência, consulte DNS e
               investigue conexões com ferramentas diretas, no navegador.
             </p>
@@ -77,17 +87,23 @@ export function Home() {
             </div>
           </div>
         </div>
+        <a
+          href="#ferramentas"
+          className="hero-scroll flex items-center gap-2 text-xs text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Conheça as ferramentas <ArrowDown className="h-4 w-4" />
+        </a>
       </section>
 
       {/* Tools Catalog Section */}
       <section id="ferramentas" className="flex flex-col gap-8 scroll-mt-20">
-        <div className="flex flex-col gap-3">
-          <span className="font-mono text-caption tracking-wider uppercase text-blue-cornflower">
+        <Reveal className="flex flex-col gap-3">
+          <span className="type-eyebrow text-blue-cornflower">
             // CATÁLOGO DE FERRAMENTAS
           </span>
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <h2 className="text-heading-sm font-semibold text-foreground">
+              <h2 className="section-title text-foreground">
                 Uma ferramenta para cada pergunta.
               </h2>
               <p className="text-body-sm text-muted-foreground">
@@ -126,12 +142,23 @@ export function Home() {
               </button>
             ))}
           </div>
-        </div>
+        </Reveal>
 
         {/* Tools Grid */}
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredTools.map((tool) => (
-            <ToolCard key={tool.href} {...tool} />
+            <motion.div
+              key={tool.href}
+              layout={reducedMotion ? false : "position"}
+              initial={reducedMotion ? false : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: reducedMotion ? 0 : 0.28 }}
+              className="h-full"
+            >
+              <Reveal className="h-full">
+                <ToolCard {...tool} />
+              </Reveal>
+            </motion.div>
           ))}
         </div>
 
@@ -158,10 +185,10 @@ export function Home() {
       {/* How It Works Architecture Pipeline */}
       <section className="execution-section flex flex-col gap-6 border-t border-steel-border py-10">
         <div className="flex flex-col gap-2">
-          <span className="font-mono text-caption tracking-wider uppercase text-blue-cornflower">
+          <span className="type-eyebrow text-blue-cornflower">
             // TRANSPARÊNCIA DE EXECUÇÃO
           </span>
-          <h2 className="text-heading-sm font-semibold text-snow">
+          <h2 className="section-title text-snow">
             Como os diagnósticos são executados
           </h2>
           <p className="text-body-sm text-muted-foreground max-w-[70ch]">
@@ -171,7 +198,7 @@ export function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 pt-4">
+        <Reveal className="execution-steps grid grid-cols-1 gap-6 md:grid-cols-3 pt-4">
           <div className="flex flex-col gap-3 border-l border-steel-border pl-5">
             <span className="font-mono text-caption text-blue-cornflower font-semibold">
               01. SOLICITAÇÃO NA BORDA
@@ -210,7 +237,7 @@ export function Home() {
               as métricas precisas voltam estruturadas em JSON.
             </p>
           </div>
-        </div>
+        </Reveal>
       </section>
     </main>
   )

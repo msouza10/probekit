@@ -100,9 +100,7 @@ export function Ping() {
             Origem: {ORIGIN_REGION}
           </span>
         </div>
-        <h1 className="text-heading sm:text-heading-lg font-semibold tracking-tight text-foreground">
-          Ping
-        </h1>
+        <h1 className="page-title text-foreground">Ping</h1>
         <p className="max-w-[70ch] text-body text-muted-foreground">
           Meça latência de ida e volta (RTT), perda de pacotes e jitter até
           qualquer host ou IP público. O teste executa ICMP real a partir da
