@@ -104,5 +104,18 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-inter);
+    /* Grid wireframe motif — see design.md "Grid Wireframe Motif": a
+       low-contrast 48px blueprint grid, the system's one repeated motif. */
+    background-image:
+      repeating-linear-gradient(
+        to right,
+        var(--color-card-carbon) 0 1px,
+        transparent 1px 48px
+      ),
+      repeating-linear-gradient(
+        to bottom,
+        var(--color-card-carbon) 0 1px,
+        transparent 1px 48px
+      );
   }
 }
