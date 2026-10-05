@@ -15,4 +15,9 @@ describe("Card", () => {
     expect(screen.getByText("Ping")).toBeInTheDocument()
     expect(screen.getByText("Check latency to a host")).toBeInTheDocument()
   })
+
+  it("has no box-shadow utility classes (Probekit's design system forbids shadows)", () => {
+    render(<Card data-testid="card" />)
+    expect(screen.getByTestId("card").className).not.toMatch(/shadow/)
+  })
 })

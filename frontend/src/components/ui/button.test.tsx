@@ -7,4 +7,9 @@ describe("Button", () => {
     render(<Button>Run ping</Button>)
     expect(screen.getByRole("button", { name: "Run ping" })).toBeInTheDocument()
   })
+
+  it("has no box-shadow utility classes (Probekit's design system forbids shadows)", () => {
+    render(<Button>Run ping</Button>)
+    expect(screen.getByRole("button").className).not.toMatch(/shadow/)
+  })
 })

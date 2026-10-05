@@ -1,12 +1,21 @@
 import * as React from "react"
 import { cn } from "cn"
+import { motion } from "motion/react"
 
-function Card({ className, ...props }: React.ComponentProps<"div">) {
+function Card({
+  className,
+  ...props
+}: Omit<
+  React.ComponentProps<"div">,
+  "onDrag" | "onDragStart" | "onDragEnd" | "onAnimationStart" | "onAnimationEnd"
+>) {
   return (
-    <div
+    <motion.div
       data-slot="card"
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.15 }}
       className={cn(
-        "flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm",
+        "flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground",
         className
       )}
       {...props}
