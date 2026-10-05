@@ -10,6 +10,6 @@ describe("App", () => {
         <App />
       </MemoryRouter>
     )
-    expect(screen.getByText(/probekit/i)).toBeInTheDocument()
+    expect(screen.getByRole("heading", { level: 1, name: /probekit/i })).toBeInTheDocument()
   })
 })
