@@ -82,4 +82,4 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 ## Próximos passos
 
 1. Começar o frontend (páginas `/ping` e `/dns-lookup`, 4 estados visuais), com React + Vite + TypeScript.
-2. Fluxo de publicação reproduzível (Terraform + GitHub Actions, VM OCI + Cloudflare Pages).
+2. Fluxo de publicação reproduzível (Terraform pro DNS da Cloudflare, Wrangler pro deploy do Worker/frontend, binário Go na VM OCI já existente via GitHub Actions).
