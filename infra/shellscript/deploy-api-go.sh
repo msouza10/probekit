@@ -1,27 +1,49 @@
-#/bin/bash
+#!/bin/bash
 
-if [ -f /etc/debian_version ]; then
-    apt update
-    apt install -y golang=1.26
-elif [ -f /etc/redhat-release ]; then
-    dnf update
-    dnf install -y golang=1.26
-fi
+# checar se existe arquivo /etc/os-release
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [ "$ID" = "ubuntu" ]; then
+    echo "Ubuntu"
+        if ! apt update; then
+            echo "Erro ao atualizar apt"
+            exit 1
+        fi
+        if ! apt install -y jq; then
+            echo "Erro ao instalar jq"
+            exit 1
+        fi
+    elif [ "$ID" = "redhat" ]; then
+        echo "Red Hat"
+        if ! dnf update; then
+            echo "Erro ao atualizar dnf"
+            exit 1
+        fi
+        if ! dnf install -y jq; then
+        echo "Erro ao instalar jq"
+        exit 1
+        fi
+    fi
+fi 
 
-# baixar binario
-if ! curl -o probekit https://github.com/msouza10/probekit.git; then
+# baixar binario o ultimo binario disponivel
+# usar curl para buscar o ultimo tag e fazer o download do binario
+
+LATEST=$(curl -fsSL https://api.github.com/repos/msouza10/probekit/releases/latest | jq -r '.tag_name')
+
+if ! curl -fsSL -o api-service-golang https://github.com/msouza10/probekit/releases/download/${LATEST}/probekit-linux-amd64-api-go; then
     echo "Erro ao baixar binario"
     exit 1
 fi
 
-# criar diretorio
+# criar pasta
 if ! mkdir -p /opt/probekit; then
-    echo "Erro ao criar diretorio"
+    echo "Erro ao criar pasta probekit"
     exit 1
 fi
 
 # mover binario 
-if ! mv probekit /opt/probekit/probekit; then
+if ! mv api-service-golang /opt/probekit; then
     echo "Erro ao mover binario"
     exit 1
 fi
@@ -38,7 +60,7 @@ fi
 
 chown -R probekit:probekit /opt/probekit
 
-chmod +x /opt/probekit/probekit
+chmod 500 -R /opt/probekit/
 
 
 # criar service
@@ -49,8 +71,8 @@ After=network.target
 
 [Service]
 User=probekit
-WorkingDirectory=/opt/probekit/backend/api-service-golang
-ExecStart=go run .
+WorkingDirectory=/opt/probekit
+ExecStart=/opt/probekit/api-service-golang
 Restart=always
 
 [Install]
@@ -70,11 +92,11 @@ if ! systemctl start probekit; then
     exit 1
 fi
 
+# validar se a api esta rodando
+
 if curl --fail http://localhost:8080/ -H "Host: api.probekit.cc" | grep "OK" > /dev/null 2>&1; then
     echo "Service started successfully"
 else
     echo "Service failed to start"
     exit 1
 fi
-
-
