@@ -1,0 +1,113 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Credentials infisical
+        id: infisical
+        uses: infisical/actions/fetch-secrets@v2
+        with:
+          method: "oidc"
+          domain: "https://app.infisical.com"
+          identity-id: "0e647abf-1360-46ce-93fe-6e25ca3dddcb"
+          project-slug: "probekit-xb-qb"
+          env-slug: "prod"
+          export-type: "env"
+          recursive: true
+
+      - name: Write SSH private key to file
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_ }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/probekit.pem
+          chmod 600 ~/.ssh/probekit.pem
+
+      - name: Write OCI private key to file
+        env:
+          OCI_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY_PATH }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$OCI_PRIVATE_KEY" > ~/.ssh/private_key_oci.pem
+          chmod 600 ~/.ssh/private_key_oci.pem
+          echo "TF_VAR_private_key_path=$HOME/.ssh/private_key_oci.pem" >> $GITHUB_ENV
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply -input=false tfplan
+
+      - name: Set variables
+        run: |
+          VM_API_01=$(terraform output -json api_probekit_public_ip | jq -r '.[0]')
+          VM_API_02=$(terraform output -json api_probekit_public_ip | jq -r '.[1]')
+
+          echo "VM_API_01=$VM_API_01" >> $GITHUB_ENV
+          echo "VM_API_02=$VM_API_02" >> $GITHUB_ENV
+
+      - name: Waiting for the cloud-init to finish
+        run: |
+          for ip in "$VM_API_01" "$VM_API_02"; do
+            ready=false
+            for _ in {1..30}; do
+              if ssh -o StrictHostKeyChecking=accept-new -o ConnectTimeout=5 -i ~/.ssh/probekit.pem ubuntu@"$ip" "cloud-init status --wait"; then
+                ready=true
+                break
+              fi
+              sleep 10
+            done
+            if [ "$ready" != true ]; then
+              echo "VM $ip not ready"
+              exit 1 
+            fi
+          done
+
+      - name: Execute deploy api go in first vm
+        run: |
+          ssh -o StrictHostKeyChecking=accept-new -i ~/.ssh/probekit.pem ubuntu@$VM_API_01 'sudo bash -s' < ../shellscript/deploy-api-go.sh
+          
+      - name: Execute deploy api go in second vm
+        run: |
+          ssh -o StrictHostKeyChecking=accept-new -i ~/.ssh/probekit.pem ubuntu@$VM_API_02 'sudo bash -s' < ../shellscript/deploy-api-go.sh
+          
+
+
+          
+          
+          
+          
+        
+        
+      
+      
+    
+      
+    
+  

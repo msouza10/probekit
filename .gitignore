@@ -21,6 +21,11 @@ infra/**/.terraform.lock.hcl
 # Claude Code — configuração pessoal, não compartilhada
 .claude/settings.local.json
 
+# Chaves SSH / credenciais
+*.pem
+*.key
+*.pub
+
 # OS / editor
 .DS_Store
 *.swp

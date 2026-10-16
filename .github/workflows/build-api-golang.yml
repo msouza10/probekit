@@ -1,0 +1,76 @@
+name: Build & Release API
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "backend/api-service-golang/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-api
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and Release
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: backend/api-service-golang/go.mod
+          cache-dependency-path: backend/api-service-golang/go.sum
+
+      - name: Run Tests
+        working-directory: backend/api-service-golang
+        run: go test -v ./... 
+
+      - name: Determine the release version
+        id: version
+        shell: bash
+        run: bash ./infra/shellscript/calculate-version.sh
+
+      - name: Build Linux AMD64
+        if: steps.version.outputs.release == 'true'
+        working-directory: backend/api-service-golang
+        env:
+          CGO_ENABLED: "0"
+          GOOS: linux
+          GOARCH: amd64
+        run: |
+          mkdir -p ../../dist
+          go build -trimpath -ldflags="-s -w" \
+            -o ../../dist/probekit-linux-amd64-api-go .
+
+      - name: Generate Checksum
+        if: steps.version.outputs.release == 'true'
+        run: |
+          cd dist
+          sha256sum probekit-linux-amd64-api-go > SHA256SUMS
+
+      - name: Create GitHub Release
+        if: steps.version.outputs.release == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          target_commitish: ${{ github.sha }}
+          tag_name: probekit-linux-amd64-api-go-${{ steps.version.outputs.version }}
+          name: probekit-linux-amd64-api-go-${{ steps.version.outputs.version }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            dist/probekit-linux-amd64-api-go
+            dist/SHA256SUMS
