@@ -25,7 +25,7 @@ jobs:
         with:
           method: "oidc"
           domain: "https://app.infisical.com"
-          identity-id: "0e647abf-1360-46ce-93fe-6e25ca3dddcb"
+          identity-id: "4d055d81-89da-4750-9957-5a7567e65de8"
           project-slug: "probekit-xb-qb"
           env-slug: "prod"
           export-type: "env"
