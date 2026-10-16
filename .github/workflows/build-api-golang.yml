@@ -29,6 +29,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Allow Ping
+        run: |
+          sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"
+
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
