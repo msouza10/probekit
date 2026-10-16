@@ -21,7 +21,7 @@ jobs:
 
       - name: Get Credentials infisical
         id: infisical
-        uses: Infisical/secrets-action@v1
+        uses: Infisical/secrets-action@v1.0.16
         with:
           method: "oidc"
           domain: "https://app.infisical.com"
