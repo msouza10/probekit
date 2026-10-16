@@ -33,7 +33,7 @@ jobs:
 
       - name: Write SSH private key to file
         env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY_ }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
           printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/probekit.pem
@@ -41,7 +41,7 @@ jobs:
 
       - name: Write OCI private key to file
         env:
-          OCI_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY_PATH }}
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
         run: |
           mkdir -p ~/.ssh
           printf '%s\n' "$OCI_PRIVATE_KEY" > ~/.ssh/private_key_oci.pem
