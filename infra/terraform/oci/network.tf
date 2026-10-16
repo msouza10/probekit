@@ -40,7 +40,7 @@ resource "oci_core_security_list" "probekit_security_list" {
   display_name   = "probekitSecurityList"
 
   egress_security_rules {
-    protocol    = "6"
+    protocol    = "all"
     destination = "0.0.0.0/0"
   }
 
@@ -59,8 +59,8 @@ resource "oci_core_security_list" "probekit_security_list" {
     source   = "0.0.0.0/0"
 
     tcp_options {
-      max = "8080"
-      min = "8080"
+      max = "443"
+      min = "443"
     }
   }
 }

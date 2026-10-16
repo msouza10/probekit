@@ -16,23 +16,24 @@ provider "cloudflare" {
 }
 
 provider "oci" {
-  region       = "sa-saopaulo-1"
-  tenancy_ocid = var.tenancy_ocid
-  user_ocid = var.user_ocid
-  fingerprint = var.fingerprint
+  region           = "sa-saopaulo-1"
+  tenancy_ocid     = var.tenancy_ocid
+  user_ocid        = var.user_ocid
+  fingerprint      = var.fingerprint
   private_key_path = var.private_key_path
 }
 
 # linux variables
 
+# chave publica SSH injetada nas maquinas (par: infra/ssh/probekit.key)
 variable "ssh_public_key" {
-  type    = string
+  type = string
 }
 
 # cloudflare variables
 
 variable "cf_api_token" {
-  type    = string
+  type = string
 }
 
 variable "fqdn_name" {
@@ -41,7 +42,7 @@ variable "fqdn_name" {
 }
 
 variable "zone_id" {
-  type    = string
+  type = string
 }
 
 # oci variables
@@ -66,6 +67,7 @@ variable "fingerprint" {
   type = string
 }
 
+# caminho do .pem da API da OCI (nao e a chave SSH das maquinas)
 variable "private_key_path" {
   type = string
 }
@@ -85,12 +87,15 @@ module "oci" {
 module "cloudflare" {
   source = "./cloudflare"
 
-  cf_api_token  = var.cf_api_token
-  fqdn_name     = var.fqdn_name
-  zone_id       = var.zone_id
+  cf_api_token = var.cf_api_token
+  fqdn_name    = var.fqdn_name
+  zone_id      = var.zone_id
 
   # variables for other module
 
   nlb_ip_address = module.oci.nlb_ip_address
 }
 
+output "api_probekit_public_ip" {
+  value = module.oci.api_probekit_public_ip
+}

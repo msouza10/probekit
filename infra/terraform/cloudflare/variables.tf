@@ -16,7 +16,7 @@ provider "cloudflare" {
 }
 
 variable "cf_api_token" {
-  type    = string
+  type = string
 }
 
 variable "fqdn_name" {
@@ -25,9 +25,9 @@ variable "fqdn_name" {
 }
 
 variable "zone_id" {
-  type    = string
+  type = string
 }
 
 variable "nlb_ip_address" {
-  type    = string
+  type = string
 }
