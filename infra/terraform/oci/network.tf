@@ -7,8 +7,8 @@ resource "oci_core_virtual_network" "probekit_vcn" {
 
 resource "oci_core_subnet" "api_subnet" {
   cidr_block        = "10.1.20.0/24"
-  display_name      = "api-probekit-subnet"
-  dns_label         = "api-probekit-subnet"
+  display_name      = "probekitsubnet"
+  dns_label         = "probekitsubnet"
   security_list_ids = [oci_core_security_list.probekit_security_list.id]
   compartment_id    = var.compartment_id
   vcn_id            = oci_core_virtual_network.probekit_vcn.id
