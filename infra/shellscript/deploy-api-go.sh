@@ -26,6 +26,26 @@ acquire_lock() {
     fi
 }
 
+calculate_gid() {
+    local gid
+    gid=$(id -g "$APP_USER")
+
+    if [ -z "$gid" ]; then
+        log "nao foi possivel calcular o gid do usuario $APP_USER" >&2
+        exit 1
+    fi
+
+    echo "$gid"
+}
+
+allow_icmp() {
+    local gid
+    gid=$(calculate_gid)
+
+    echo "net.ipv4.ping_group_range=$gid $gid" > /etc/sysctl.d/99-probekit-ping.conf
+    sysctl -p "/etc/sysctl.d/99-probekit-ping.conf"
+}
+
 check_tls_files() {
     if [ -f "$TLS_CERT_FILE" ] && [ -f "$TLS_KEY_FILE" ]; then
         return 0
@@ -126,6 +146,7 @@ Environment="TLS_KEY_FILE=$TLS_KEY_FILE"
 ExecStart=$BIN_PATH
 Restart=always
 AmbientCapabilities=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_RAW
 
 [Install]
 WantedBy=multi-user.target
@@ -201,6 +222,7 @@ main() {
     check_tls_files
 
     install_dependencies
+    allow_icmp
 
     # Antes dos downloads: se algo depois falhar, a porta ja esta aberta.
     free_ports 22 443
