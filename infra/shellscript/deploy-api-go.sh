@@ -11,6 +11,8 @@ VERSION_FILE="$APP_DIR/VERSION"
 UPDATER_PATH="/usr/local/sbin/autodeploy-api-go.sh"
 TLS_CERT_FILE="/etc/probekit/origin-ca.pem"
 TLS_KEY_FILE="/etc/probekit/origin-ca-key.pem"
+CORS_ALLOWED_ORIGINS="https://probekit.cc,https://www.probekit.cc"
+
 
 TMP_DIR=""
 
@@ -143,6 +145,7 @@ User=$APP_USER
 WorkingDirectory=$APP_DIR
 Environment="TLS_CERT_FILE=$TLS_CERT_FILE"
 Environment="TLS_KEY_FILE=$TLS_KEY_FILE"
+Environment="CORS_ALLOWED_ORIGINS=$CORS_ALLOWED_ORIGINS"
 ExecStart=$BIN_PATH
 Restart=always
 AmbientCapabilities=CAP_NET_BIND_SERVICE
