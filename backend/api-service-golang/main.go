@@ -65,7 +65,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	if err := http.ListenAndServeTLS(addr, certFile, keyFile, nil); err != nil {
+	origins := utils.OriginsFromEnv()
+	log.Printf("CORS allowed origins: %v", origins)
+
+	cors := utils.WithCORS(origins, http.DefaultServeMux)
+
+	if err := http.ListenAndServeTLS(addr, certFile, keyFile, cors); err != nil {
 		log.Fatal(err)
 	}
 }
