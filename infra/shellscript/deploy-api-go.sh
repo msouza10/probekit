@@ -9,6 +9,8 @@ ASSET="probekit-linux-amd64-api-go"
 BIN_PATH="$APP_DIR/api-service-golang"
 VERSION_FILE="$APP_DIR/VERSION"
 UPDATER_PATH="/usr/local/sbin/autodeploy-api-go.sh"
+TLS_CERT_FILE="/etc/probekit/origin-ca.pem"
+TLS_KEY_FILE="/etc/probekit/origin-ca-key.pem"
 
 TMP_DIR=""
 
@@ -22,6 +24,30 @@ acquire_lock() {
         log "outro deploy em andamento, saindo"
         exit 0
     fi
+}
+
+check_tls_files() {
+    if [ -f "$TLS_CERT_FILE" ] && [ -f "$TLS_KEY_FILE" ]; then
+        return 0
+    fi
+
+    log "arquivo de certificado ou chave nao encontrado" >&2
+    exit 1
+}
+
+install_tls_files() {
+    install -D -o "$APP_USER" -g "$APP_USER" -m 0644 "/tmp/origin-ca.pem" "$TLS_CERT_FILE"
+    install -D -o "$APP_USER" -g "$APP_USER" -m 0600 "/tmp/origin-ca-key.pem" "$TLS_KEY_FILE"
+
+    if [ -f "$TLS_CERT_FILE" ] && [ -f "$TLS_KEY_FILE" ]; then
+        log "arquivo de certificado ou chave movido para" "$TLS_CERT_FILE" "$TLS_KEY_FILE"
+
+        rm -f "/tmp/origin-ca.pem" "/tmp/origin-ca-key.pem"
+        return 0
+    fi
+
+    log "arquivo de certificado ou chave nao movido para" "$TLS_CERT_FILE" "$TLS_KEY_FILE" >&2
+    exit 1
 }
 
 install_dependencies() {
@@ -95,6 +121,8 @@ After=network.target
 [Service]
 User=$APP_USER
 WorkingDirectory=$APP_DIR
+Environment="TLS_CERT_FILE=$TLS_CERT_FILE"
+Environment="TLS_KEY_FILE=$TLS_KEY_FILE"
 ExecStart=$BIN_PATH
 Restart=always
 AmbientCapabilities=CAP_NET_BIND_SERVICE
@@ -148,7 +176,7 @@ EOF
 
 validate_api() {
     for _ in $(seq 1 15); do
-        if curl -fsS http://localhost:8080/ -H "Host: api.probekit.cc" 2>/dev/null | grep -q "OK"; then
+        if curl -fsS -k https://localhost:443/ -H "Host: api.probekit.cc" 2>/dev/null | grep -q "OK"; then
             log "API respondendo"
             return 0
         fi
@@ -166,8 +194,14 @@ main() {
     TMP_DIR=$(mktemp -d)
     trap 'rm -rf "$TMP_DIR"' EXIT
 
-    install_dependencies
     ensure_user_and_dir
+    if [ -f "/tmp/origin-ca.pem" ] && [ -f "/tmp/origin-ca-key.pem" ]; then
+        install_tls_files
+    fi
+    check_tls_files
+
+    install_dependencies
+
     # Antes dos downloads: se algo depois falhar, a porta ja esta aberta.
     free_ports 22 443
 
