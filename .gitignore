@@ -38,3 +38,6 @@ skills-lock.json
 .mcp.json
 /package.json
 /package-lock.json
+
+# Cloudflare
+frontend/.wrangler/
