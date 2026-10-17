@@ -88,6 +88,21 @@ jobs:
               exit 1 
             fi
           done
+      
+      - name: Write cert and key to file on vm
+        env:
+          TLS_CERT_FILE: ${{ secrets.TLS_CERT_FILE }}
+          TLS_KEY_FILE: ${{ secrets.TLS_KEY_FILE }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$TLS_CERT_FILE" > ~/.ssh/origin-ca.pem
+          chmod 600 ~/.ssh/origin-ca.pem
+          printf '%s\n' "$TLS_KEY_FILE" > ~/.ssh/origin-ca-key.pem
+          chmod 600 ~/.ssh/origin-ca-key.pem
+          scp -o StrictHostKeyChecking=accept-new -i ~/.ssh/probekit.pem ~/.ssh/origin-ca.pem ubuntu@$VM_API_01:/tmp/origin-ca.pem
+          scp -o StrictHostKeyChecking=accept-new -i ~/.ssh/probekit.pem ~/.ssh/origin-ca-key.pem ubuntu@$VM_API_01:/tmp/origin-ca-key.pem
+          scp -o StrictHostKeyChecking=accept-new -i ~/.ssh/probekit.pem ~/.ssh/origin-ca.pem ubuntu@$VM_API_02:/tmp/origin-ca.pem
+          scp -o StrictHostKeyChecking=accept-new -i ~/.ssh/probekit.pem ~/.ssh/origin-ca-key.pem ubuntu@$VM_API_02:/tmp/origin-ca-key.pem
 
       - name: Execute deploy api go in first vm
         run: |
@@ -96,6 +111,7 @@ jobs:
       - name: Execute deploy api go in second vm
         run: |
           ssh -o StrictHostKeyChecking=accept-new -i ~/.ssh/probekit.pem ubuntu@$VM_API_02 'sudo bash -s' < ../shellscript/deploy-api-go.sh
+          
           
 
 

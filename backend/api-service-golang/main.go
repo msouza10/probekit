@@ -4,8 +4,9 @@ import (
 	"api-service-golang/handler"
 	"api-service-golang/utils"
 	"log"
-	"net/http"
 	"net"
+	"net/http"
+	"os"
 )
 
 func main() {
@@ -13,7 +14,7 @@ func main() {
 		if r.Method != http.MethodGet {
 			utils.SetJSON(w, http.StatusMethodNotAllowed, utils.ErrorResponse{
 				Error: "Method not allowed",
-				Code:    "invalid_method",
+				Code:  "invalid_method",
 			})
 			return
 		}
@@ -44,16 +45,27 @@ func main() {
 		})
 	}
 
-	log.Printf("Server running on %s", "http://localhost:8080")
+	addr := os.Getenv("ADDR")
+	if addr == "" {
+		addr = ":443"
+	}
+
+	log.Printf("Server running (HTTPS) on %s", addr)
+
 	log.Println("root endpoint - /")
 
 	http.Handle("/api/ping", WithRateLimit(handler.Ping()))
 	log.Println("ping endpoint - /api/ping?target=<target>&count=<count>&timeout=<timeout>")
 
 	http.Handle("/api/dns-lookup", WithRateLimit(handler.Lookup()))
-	log.Println("lookup endpoint - /api/lookup?domain=<domain>")
+	log.Println("dns-lookup endpoint - /api/dns-lookup?domain=<domain>")
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	certFile, keyFile, err := utils.TLSFilesFromEnv()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := http.ListenAndServeTLS(addr, certFile, keyFile, nil); err != nil {
 		log.Fatal(err)
 	}
 }
