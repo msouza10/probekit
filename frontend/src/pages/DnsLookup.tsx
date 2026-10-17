@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { type DnsLookupResult, ORIGIN_REGION, runDnsLookup } from "@/lib/api"
+import { type DnsLookupResult, PROBE_PROVIDER, runDnsLookup } from "@/lib/api"
 
 export function DnsLookup() {
   const [domain, setDomain] = useState("")
@@ -51,8 +51,9 @@ export function DnsLookup() {
       setResult(data)
       setStatus("success")
     } catch (err: any) {
-      if (err.code === "backend_unreachable") {
-        // High fidelity fallback simulation if Go backend is offline
+      if (import.meta.env.DEV && err.code === "backend_unreachable") {
+        // Simulation only in dev (Go backend offline). In production a
+        // failure must show as an error, never as made-up results.
         const simulatedIps =
           finalDomain === "cloudflare.com"
             ? ["104.16.132.229", "104.16.133.229"]
@@ -73,7 +74,7 @@ export function DnsLookup() {
           ns: [`ns1.${finalDomain}`, `ns2.${finalDomain}`],
           srv: [],
           ip: simulatedIps,
-          origin_region: `${ORIGIN_REGION} (Simulação Local)`,
+          origin_region: "Simulação local",
         })
         setStatus("success")
       } else {
@@ -103,7 +104,7 @@ export function DnsLookup() {
             <span>FERRAMENTA DE REDE // CONSULTA AUTORITATIVA</span>
           </div>
           <span className="font-mono text-caption text-fog">
-            Origem: {ORIGIN_REGION}
+            Origem: {PROBE_PROVIDER}
           </span>
         </div>
         <h1 className="page-title text-foreground">DNS Lookup</h1>
@@ -267,7 +268,7 @@ export function DnsLookup() {
                 Consultando registros de {domain}
               </h3>
               <p className="text-body-sm text-fog font-mono">
-                Resolver autoritativo via {ORIGIN_REGION}
+                Resolver autoritativo via {PROBE_PROVIDER}
               </p>
             </div>
           </div>
@@ -294,12 +295,14 @@ export function DnsLookup() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Badge
-                variant="outline"
-                className="border-steel-border bg-page-ink font-mono text-caption text-ash"
-              >
-                {result.origin_region}
-              </Badge>
+              {result.origin_region && (
+                <Badge
+                  variant="outline"
+                  className="border-steel-border bg-page-ink font-mono text-caption text-ash"
+                >
+                  {result.origin_region}
+                </Badge>
+              )}
               <Button
                 variant="outline"
                 size="sm"

@@ -1,0 +1,16 @@
+name = "probekit"
+compatibility_date = "2026-10-17"
+
+# Domínios do site. Com custom_domain = true a Cloudflare cria o registro DNS
+# e o certificado sozinha (não há nada disso no Terraform; ver spec de infra).
+# `routes` precisa vir antes de qualquer [tabela], senão o TOML o atribui a ela.
+routes = [
+  { pattern = "probekit.cc", custom_domain = true },
+  { pattern = "www.probekit.cc", custom_domain = true },
+]
+
+# Worker só de arquivos estáticos (sem código): serve o build do Vite.
+[assets]
+directory = "./dist"
+# SPA: rotas como /ping e /dns-lookup caem no index.html e o React Router assume.
+not_found_handling = "single-page-application"

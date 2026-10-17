@@ -39,7 +39,23 @@ export interface ApiError {
   code: string
 }
 
-export const ORIGIN_REGION = "Oracle Cloud us-ashburn-1 (East)"
+// Quem hospeda a sonda. A região exata vem da resposta da API (origin_region).
+export const PROBE_PROVIDER = "Oracle Cloud"
+
+// Em produção VITE_API_BASE_URL aponta para a API (https://api.probekit.cc).
+// Vazio, o caminho fica relativo e o proxy do Vite (dev) encaminha para o Go.
+function apiUrl(path: string): string {
+  const base = String(import.meta.env.VITE_API_BASE_URL ?? "").replace(
+    /\/+$/,
+    "",
+  )
+  return `${base}${path}`
+}
+
+const BACKEND_UNREACHABLE: ApiError = {
+  error: "Não foi possível conectar à API. Tente novamente em instantes.",
+  code: "backend_unreachable",
+}
 
 export async function runPing(
   target: string,
@@ -53,7 +69,7 @@ export async function runPing(
   })
 
   try {
-    const res = await fetch(`/api/ping?${params.toString()}`)
+    const res = await fetch(apiUrl(`/api/ping?${params.toString()}`))
     const data = await res.json()
 
     if (!res.ok) {
@@ -63,20 +79,13 @@ export async function runPing(
       } as ApiError
     }
 
-    return {
-      ...data,
-      origin_region: ORIGIN_REGION,
-    }
+    return data as PingResult
   } catch (err: unknown) {
     if (typeof err === "object" && err !== null && "code" in err) {
       throw err as ApiError
     }
     // Network or server unreachable fallback
-    throw {
-      error:
-        "Não foi possível conectar ao backend Go (verifique se http://localhost:8080 está ativo).",
-      code: "backend_unreachable",
-    } as ApiError
+    throw { ...BACKEND_UNREACHABLE }
   }
 }
 
@@ -92,7 +101,7 @@ export async function runDnsLookup(
   }
 
   try {
-    const res = await fetch(`/api/dns-lookup?${params.toString()}`)
+    const res = await fetch(apiUrl(`/api/dns-lookup?${params.toString()}`))
     const data = await res.json()
 
     if (!res.ok) {
@@ -102,18 +111,11 @@ export async function runDnsLookup(
       } as ApiError
     }
 
-    return {
-      ...data,
-      origin_region: ORIGIN_REGION,
-    }
+    return data as DnsLookupResult
   } catch (err: unknown) {
     if (typeof err === "object" && err !== null && "code" in err) {
       throw err as ApiError
     }
-    throw {
-      error:
-        "Não foi possível conectar ao backend Go (verifique se http://localhost:8080 está ativo).",
-      code: "backend_unreachable",
-    } as ApiError
+    throw { ...BACKEND_UNREACHABLE }
   }
 }

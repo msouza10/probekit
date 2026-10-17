@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ORIGIN_REGION, type PingResult, runPing } from "@/lib/api"
+import { PROBE_PROVIDER, type PingResult, runPing } from "@/lib/api"
 
 export function Ping() {
   const [target, setTarget] = useState("")
@@ -50,8 +50,9 @@ export function Ping() {
       setResult(data)
       setStatus("success")
     } catch (err: any) {
-      if (err.code === "backend_unreachable") {
-        // Friendly simulation mode when Go backend isn't started
+      if (import.meta.env.DEV && err.code === "backend_unreachable") {
+        // Simulation only in dev (Go backend not started). In production a
+        // failure must show as an error, never as made-up results.
         const simulatedMin = (10 + Math.random() * 5).toFixed(1)
         const simulatedAvg = (parseFloat(simulatedMin) + 1.2).toFixed(1)
         const simulatedMax = (parseFloat(simulatedAvg) + 2.5).toFixed(1)
@@ -67,7 +68,7 @@ export function Ping() {
           min_rtt: `${simulatedMin}ms`,
           avg_rtt: `${simulatedAvg}ms`,
           max_rtt: `${simulatedMax}ms`,
-          origin_region: `${ORIGIN_REGION} (Simulação Local)`,
+          origin_region: "Simulação local",
         })
         setStatus("success")
       } else {
@@ -97,7 +98,7 @@ export function Ping() {
             <span>FERRAMENTA DE REDE // ICMP PROBE</span>
           </div>
           <span className="font-mono text-caption text-fog">
-            Origem: {ORIGIN_REGION}
+            Origem: {PROBE_PROVIDER}
           </span>
         </div>
         <h1 className="page-title text-foreground">Ping</h1>
@@ -274,7 +275,7 @@ export function Ping() {
                 Aguardando resposta de {target}
               </h3>
               <p className="text-body-sm text-fog font-mono">
-                Sonda ativa: {ORIGIN_REGION}
+                Sonda ativa: {PROBE_PROVIDER}
               </p>
             </div>
           </div>
@@ -304,12 +305,14 @@ export function Ping() {
             </div>
 
             <div className="flex items-center gap-3">
-              <Badge
-                variant="outline"
-                className="border-steel-border bg-page-ink font-mono text-caption text-ash"
-              >
-                {result.origin_region}
-              </Badge>
+              {result.origin_region && (
+                <Badge
+                  variant="outline"
+                  className="border-steel-border bg-page-ink font-mono text-caption text-ash"
+                >
+                  {result.origin_region}
+                </Badge>
+              )}
               <Button
                 variant="outline"
                 size="sm"
