@@ -1,5 +1,7 @@
 # Probekit — feature: ping e DNS lookup
 
+> **Estado em 2026-10-17:** implementado e no ar (`/api/ping`, `/api/dns-lookup` e as páginas `/ping` e `/dns-lookup`). Pendentes: devolver `origin_region` nas respostas e usar o IP real do cliente no rate limit. Detalhes no plano `docs/superpowers/plans/2026-10-09-probekit-first-deploy.md`, Task 3.
+
 ## Contexto
 
 Ver `OVERVIEW.md` e `AGENTS.md`. Este spec cobre a implementação das duas ferramentas do primeiro marco: ping e DNS lookup ("tradução"), backend e frontend. Assume que o scaffold do frontend (`2026-10-01-probekit-frontend-scaffold-design.md`) e a VM do backend (`2026-10-01-probekit-infra-design.md`) existem ou estão em paralelo.

@@ -40,7 +40,7 @@ Ter um site estático publicável, navegável, com uma página inicial que liste
         ui/          # primitivos gerados via shadcn/ui (Button, Card, Badge, Input, Tabs, Tooltip...)
                       # sem lógica de negócio; estilizados com Tailwind, Radix UI por baixo
         ToolCard.tsx  # e outros componentes de feature, compostos a partir de ui/
-      pages/          # Home, Ping, DnsLookup (placeholders por enquanto)
+      pages/          # Home, Ping, DnsLookup (Ping e DnsLookup já chamam a API; ver frontend/README.md)
       App.tsx         # rotas + AnimatePresence (transição entre páginas)
       main.tsx
   ```

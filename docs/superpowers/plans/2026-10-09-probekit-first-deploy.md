@@ -12,6 +12,30 @@
 
 **Specs/ADRs:** `docs/superpowers/specs/2026-10-01-probekit-infra-design.md`, `…-ping-dns-feature-design.md`, `…-frontend-scaffold-design.md`, `docs/adr/0001`, `docs/adr/0002`.
 
+## Estado em 2026-10-17
+
+O primeiro marco está **no ar**: `https://probekit.cc` (site, deploy manual com Wrangler) chamando `https://api.probekit.cc` (2 VMs OCI atrás do NLB, TLS Origin CA, CORS), com release e deploy da API automatizados. As seções abaixo mantêm o histórico do plano, agora com cada item marcado conforme o que foi feito e verificado.
+
+| Task | Estado |
+|---|---|
+| 0 · Decisões e ADRs | ✅ ADRs 0003, 0004 e 0005 |
+| 1 · Rede e NLB na 443 | ✅ (falta só revisar o `plan` no log do workflow) |
+| 2 · Egress ICMP/UDP | ✅ verificado em produção |
+| 3 · Go: TLS, IP do cliente, CORS, `origin_region` | ⚠️ TLS ✅ e CORS ✅; **IP real do cliente e `origin_region` pendentes** |
+| 4 · `deploy-api-go.sh` | ✅ |
+| 5 · Primeira release | ✅ 1.0.0, 1.1.0 e 1.2.0 |
+| 6 · Certificado | ✅ entregue pelo workflow |
+| 7 · Deploy inicial e runbook | ⚠️ deploy, smoke test e runbook ✅; faltam o teste de derrubar uma VM, confirmar Full (strict) no painel e `concurrency` |
+| 8 · Frontend: URL base da API | ✅ PR #8 |
+| 9 · `wrangler.toml` | ✅ e **site publicado manualmente** |
+| 10 · Secrets no GitHub | ⏳ só o necessário para automatizar o site |
+| 11 · CI em pull request | ⏳ |
+| 12 · Deploy automático do frontend | ⏳ (hoje manual) |
+| 13 · Endurecimento de acessos | ⏳ |
+| 14 · Documentação | ✅ nesta rodada |
+
+**Próximos passos:** (1) Task 3 restante no backend (IP real do cliente e `origin_region`); (2) Tasks 11 e 12 (CI e deploy automático do site); (3) Task 13 (a 443 só para as faixas da Cloudflare, SSH restrito); (4) teste de derrubar uma VM.
+
 ## Global Constraints
 
 - Free tier: shape `VM.Standard.E2.1.Micro` (1 OCPU / 1 GB), região `sa-saopaulo-1`, Cloudflare free.
@@ -45,6 +69,17 @@
 | Rate limit por `r.RemoteAddr`; atrás de Cloudflare+NLB todos os usuários parecem o mesmo IP | `main.go` (`WithRateLimit`) |
 | Frontend chama `/api/...` relativo; em produção cai no Worker, não na API; backend sem CORS | `frontend/src/lib/api.ts`, `main.go` |
 | `user_data` ausente: o script de deploy nunca roda | `infra/terraform/oci/instance.tf` |
+
+### Situação das divergências em 2026-10-17
+
+| Divergência | Situação |
+|---|---|
+| TLS no Go | ✅ Resolvida (PR #5, [ADR-0003](../../adr/0003-porta-origem-e-entrega-do-certificado.md)) |
+| Egress só TCP | ✅ Resolvida (egress `all`; ping e DNS lookup funcionam nas VMs) |
+| `origin_region` ausente; frontend com região fixa | ⏳ O frontend não fixa mais a região (PR #8) e lê o campo; o backend ainda não o devolve |
+| Rate limit por `RemoteAddr` | ⏳ Pendente: o NLB preserva a origem, então o Go vê o IP da borda da Cloudflare |
+| Frontend relativo e sem CORS | ✅ Resolvida (CORS no PR #7, `VITE_API_BASE_URL` no PR #8, [ADR-0004](../../adr/0004-chamada-frontend-api-com-cors.md)) |
+| `user_data` ausente | ✅ Superada pela D6: o workflow entrega o script por SSH |
 
 ## 2. Mapa anti-duplicação
 
@@ -81,14 +116,14 @@ Falhas prováveis que nenhum teste automatizado cobre; cada uma tem verificaçã
 |---|---|---|
 | D1 | Porta Cloudflare→NLB→VM | NLB escuta **443** e encaminha para **8443** na VM (Go não precisa de `CAP_NET_BIND_SERVICE`). Alternativa: Origin Rule mantendo 8080 |
 | D2 | Como o frontend chama a API | **Direto em `api.probekit.cc` com CORS** (allowlist `https://probekit.cc` + origem de dev). Alternativa: rota no Worker fazendo proxy, sem CORS, mas com código de Worker |
-| D3 | Como as VMs recebem **novas** versões (redeploy; o deploy inicial é do workflow, ver D6) | **EM ABERTO** (criador ainda decide). Opção A: systemd timer nas VMs consulta `releases/latest` (sem SSH nem chave no CI). Opção B: GitHub Action dispara o redeploy (ex.: ao publicar release), exige SSH do runner e chave no CI. Não bloqueia o deploy inicial |
-| D4 | Entrega do certificado Origin CA nas VMs | **Cópia manual única por `scp`** (validade de até 15 anos, ADR-0002). `user_data` é visível na metadata da OCI, então não serve para chave privada |
+| D3 | Como as VMs recebem **novas** versões (redeploy; o deploy inicial é do workflow, ver D6) | **Decidido: opção A** (timer de 5 min nas VMs), ver [ADR-0005](../../adr/0005-atualizacao-das-vms-e-deploy-inicial.md). Opção A: systemd timer nas VMs consulta `releases/latest` (sem SSH nem chave no CI). Opção B: GitHub Action dispara o redeploy (ex.: ao publicar release), exige SSH do runner e chave no CI. Não bloqueia o deploy inicial |
+| D4 | Entrega do certificado Origin CA nas VMs | **Cópia manual única por `scp`** (validade de até 15 anos, ADR-0002). `user_data` é visível na metadata da OCI, então não serve para chave privada **Mudou na execução:** o certificado vai por secrets do GitHub e pelo workflow ([ADR-0003](../../adr/0003-porta-origem-e-entrega-do-certificado.md)). |
 | D5 | State do Terraform | **Decidido: remoto** no bucket OCI (`backend.tf`). Substitui a decisão 8 do spec de infra (state local). CI pode rodar `plan` e `apply` |
 | D6 | Deploy inicial | **Decidido:** o workflow `deploy-api-golang.yml` (manual) roda `terraform apply`, descobre os IPs das VMs, conecta por SSH e executa o `deploy-api-go.sh` (binário + serviço systemd). Segredos via Infisical (OIDC) |
 
-- [ ] Responder D1, D2, D3, D4 (D5 e D6 já decididas). Estado atual: D1 está no Terraform como 443→443 (NLB escuta 443 e a VM também; difere da recomendação 443→8443, registrar no ADR); D3 está implementada no script (timer de 5 min); D2 e D4 em aberto (Origin CA ainda não gerado)
-- [ ] Criar os 3 ADRs (D1+D4 no 0003; D5 vira nota no 0005 junto com D3)
-- [ ] Atualizar a decisão 8 do spec de infra (state agora remoto)
+- [x] Responder D1, D2, D3, D4 (D5 e D6 já decididas). Respostas registradas em 2026-10-17: D1 = 443→443 ([ADR-0003](../../adr/0003-porta-origem-e-entrega-do-certificado.md)); D2 = frontend chama a API direto com CORS ([ADR-0004](../../adr/0004-chamada-frontend-api-com-cors.md)); D3 = timer de 5 min nas VMs ([ADR-0005](../../adr/0005-atualizacao-das-vms-e-deploy-inicial.md)); D4 = certificado entregue pelo workflow a partir de secrets do GitHub, no lugar do `scp` manual ([ADR-0003](../../adr/0003-porta-origem-e-entrega-do-certificado.md))
+- [x] Criar os 3 ADRs: 0003 (D1+D4), 0004 (D2) e 0005 (D3+D5+D6), em 2026-10-17
+- [x] Atualizar a decisão 8 do spec de infra (state agora remoto), feito em 2026-10-17
 
 ---
 
@@ -106,7 +141,7 @@ Falhas prováveis que nenhum teste automatizado cobre; cada uma tem verificaçã
 **Files:** `infra/terraform/oci/network.tf` (bloco `egress_security_rules`)
 
 - [x] Trocar o egress para permitir todos os protocolos (`"all"`)
-- [ ] **Verificar (pós-apply, Task 7):** `ping` e `dns-lookup` respondem de dentro da VM
+- [x] **Verificar (pós-apply, Task 7):** `ping` e `dns-lookup` respondem de dentro da VM — verificado em produção em 2026-10-17: `/api/ping` e `/api/dns-lookup` respondem 200 por `api.probekit.cc` (o ping exigiu liberar o ICMP sem privilégio, ver Task 4)
 
 ### Task 3: Go — TLS, IP do cliente, CORS e `origin_region` **[Criador; testes: Assistente]**
 **Depende de:** D1, D2. **Files:** `backend/api-service-golang/main.go`, `utils/` (novo helper de IP), `handler/ping.go`, `handler/lookup.go`
@@ -114,28 +149,30 @@ Falhas prováveis que nenhum teste automatizado cobre; cada uma tem verificaçã
 Conceitos a estudar (sessão guiada, um passo por vez): `http.ListenAndServeTLS`; ler cabeçalho `CF-Connecting-IP` só quando a conexão vem de IP da Cloudflare (senão é forjável); middleware CORS e resposta ao `OPTIONS`; ler uma variável de ambiente para `ORIGIN_REGION`.
 
 Critérios de pronto:
-- [ ] Servidor sobe em TLS com caminhos de cert/key vindos de variáveis de ambiente
-- [ ] `RateLimiter` usa o IP real do cliente
-- [ ] `Access-Control-Allow-Origin` só para a allowlist; `OPTIONS` responde 204
-- [ ] Respostas de `/api/ping` e `/api/dns-lookup` trazem `origin_region` (cumpre o spec do ping)
-- [ ] **Assistente:** escrever os testes (`tests/clientip_test.go`, `tests/cors_test.go`, `tests/origin_region_test.go`) assim que o criador definir as assinaturas; rodar `go test ./...`
+- [x] Servidor sobe em TLS com caminhos de cert/key vindos de variáveis de ambiente — PR #5; `tests/tls_test.go` (leitura das variáveis, HTTPS real, saída com erro sem os arquivos)
+- [ ] `RateLimiter` usa o IP real do cliente — **pendente.** O NLB preserva o IP de origem (verificado com `ss` nas VMs), então o Go enxerga o IP da borda da Cloudflare. Plano: `ClientIP` confia em `CF-Connecting-IP` só quando a conexão vem de faixa da Cloudflare (`TRUSTED_PROXY_CIDRS`)
+- [x] `Access-Control-Allow-Origin` só para a allowlist; `OPTIONS` responde 204 — PR #7; `tests/cors_test.go`; o preflight responde 204 (origem permitida) ou 403 (não permitida)
+- [ ] Respostas de `/api/ping` e `/api/dns-lookup` trazem `origin_region` (cumpre o spec do ping) — **pendente**; o frontend já lê o campo
+- [ ] **Assistente:** escrever os testes (`tests/clientip_test.go`, `tests/cors_test.go`, `tests/origin_region_test.go`) assim que o criador definir as assinaturas; rodar `go test ./...` — `tls_test.go` e `cors_test.go` escritos; faltam `clientip_test.go` e `origin_region_test.go`
 
 ### Task 4: Estender `deploy-api-go.sh` **[Criador]**
 **Depende de:** D1, D3, D4. **Files:** `infra/shellscript/deploy-api-go.sh` (editar). O timer reutiliza o próprio script, copiado da tag da release para `/usr/local/sbin/autodeploy-api-go.sh`, então `probekit-update.sh` não é mais necessário.
 
-- [ ] Health check final usa HTTPS na porta de D1 (`curl -k`), não `http://localhost:8080` (depende da Task 3)
-- [ ] Service recebe as variáveis de ambiente de cert/key/região/porta (depende da Task 3 e D4)
+- [x] Health check final usa HTTPS na porta de D1 (`curl -k`), não `http://localhost:8080` (depende da Task 3) — `curl -fsS -k https://localhost:443/`
+- [x] Service recebe as variáveis de ambiente de cert/key/região/porta (depende da Task 3 e D4) — cert/key (`TLS_CERT_FILE`, `TLS_KEY_FILE`) e `CORS_ALLOWED_ORIGINS`; a porta usa o padrão `:443`; a região depende do `origin_region` (Task 3)
 - [x] Liberar a porta no firewall do SO e persistir: `free_ports 22 443` (iptables/ip6tables, `netfilter-persistent save` se existir); **confirmar o estado real na VM** com `iptables -L INPUT -n --line-numbers`
 - [x] Timer de atualização (`autodeploy-api-go.timer`, 5 min): compara a tag instalada com `releases/latest`, baixa, confere `SHA256SUMS`, reinicia só se mudou; updater instalado a partir da **tag** da release
 - [x] Ramo RedHat removido (só Ubuntu); `set -euo pipefail`; `flock`; download em `mktemp -d`
-- [ ] **Verificar:** rodar duas vezes na mesma VM é idempotente. Simulado em 2026-10-16 (execução repetida: 0 downloads, 0 restarts, regras de firewall sem duplicar; release nova: 1 restart; checksum adulterado: aborta sem alterar nada). **Falta confirmar numa VM real**
+- [x] **Verificar:** rodar duas vezes na mesma VM é idempotente. Simulado em 2026-10-16 (execução repetida: 0 downloads, 0 restarts, regras de firewall sem duplicar; release nova: 1 restart; checksum adulterado: aborta sem alterar nada). **Falta confirmar numa VM real** — o workflow *Deploy* rodou três vezes em 2026-10-17 sobre VMs já configuradas, sem falha
+- [x] Instalar cert e chave em `/etc/probekit` (dono `probekit`, chave `0600`) e conferir que existem **antes** de trocar o binário (`install_tls_files` e `check_tls_files`)
+- [x] ICMP sem privilégio: `allow_icmp` grava `net.ipv4.ping_group_range` com o gid do usuário do serviço; `CAP_NET_RAW` fica disponível para ferramentas futuras (traceroute)
 
 ### Task 5: Primeira release **[Criador]**
 **Depende de:** Task 3. **Files:** nenhum (usa o workflow existente)
 
-- [ ] Merge na `main` com um `feat:` em `backend/api-service-golang/`
-- [ ] **Verificar:** release `probekit-linux-amd64-api-go-1.0.0` com binário e `SHA256SUMS`
-- [ ] **Verificar:** `curl -fsSL …/releases/latest | jq -r .tag_name` devolve a tag
+- [x] Merge na `main` com um `feat:` em `backend/api-service-golang/` — PR #5 (release 1.1.0) e PR #7 (1.2.0)
+- [x] **Verificar:** release `probekit-linux-amd64-api-go-1.0.0` com binário e `SHA256SUMS` — releases 1.0.0, 1.1.0 e 1.2.0 publicadas
+- [x] **Verificar:** `curl -fsSL …/releases/latest | jq -r .tag_name` devolve a tag — `latest` é a 1.2.0
 
 ---
 
@@ -145,7 +182,7 @@ Critérios de pronto:
 **Depende de:** Tasks 4, 5. **Files:** `infra/terraform/oci/instance.tf` (adicionar `user_data` ao `metadata`)
 
 - [x] ~~`user_data` baixa e executa o `deploy-api-go.sh` da release~~ — descartado, substituído pela D6 (o workflow entrega o script por SSH)
-- [ ] Gerar o certificado Origin CA no painel da Cloudflare (`api.probekit.cc`) e guardar fora do repo
+- [x] Gerar o certificado Origin CA no painel da Cloudflare (`api.probekit.cc`) e guardar fora do repo — entregue por secrets do GitHub e pelo workflow ([ADR-0003](../../adr/0003-porta-origem-e-entrega-do-certificado.md))
 
 ### Task 7: Deploy inicial pelo workflow e runbook **[Criador]**
 **Files:** `.github/workflows/deploy-api-golang.yml`
@@ -156,14 +193,14 @@ Critérios de pronto:
 - [x] Espera das VMs: laço de até 30 tentativas com `cloud-init status --wait`, falha com `exit 1` se esgotar
 - [x] SSH para cada VM com chave em GitHub Secret, `StrictHostKeyChecking=accept-new`, executando o `deploy-api-go.sh` com `sudo bash -s`
 - [x] Porta 22 da security list permite o acesso do runner (hoje `0.0.0.0/0`; restringir na Task 13)
-- [ ] Conferir no GitHub os nomes dos secrets usados pelo workflow (`SSH_PRIVATE_KEY_`, `PRIVATE_KEY_PATH`) e, no Infisical, que os segredos se chamam `TF_VAR_*`
+- [x] Conferir no GitHub os nomes dos secrets usados pelo workflow (`SSH_PRIVATE_KEY_`, `PRIVATE_KEY_PATH`) e, no Infisical, que os segredos se chamam `TF_VAR_*` — nomes atuais: `SSH_PRIVATE_KEY`, `OCI_PRIVATE_KEY`, `TLS_CERT_FILE`, `TLS_KEY_FILE`
 - [ ] Limpar linhas em branco ao final do workflow; opcional: `concurrency` para evitar dois applies simultâneos
-- [ ] Disparar o workflow manualmente e revisar o `plan` no log
-- [ ] `scp` do cert/key para as 2 VMs e `systemctl restart probekit`
-- [ ] Zona Cloudflare em **SSL/TLS → Full (strict)**
-- [ ] **Smoke test:** `curl -fsS https://api.probekit.cc/` → `{"message":"OK"}`; `/api/ping?target=1.1.1.1&count=2`; `/api/dns-lookup?domain=example.com`; ping a IP privado → `400`
+- [x] Disparar o workflow manualmente e revisar o `plan` no log — executado com sucesso mais de uma vez; revisar o `plan` no log segue sendo responsabilidade do criador a cada execução
+- [x] `scp` do cert/key para as 2 VMs e `systemctl restart probekit` — automatizado no workflow (passo que grava o cert e a chave e os copia para as duas VMs); o restart é feito pelo script de deploy
+- [ ] Zona Cloudflare em **SSL/TLS → Full (strict)** — a API responde por HTTPS pela Cloudflare com o Origin CA; falta confirmar no painel que o modo é Full (strict)
+- [x] **Smoke test:** `curl -fsS https://api.probekit.cc/` → `{"message":"OK"}`; `/api/ping?target=1.1.1.1&count=2`; `/api/dns-lookup?domain=example.com`; ping a IP privado → `400` — verificado em 2026-10-17: `/`, `/api/ping` e `/api/dns-lookup` retornam 200 e o ping para `10.0.0.1` retorna 400
 - [ ] Derrubar uma VM e confirmar que o NLB continua respondendo
-- [ ] Registrar o passo a passo em `docs/runbook-deploy.md`
+- [x] Registrar o passo a passo em `docs/runbook-deploy.md` — [`docs/runbook-deploy.md`](../../runbook-deploy.md)
 
 ---
 
@@ -172,23 +209,24 @@ Critérios de pronto:
 ### Task 8: URL base da API e região vinda da resposta **[Assistente]**
 **Depende de:** D2, Task 3. **Files:** Modify `frontend/src/lib/api.ts`; Create `frontend/.env.example`, `frontend/src/lib/api.test.ts`
 
-- [ ] Teste: `runPing` usa `import.meta.env.VITE_API_BASE_URL` como prefixo e, sem a variável, usa caminho relativo (dev com proxy do Vite)
-- [ ] Remover `ORIGIN_REGION` fixo; usar `origin_region` da resposta
-- [ ] Mensagem de erro de rede sem citar `localhost:8080`
-- [ ] `npx vitest run` e `npm run build`
+- [x] Teste: `runPing` usa `import.meta.env.VITE_API_BASE_URL` como prefixo e, sem a variável, usa caminho relativo (dev com proxy do Vite) — PR #8; `frontend/src/lib/api.test.ts`
+- [x] Remover `ORIGIN_REGION` fixo; usar `origin_region` da resposta — o badge só aparece se a API devolver o campo
+- [x] Mensagem de erro de rede sem citar `localhost:8080`
+- [x] `npx vitest run` e `npm run build` — 37 testes passando e build ok
 
 ### Task 9: `wrangler.toml` **[Assistente]**
 **Files:** Create `frontend/wrangler.toml`
 
-- [ ] Worker com static assets apontando para `dist`, fallback de SPA, `routes` para `probekit.cc` (e `www`, se desejado), conforme decisões 1, 3 e 12 do spec de infra
-- [ ] **Verificar:** `npx wrangler deploy --dry-run` (sem credencial real)
+- [x] Worker com static assets apontando para `dist`, fallback de SPA, `routes` para `probekit.cc` (e `www`, se desejado), conforme decisões 1, 3 e 12 do spec de infra — `frontend/wrangler.toml`
+- [x] **Verificar:** `npx wrangler deploy --dry-run` (sem credencial real) — o dry-run lê os arquivos de `dist/` sem erro
+- [x] **Primeiro deploy manual:** o site está no ar em `probekit.cc` e `www.probekit.cc` (verificado em 2026-10-17: `/`, `/ping` e `/dns-lookup` respondem 200). Build com `VITE_API_BASE_URL=https://api.probekit.cc` e `npx wrangler deploy`; passo a passo no [runbook](../../runbook-deploy.md)
 
 ---
 
 ## Fase 4 — Pipelines **[Criador]**
 
 ### Task 10: Segredos no GitHub
-- [ ] `CLOUDFLARE_API_TOKEN` (escopo Workers) e `CLOUDFLARE_ACCOUNT_ID`
+- [ ] `CLOUDFLARE_API_TOKEN` (escopo Workers) e `CLOUDFLARE_ACCOUNT_ID` — só necessários para automatizar o site; hoje o deploy manual usa `wrangler login`
 - [ ] Credenciais OCI e chave SSH ficam no Infisical (acesso por OIDC); no GitHub só os segredos mínimos. Como o CI agora aplica Terraform (D5/D6), restringir o `environment: production` (aprovação/branch)
 
 ### Task 11: CI em pull request
@@ -201,7 +239,7 @@ Critérios de pronto:
 ### Task 12: Deploy do frontend
 **Files:** Create `.github/workflows/deploy-frontend.yml`
 - [ ] Dispara na `main` com `paths: frontend/**`; usa `cloudflare/wrangler-action` com `VITE_API_BASE_URL=https://api.probekit.cc` no build
-- [ ] **Verificar:** `https://probekit.cc/ping` carrega e executa um ping real
+- [ ] **Verificar:** `https://probekit.cc/ping` carrega e executa um ping real — o site já foi publicado manualmente; falta a automação e confirmar no navegador a chamada à API (verificada até aqui por `curl`)
 
 ---
 
@@ -213,10 +251,10 @@ Critérios de pronto:
 - [ ] Instâncias em fault domains distintos
 
 ### Task 14: Documentação **[Assistente]**
-- [ ] `OVERVIEW.md`: atualizar o progresso (frontend e infra)
-- [ ] Marcar o plano `2026-10-04-probekit-frontend-scaffold.md` como concluído
-- [ ] Corrigir referências a `docs/arch.md` → `docs/architecture/arch.md`
-- [ ] Remover a decisão "fora do Terraform" obsoleta no spec de infra
+- [x] `OVERVIEW.md`: atualizar o progresso (frontend e infra) — atualizado em 2026-10-17
+- [x] Marcar o plano `2026-10-04-probekit-frontend-scaffold.md` como concluído — banner de concluído no plano do scaffold
+- [x] Corrigir referências a `docs/arch.md` → `docs/architecture/arch.md` — na spec de infra
+- [x] Remover a decisão "fora do Terraform" obsoleta no spec de infra — spec de infra atualizada (state remoto, deploy do binário, webserver resolvido)
 
 ---
 

@@ -27,6 +27,8 @@ O projeto também será um laboratório pessoal de DevOps, com infraestrutura co
 - Hospedar o frontend simultaneamente em várias clouds não é requisito inicial.
 - Terraform e GitHub Actions fazem parte da abordagem DevOps.
 - A infraestrutura deve respeitar o free tier; provedores, limites e mecanismos de controle ainda serão definidos.
+- Frontend como **Cloudflare Worker com assets estáticos** (não Pages), gerenciado pelo Wrangler; a API fica em `api.probekit.cc`, em duas VMs OCI atrás de um Network Load Balancer ([ADR-0001](./docs/adr/0001-oci-network-load-balancer.md)).
+- TLS terminado no próprio binário Go, com certificado Origin CA e zona em Full (strict) ([ADR-0002](./docs/adr/0002-terminacao-tls-cloudflare-full-strict.md)); porta, entrega do certificado, CORS e atualização das VMs em [ADR-0003](./docs/adr/0003-porta-origem-e-entrega-do-certificado.md), [ADR-0004](./docs/adr/0004-chamada-frontend-api-com-cors.md) e [ADR-0005](./docs/adr/0005-atualizacao-das-vms-e-deploy-inicial.md).
 - Gestão de tasks/backlog via **Azure Boards**, conectado ao repositório GitHub (código/CI/CD continuam só no GitHub — Azure Boards é usado apenas pra work items/sprints, via integração oficial GitHub ↔ Azure Boards).
 
 ## Responsabilidades
@@ -60,9 +62,28 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 - ⏳ O middleware em si (dentro de `main()`) não é testável automaticamente hoje — só a lógica do `RateLimiter`; validado manualmente ponta a ponta.
 - ⏳ Sem limpeza periódica de IPs antigos ainda (mapas crescem indefinidamente) — aceitável na escala atual do projeto.
 
-**Frontend:** não iniciado.
+**Frontend (`probekit.cc`):**
+- ✅ SPA em React 19 + Vite + TypeScript, Tailwind v4, shadcn/ui e Motion; páginas Home, Ping, DNS Lookup, Sobre e NotFound.
+- ✅ As páginas de Ping e DNS Lookup chamam a API de verdade (`VITE_API_BASE_URL`, `https://api.probekit.cc` em produção); a simulação de resultados só existe em desenvolvimento, para nunca mostrar dados inventados em produção.
+- ✅ Testes com Vitest (37, incluindo o cliente da API).
+- ✅ **Site no ar** como Cloudflare Worker com assets estáticos (`frontend/wrangler.toml`), nos domínios `probekit.cc` e `www.probekit.cc`, com deploy **manual** via Wrangler (passo a passo no [`runbook`](./docs/runbook-deploy.md)).
+- ⏳ O badge de região só aparece quando a API devolver `origin_region` (ainda não devolve).
+- ⏳ Rotas inexistentes respondem HTTP 200 com a página NotFound do React (fallback de SPA do Worker), não 404.
+- ⏳ Sem workflow de deploy automático nem CI em pull request.
 
-**Infraestrutura/deploy:** não iniciado (depende do spec de infra, `docs/superpowers/specs/2026-10-01-probekit-infra-design.md`).
+**Infraestrutura e deploy da API:**
+- ✅ Terraform (state remoto em bucket OCI) provisiona a rede, 2 VMs e o Network Load Balancer (L4, TCP/443) na OCI, e o registro DNS `api` (proxied) na Cloudflare.
+- ✅ TLS terminado no binário Go com certificado Origin CA da Cloudflare ([ADR-0002](./docs/adr/0002-terminacao-tls-cloudflare-full-strict.md)); certificado e chave chegam às VMs pelo workflow de deploy, a partir de secrets do GitHub ([ADR-0003](./docs/adr/0003-porta-origem-e-entrega-do-certificado.md)).
+- ✅ CORS por lista de origens (`CORS_ALLOWED_ORIGINS`) com preflight ([ADR-0004](./docs/adr/0004-chamada-frontend-api-com-cors.md)).
+- ✅ ICMP sem privilégio liberado só para o grupo do usuário do serviço (`net.ipv4.ping_group_range`); sem isso o `/api/ping` respondia 500 nas VMs.
+- ✅ Release automática do binário (`probekit-linux-amd64-api-go-X.Y.Z`, hoje na 1.2.0) e atualização das VMs por timer de 5 minutos ([ADR-0005](./docs/adr/0005-atualizacao-das-vms-e-deploy-inicial.md)).
+- ✅ Workflow *Deploy* (manual): `terraform apply`, espera do cloud-init, entrega do certificado e execução do `deploy-api-go.sh` por SSH nas duas VMs. Rodou com sucesso mais de uma vez.
+- ✅ Smoke test em produção (2026-10-17): `/`, `/api/ping` e `/api/dns-lookup` respondem 200, ping para IP privado responde 400, e o preflight de CORS responde 204 só para as origens permitidas.
+- ⏳ Teste de derrubar uma VM e confirmar que o NLB continua respondendo.
+
+**Limitações conhecidas:**
+- O limite de requisições usa `r.RemoteAddr`. O NLB preserva o IP de origem (verificado nas VMs em 2026-10-17 com `ss`), então o Go enxerga o IP da **borda da Cloudflare**, não o do usuário: todos os usuários de um mesmo ponto de presença dividem o mesmo limite. A correção planejada é usar `CF-Connecting-IP` apenas quando a conexão vier de uma faixa de IP da Cloudflare.
+- A porta 443 do NLB e das VMs está aberta para `0.0.0.0/0` (não só para a Cloudflare) e o SSH (22) também.
 
 ## Diretrizes propostas
 
@@ -81,5 +102,10 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 
 ## Próximos passos
 
-1. Começar o frontend (páginas `/ping` e `/dns-lookup`, 4 estados visuais), com React + Vite + TypeScript.
-2. Fluxo de publicação reproduzível (Terraform pro DNS da Cloudflare, Wrangler pro deploy do Worker/frontend, binário Go na VM OCI já existente via GitHub Actions).
+O primeiro marco (ping e DNS lookup no ar, com infraestrutura reproduzível) está concluído. O acompanhamento tarefa a tarefa fica em [`docs/superpowers/plans/2026-10-09-probekit-first-deploy.md`](./docs/superpowers/plans/2026-10-09-probekit-first-deploy.md). O que vem a seguir, em ordem:
+
+1. **Backend (Task 3, restante):** usar o IP real do cliente no limite de requisições (`CF-Connecting-IP` só quando a conexão vem de faixa da Cloudflare) e devolver `origin_region` nas respostas de ping e DNS lookup.
+2. **Automatizar o site:** workflow `deploy-frontend.yml` com `cloudflare/wrangler-action` (secrets `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID`; `VITE_API_BASE_URL` no build) e CI em pull request (`go vet`/`go test`, `npm ci`/lint/testes/build, `terraform fmt`/`validate`).
+3. **Operação:** teste de derrubar uma VM, `concurrency` nos workflows e aprovação obrigatória no ambiente `production`.
+4. **Endurecimento (Task 13):** restringir a 443 às faixas de IP da Cloudflare, restringir o SSH, distribuir as VMs em fault domains distintos e avaliar *Authenticated Origin Pulls*.
+5. **Próximas ferramentas** do catálogo, definidas conforme as necessidades.
