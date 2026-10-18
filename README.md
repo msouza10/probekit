@@ -126,11 +126,12 @@ O passo a passo completo, com verificações e diagnóstico de erros, está em [
 ## Documentação do projeto
 
 - [`OVERVIEW.md`](./OVERVIEW.md): propósito, decisões, progresso e próximos passos.
+- [`docs/README.md`](./docs/README.md): o que é cada tipo de documento (spec, ADR, plano, runbook, issue) e o padrão de cada um.
 - [`docs/architecture/arch.md`](./docs/architecture/arch.md): arquitetura, componentes e fluxo de uma requisição.
 - [`docs/adr/`](./docs/adr/): registros de decisões de arquitetura (ADRs).
 - [`docs/runbook-deploy.md`](./docs/runbook-deploy.md): como publicar e diagnosticar a API e o site.
 - [`Especificações`](./docs/superpowers/specs/): escopo e decisões de design das funcionalidades, do frontend e da infraestrutura.
-- [`Planos`](./docs/superpowers/plans/): planos de implementação e o acompanhamento de cada tarefa.
+- [`Planos`](./docs/superpowers/plans/): passo a passo de cada iniciativa. O estado das tarefas fica no GitHub Project, não nos planos.
 - [`AGENTS.md`](./AGENTS.md): acordo de colaboração entre o criador e o assistente. Infraestrutura e parte dos backends ficam com o criador como prática; o assistente contribui com frontend, testes, revisão e apoio ao aprendizado.
 
 ## Licença

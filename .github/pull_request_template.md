@@ -1,0 +1,9 @@
+<!-- Título do PR: tipo(escopo): resumo (igual ao commit principal). A release é decidida pela mensagem de cada commit que toca backend/api-service-golang/ (feat = minor, fix/perf = patch), não pelo título. -->
+
+- Adiciona …
+- Passa a …
+- Remove …
+
+Closes #
+
+<!-- Repositório público: sem segredo, chave, IP, nome de recurso interno nem detalhe de exposição. Padrão em docs/README.md. -->
