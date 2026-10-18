@@ -26,14 +26,28 @@ func main() {
 		utils.SetJSON(w, http.StatusOK, res)
 	})
 
+	cloudflareCIDRs, err := utils.TrustedProxyCIDRs()
+	if err != nil {
+		log.Printf("Error getting cloudflare cidrs: %s", err)
+	}
+
+	parsedCIDRs := make([]*net.IPNet, 0, len(cloudflareCIDRs))
+	for _, cidr := range cloudflareCIDRs {
+		_, ipNet, err := net.ParseCIDR(cidr)
+		if err != nil {
+			log.Printf("Invalid cidr - %s: %v", cidr, err)
+			continue
+		}
+		parsedCIDRs = append(parsedCIDRs, ipNet)
+	}
+
+	log.Printf("Cloudflare trusted ranges loaded: %d", len(parsedCIDRs))
+
 	rl := utils.NewRateLimiter()
 
 	WithRateLimit := func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ip, _, err := net.SplitHostPort(r.RemoteAddr)
-			if err != nil {
-				ip = r.RemoteAddr
-			}
+			ip := utils.RealIP(r, parsedCIDRs)
 			if !rl.Allow(ip) {
 				utils.SetJSON(w, http.StatusTooManyRequests, utils.ErrorResponse{
 					Error: "Too many requests, try again later",
