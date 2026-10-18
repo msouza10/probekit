@@ -19,8 +19,10 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:8080",
+        // A API só serve HTTPS; em dev ela usa um certificado autoassinado.
+        target: "https://localhost:8443",
         changeOrigin: true,
+        secure: false,
       },
     },
   },

@@ -1,5 +1,7 @@
 # Probekit Frontend Scaffold Implementation Plan
 
+> **Status: concluído.** O scaffold foi entregue no PR #1 (mergeado em 2026-10-05) e evoluiu depois: as páginas `/ping` e `/dns-lookup` deixaram de ser placeholders e chamam a API (PR #8), e o site está no ar em `probekit.cc` (deploy manual com Wrangler, ver [`docs/runbook-deploy.md`](../../runbook-deploy.md)). As caixas de seleção abaixo **não foram marcadas durante a execução** e ficam como estão, como registro do plano original; o estado real do frontend está em [`frontend/README.md`](../../../frontend/README.md) e no [`OVERVIEW.md`](../../../OVERVIEW.md).
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Stand up the Probekit frontend scaffold: a buildable, navigable React site with a themed, animated component foundation (shadcn/ui primitives + Motion) and a home page listing the ping/DNS-lookup tools, ready for their dedicated feature specs to plug into.
