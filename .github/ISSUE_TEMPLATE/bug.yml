@@ -1,0 +1,57 @@
+name: Bug
+description: Algo que deveria funcionar e não funciona.
+title: "fix(escopo): "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        O repositório é **público**. Não escreva segredo, chave, IP, nome de recurso interno nem o detalhe de uma exposição aberta. Para um problema de segurança, **não abra issue pública**: fale com o criador diretamente.
+  - type: textarea
+    id: observado
+    attributes:
+      label: O que acontece
+      description: O comportamento atual, com o texto exato do erro quando for curto.
+    validations:
+      required: true
+  - type: textarea
+    id: esperado
+    attributes:
+      label: O que deveria acontecer
+    validations:
+      required: true
+  - type: textarea
+    id: reproducao
+    attributes:
+      label: Como reproduzir
+      description: Passos mínimos, de preferência comandos.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: evidencia
+    attributes:
+      label: Evidência
+      description: Trecho de log, status HTTP, versão (tag da release), data e hora. Sem dados sensíveis.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área
+      options:
+        - api
+        - frontend
+        - infra
+        - pipeline
+        - docs
+    validations:
+      required: true
+  - type: dropdown
+    id: dono
+    attributes:
+      label: Dono
+      options:
+        - Criador
+        - Assistente
+    validations:
+      required: true

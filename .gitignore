@@ -18,9 +18,6 @@ infra/**/*.tfstate.*
 infra/**/*.tfvars
 infra/**/.terraform.lock.hcl
 
-# Claude Code — configuração pessoal, não compartilhada
-.claude/settings.local.json
-
 # Chaves SSH / credenciais
 *.pem
 *.key
@@ -31,8 +28,6 @@ infra/**/.terraform.lock.hcl
 *.swp
 
 # AI
-AGENTS.md
-.claude/
 .agents/
 skills-lock.json
 .mcp.json

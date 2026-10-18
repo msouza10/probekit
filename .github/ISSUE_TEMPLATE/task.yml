@@ -1,0 +1,53 @@
+name: Task
+description: Uma entrega verificável que cabe em um PR.
+title: "tipo(escopo): "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        O repositório é **público**. Não escreva segredo, chave, IP, nome de recurso interno nem o detalhe de uma exposição aberta. Segredos aparecem só pelo nome.
+        O título segue o formato do commit: `feat(api): ...`, `fix(infra): ...`, `docs: ...`. Padrão em [docs/README.md](https://github.com/msouza10/probekit/blob/main/docs/README.md).
+  - type: textarea
+    id: resultado
+    attributes:
+      label: Resultado esperado
+      description: O que existe ou funciona depois, não como fazer.
+    validations:
+      required: true
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Critérios de aceite
+      description: Caixas que alguém consegue verificar (um comando, um log, um teste), não "funciona bem".
+      placeholder: |
+        - [ ] `go test ./...` passa com o novo teste
+        - [ ] o log da VM mostra ...
+    validations:
+      required: true
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto e links
+      description: Links para o epic, a spec, o ADR ou o plano. Não copie o conteúdo, aponte para ele.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área
+      options:
+        - api
+        - frontend
+        - infra
+        - pipeline
+        - docs
+    validations:
+      required: true
+  - type: dropdown
+    id: dono
+    attributes:
+      label: Dono
+      description: Quem escreve, conforme o AGENTS.md (Terraform, workflows e o Go de aprendizado são do Criador).
+      options:
+        - Criador
+        - Assistente
+    validations:
+      required: true

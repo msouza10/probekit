@@ -1,0 +1,56 @@
+name: Decision
+description: Uma escolha entre alternativas que ainda não foi tomada. Termina em um ADR.
+title: "decision: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        O repositório é **público**. Não escreva segredo, chave, IP, nome de recurso interno nem o detalhe de uma exposição aberta.
+        Uma decision não é uma tarefa de implementação: ela termina quando o ADR é aceito (ver `docs/adr/`). A implementação vira task.
+  - type: textarea
+    id: pergunta
+    attributes:
+      label: Pergunta
+      description: O que precisa ser decidido, em uma frase.
+    validations:
+      required: true
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto e restrições
+      description: O que é fixo (custo, free tier, um operador só, prazos) e o que motivou a pergunta.
+    validations:
+      required: true
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: Alternativas
+      description: Pelo menos duas, cada uma com o ganho e o custo.
+      placeholder: |
+        ### A. ...
+        ### B. ...
+    validations:
+      required: true
+  - type: textarea
+    id: recomendacao
+    attributes:
+      label: Recomendação
+      description: Se houver. Quem decide é o criador.
+  - type: input
+    id: adr
+    attributes:
+      label: ADR resultante
+      description: Preencha quando o ADR existir.
+      placeholder: docs/adr/NNNN-nome.md
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área
+      options:
+        - api
+        - frontend
+        - infra
+        - pipeline
+        - docs
+    validations:
+      required: true

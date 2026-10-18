@@ -1,0 +1,66 @@
+name: Epic
+description: Um objetivo com várias etapas. Reúne tasks como sub-issues e tem um plano curto.
+title: "epic: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        O repositório é **público**. Não escreva segredo, chave, IP, nome de recurso interno nem o detalhe de uma exposição aberta. Segredos aparecem só pelo nome.
+        Padrão completo em [docs/README.md](https://github.com/msouza10/probekit/blob/main/docs/README.md).
+  - type: textarea
+    id: objetivo
+    attributes:
+      label: Objetivo
+      description: O que muda para o projeto quando isso estiver pronto, em uma ou duas frases.
+    validations:
+      required: true
+  - type: textarea
+    id: motivo
+    attributes:
+      label: Por que agora
+      description: O problema ou o risco de não fazer. Cite evidências (um incidente, um limite conhecido).
+    validations:
+      required: true
+  - type: textarea
+    id: fora-do-escopo
+    attributes:
+      label: O que não entra
+      description: Limites claros evitam que o epic cresça sem fim.
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Critérios de conclusão
+      description: Caixas verificáveis. O epic fecha quando todas as sub-issues fecharem e estas caixas estiverem marcadas.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+  - type: input
+    id: plano
+    attributes:
+      label: Plano
+      description: Caminho do plano curto em `docs/superpowers/plans/` (pode ser criado depois).
+      placeholder: docs/superpowers/plans/AAAA-MM-DD-nome.md
+  - type: dropdown
+    id: area
+    attributes:
+      label: Área
+      options:
+        - api
+        - frontend
+        - infra
+        - pipeline
+        - docs
+    validations:
+      required: true
+  - type: dropdown
+    id: dono
+    attributes:
+      label: Dono
+      description: Quem conduz o epic, conforme o AGENTS.md.
+      options:
+        - Criador
+        - Assistente
+    validations:
+      required: true
