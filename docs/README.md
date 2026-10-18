@@ -47,14 +47,17 @@ Os quatro tipos de issue, os campos de cada um e como usá-los estão na [seçã
 
 Segue o modelo de [`adr/0000-exemple-adr.md`](./adr/0000-exemple-adr.md): Status, Contexto, Decisão, Alternativas consideradas (com o motivo da não escolha), Consequências (positivas e negativas) e Validação.
 
-- Numeração sequencial. **Nunca edite um ADR aceito**: se a decisão mudar, crie um novo e marque o antigo como "Substituída por ADR-NNNN".
+- Numeração sequencial. **A decisão de um ADR aceito não se edita**: *Contexto*, *Decisão* e *Alternativas* ficam como foram escritos. Se a decisão mudar, crie um novo ADR e marque o antigo como "Substituída por ADR-NNNN".
+- O ADR registra a decisão **e a sua implementação**: as seções *Status* e *Validação* podem ser atualizadas, sempre com a data, conforme a decisão é implementada e verificada (por exemplo, "Pendente" vira o resultado de um teste em produção).
 - Só registre como validado o que foi **de fato verificado**, com a data.
+- Uma issue *Decision* termina quando o ADR é aceito; a implementação é feita pelas tasks do plano, e o ADR recebe a *Validação* quando elas terminam.
 
 ### Plano
 
-- Um plano por **iniciativa**, pequeno, com objetivo, passos e critérios verificáveis.
-- Aponta para as issues; não replica o estado delas.
-- Ao terminar, recebe o banner `> **Status: concluído.** <o que foi entregue, PRs>` e fica como registro.
+- Um plano por **epic**, pequeno, com objetivo, passos e critérios verificáveis. Escreva-o com `superpowers:writing-plans`.
+- **O plano vem primeiro.** Cada *Task* do plano vira uma sub-issue do epic; as tasks são derivadas do plano, não inventadas à parte.
+- O estado oficial de uma task está na **issue**. As caixas de passo dentro de uma Task do plano são o roteiro de quem executa, sem valor como estado do projeto.
+- O epic fecha quando todas as sub-issues fecham. Aí o plano recebe o banner `> **Status: concluído.** <o que foi entregue, PRs>` e fica como registro, sem mais edições.
 - O que sobrar vira issue, não "pendente" dentro do plano.
 
 ### Runbook
@@ -118,11 +121,13 @@ branch → código + testes → PR (Closes #N) → merge
 O trabalho se organiza em três níveis. Os nomes dos templates são em inglês (são os nomes que o GitHub mostra ao abrir uma issue); o conteúdo e os campos são em português.
 
 ```
-Epic  (issue "pai" + um plano curto)
-  ├─ Task  (sub-issue, vira um PR com "Closes #N")
+Epic  (issue "pai") ── tem um Plano real
+  ├─ Task  (sub-issue = uma Task do plano; vira um PR com "Closes #N")
   ├─ Task
-  └─ Bug / Decision (quando surgirem)
+  └─ Bug / Decision (quando surgirem; a Decision termina em um ADR)
 ```
+
+**Ordem:** primeiro o epic e o plano, depois as tasks (derivadas do plano). Uma issue de task sem Task correspondente no plano é sinal de que o plano está incompleto ou de que ela é um bug.
 
 | Template | Quando usar | Termina quando | Arquivo |
 |---|---|---|---|
@@ -140,6 +145,10 @@ Epic  (issue "pai" + um plano curto)
 ## 8. GitHub Project
 
 O Project é o único lugar do estado (seção 1). Ele não repete as regras daqui; a descrição dele só aponta para este arquivo.
+
+**Rascunhos antes de issues.** Para validar um desenho sem publicar nada, os itens nascem como *draft items* do Project (privados, não são issues). Só depois da validação eles são convertidos em issues, o que as torna públicas. O script `.claude/skills/probekit-docs/scripts/project_sync.py` sincroniza um inventário (JSON) com esses rascunhos; o inventário é o planejamento e **fica fora do repositório**.
+
+**Trabalho concluído também é registrado**, com Status *Concluída*, apontando para o PR, a release, o ADR e a evidência da verificação. O epic do primeiro deploy (E0) foi registrado assim, a partir do plano `2026-10-09-probekit-first-deploy.md`.
 
 **Campos:**
 
