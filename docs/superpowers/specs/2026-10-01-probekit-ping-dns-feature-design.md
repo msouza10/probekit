@@ -1,6 +1,6 @@
 # Probekit — feature: ping e DNS lookup
 
-> **Estado em 2026-10-17:** implementado e no ar (`/api/ping`, `/api/dns-lookup` e as páginas `/ping` e `/dns-lookup`). Pendentes: devolver `origin_region` nas respostas e usar o IP real do cliente no rate limit. Detalhes no plano `docs/superpowers/plans/2026-10-09-probekit-first-deploy.md`, Task 3.
+> **Nota de 2026-10-18:** as rotas `/api/ping` e `/api/dns-lookup` e as páginas `/ping` e `/dns-lookup` estão no ar, e o rate limit usa o IP real do cliente (PR #10). O campo `origin_region` descrito abaixo **ainda não é devolvido** pelo backend; o acompanhamento dessa entrega fica no GitHub Project, não neste documento.
 
 ## Contexto
 
