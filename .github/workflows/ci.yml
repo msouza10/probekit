@@ -1,0 +1,105 @@
+name: CI Test
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  go:
+    name: Go
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: backend/api-service-golang/go.mod
+          cache-dependency-path: backend/api-service-golang/go.sum
+
+      - name: Allow Ping
+        run: |
+          sudo sysctl -w net.ipv4.ping_group_range="0 2147483647"
+
+      - name: Run Go Tests
+        working-directory: backend/api-service-golang
+        run: |
+          go test -v ./...
+
+      - name: Run Go Linters
+        working-directory: backend/api-service-golang
+        run: |
+          go vet -v ./...
+        
+  terraform:
+    name: Terraform
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: terraform fmt
+        working-directory: infra/terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Init
+        working-directory: infra/terraform
+        run: terraform init -backend=false
+
+      - name: Terraform Validate
+        working-directory: infra/terraform
+        run: terraform validate
+
+  npm:
+    name: NPM
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci 
+
+      - name: Run lint
+        working-directory: ./frontend
+        run: npm run lint
+
+      - name: Run build
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Run format check
+        working-directory: ./frontend
+        run: npm run format:check
+
+      - name: Run npm tests
+        working-directory: ./frontend
+        run: npm test
+        

@@ -17,7 +17,7 @@
 - O CI **não usa segredos** (PR de fork não os recebe).
 - O merge continua sendo **merge commit**: o `calculate-version.sh` lê a mensagem de cada commit que toca `backend/api-service-golang/**`.
 - Os jobs do CI **sempre rodam** (sem filtro de caminho): um check obrigatório que não roda trava o PR.
-- Nomes dos jobs, estáveis e curtos: workflow `CI`, jobs `go`, `frontend`, `terraform`. A regra da `main` grava esses nomes.
+- Nomes dos jobs, estáveis e curtos: workflow `CI Test`, jobs `Go`, `NPM`, `Terraform`. A regra da `main` grava esses nomes.
 - `concurrency` do *Deploy* e da release **nunca** com `cancel-in-progress: true` (cancelar um `apply` ou uma release no meio deixa estado pela metade). No CI de PR, sim.
 
 ## Review Focus
@@ -37,7 +37,7 @@ Entradas e condições que o plano implica e que mais provavelmente quebram, mai
 | Arquivo | Responsabilidade | Task |
 |---|---|---|
 | `.github/workflows/ci.yml` (novo) | testes, lint e build em PR | 1 |
-| Ruleset da `main` (GitHub, sem arquivo) | exige PR e os checks do `CI` | 2 |
+| Ruleset da `main` (GitHub, sem arquivo) | exige PR e os checks do `CI Test` | 2 |
 | `infra/shellscript/deploy-api-go.sh` | updater: backup, validação e rollback | 3 |
 | `.github/workflows/deploy-api-golang.yml` | `concurrency` e aprovação | 4 |
 | `docs/adr/NNNN-…` (novo) | decisão sobre expor a versão | 5 |
@@ -65,14 +65,14 @@ Tasks 1, 3, 4 e 5 não dependem entre si.
 **Files:** Create `.github/workflows/ci.yml`. Referência: `.github/workflows/build-api-golang.yml`.
 
 **Interfaces:**
-- Produces: três checks com os nomes `CI / go`, `CI / frontend`, `CI / terraform` (a Task 2 depende deles).
+- Produces: três checks com os nomes `CI Test / Go`, `CI Test / NPM`, `CI Test / Terraform` (a Task 2 depende deles).
 
 - [ ] Esqueleto: `on: pull_request` (sem `paths`), `permissions: contents: read`, `concurrency` por PR com `cancel-in-progress: true`.
-- [ ] Job `go`: `go vet ./...` e `go test ./...` em `backend/api-service-golang/`; reaproveitar da release o `setup-go` com `go-version-file` e o passo *Allow Ping* (`net.ipv4.ping_group_range`).
-- [ ] Job `frontend`: `npm ci`, `npm run lint`, `npm test`, `npm run build` em `frontend/`, com Node fixado (o `package.json` não declara `engines`; escolher a versão exigida pelo Vite 8 e pelo Wrangler 4) e cache do npm.
-- [ ] Job `terraform`: `terraform fmt -check -recursive`, `terraform init -backend=false`, `terraform validate` em `infra/terraform`, com o wrapper do `setup-terraform` desligado.
+- [ ] Job `Go`: `go vet ./...` e `go test ./...` em `backend/api-service-golang/`; reaproveitar da release o `setup-go` com `go-version-file` e o passo *Allow Ping* (`net.ipv4.ping_group_range`).
+- [ ] Job `NPM`: `npm ci`, `npm run lint`, `npm test`, `npm run build` em `frontend/`, com Node fixado (o `package.json` não declara `engines`; escolher a versão exigida pelo Vite 8 e pelo Wrangler 4) e cache do npm.
+- [ ] Job `Terraform`: `terraform fmt -check -recursive`, `terraform init -backend=false`, `terraform validate` em `infra/terraform`, com o wrapper do `setup-terraform` desligado.
 - [ ] Decidir o `gofmt`: corrigir os 4 arquivos listados em PR separado **antes**, ou deixá-lo de fora do CI.
-- [ ] **Verificar:** PR de teste com um teste do Go quebrado de propósito deixa `CI / go` vermelho; idem para o frontend; corrigir e ver os três verdes (`gh pr checks <nº>`). A release segue com seu próprio `go test`.
+- [ ] **Verificar:** PR de teste com um teste do Go quebrado de propósito deixa `CI Test / Go` vermelho; idem para o frontend; corrigir e ver os três verdes (`gh pr checks <nº>`). A release segue com seu próprio `go test`.
 
 ### Task 2: Exigir os checks para mergear na `main` **[Criador]**
 
@@ -82,7 +82,7 @@ Tasks 1, 3, 4 e 5 não dependem entre si.
 
 **Interfaces:** Consumes os três checks da Task 1.
 
-- [ ] Ruleset na `main`: exigir PR, exigir `CI / go`, `CI / frontend`, `CI / terraform`, bloquear force push e exclusão; aprovações em 0 (um só operador).
+- [ ] Ruleset na `main`: exigir PR, exigir `CI Test / Go`, `CI Test / NPM`, `CI Test / Terraform`, bloquear force push e exclusão; aprovações em 0 (um só operador).
 - [ ] Manter **merge commit**; decidir se o administrador pode contornar a regra e registrar a decisão.
 - [ ] Atualizar `docs/README.md` com a regra.
 - [ ] **Verificar:** PR com check vermelho não mergeia; PR só de docs fecha; a próxima release da API ainda sai (a release usa `GITHUB_TOKEN` para tag e release, não faz push de commit).
@@ -149,5 +149,5 @@ Tasks 1, 3, 4 e 5 não dependem entre si.
 ## Self-Review
 
 - **Cobertura:** as sete issues do epic têm Task; o objetivo (testes antes do merge, `main` protegida, rollback, site pelo CI) está coberto pelas Tasks 1, 2, 3 e 7; fila, aprovação e fumaça (4 e 6) endurecem o deploy; a 5 destrava a verificação por versão.
-- **Nomes:** `CI / go`, `CI / frontend` e `CI / terraform` aparecem iguais nas Tasks 1 e 2.
+- **Nomes:** `CI Test / Go`, `CI Test / NPM` e `CI Test / Terraform` aparecem iguais nas Tasks 1 e 2.
 - **Sem estado:** nenhum "pendente" ou "feito" neste arquivo; o andamento está nas issues. Ao fechar a última sub-issue, este plano ganha o banner de concluído.
