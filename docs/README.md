@@ -87,6 +87,17 @@ Escrito para quem está com o problema na mão: comando, resultado esperado e o 
 - Uma branch por task (ou por PR), criada a partir da `main` atualizada. Depois do merge, a branch não é reaproveitada.
 - Criar branch, commitar e abrir o PR é do criador (ver `AGENTS.md`); o assistente sugere o nome e escreve o texto.
 
+### Proteção da `main`
+
+Um ruleset do GitHub (*Settings → Rules → Rulesets*, nome `protection-main`) protege a `main`:
+
+- Só entra código por **pull request**; push direto, force push e exclusão da branch são bloqueados.
+- O PR só mergeia com os checks do workflow `CI Test` verdes: **`Go`**, **`NPM`** e **`Terraform`** (a regra usa o nome do job; na aba Checks aparecem como `CI Test / Go`). Quem renomear um job precisa atualizar a regra.
+- O único método de merge é o **merge commit**: o `calculate-version.sh` lê a mensagem de cada commit, e squash ou rebase quebrariam o cálculo da versão.
+- Aprovações obrigatórias: **0**, porque há um só operador e o GitHub não deixa aprovar o próprio PR.
+- O administrador do repositório pode contornar a regra **só por pull request** (nunca com push direto), para não ficar trancado se o CI quebrar por motivo externo. Decisão de 2026-10-19.
+- Os jobs do CI **sempre rodam** (o workflow não filtra por caminho): um check obrigatório que não roda deixa o PR pendente para sempre.
+
 ## 4. Ciclo de uma mudança
 
 ```
