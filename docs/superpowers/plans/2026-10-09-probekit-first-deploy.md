@@ -1,5 +1,7 @@
 # Probekit — Primeiro Deploy Completo: Plano de Implementação
 
+> **Status: concluído em 2026-10-18.** O primeiro marco foi entregue: site no Cloudflare Workers chamando a API em HTTPS nas 2 VMs atrás do NLB, com CORS, rate limit pelo IP real do cliente (PR #10) e release e deploy da API automatizados (releases 1.0.0 a 1.2.1). Este plano é histórico e não recebe mais edições: as marcações de "pendente" e "⏳" abaixo refletem 2026-10-17 e **não valem como estado**. O que sobrou (CI em pull request, deploy automático do site, endurecimento de acessos, teste de derrubar uma VM, `origin_region`) está nas issues e no GitHub Project.
+
 > **Para quem executa:** este plano respeita o `AGENTS.md`. Tarefas marcadas **[Criador]** (Terraform, workflows, Go, qualquer credencial) são escritas pelo criador; o assistente só revisa e ensina, e escreve os testes. Tarefas **[Assistente]** são frontend e `wrangler.toml`. Os passos usam checkbox (`- [ ]`) para acompanhamento.
 >
 > **Por que não há código de infra/Go aqui:** o criador está praticando Terraform e Go (ver `AGENTS.md`). Cada tarefa traz *o quê*, *onde*, *critério de pronto* e *como verificar*; o *como escrever* é feito em sessão guiada, um passo por vez.
