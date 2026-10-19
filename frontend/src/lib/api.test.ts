@@ -83,7 +83,8 @@ describe("runPing", () => {
 
     const result = await runPing("1.1.1.1")
 
-    expect(result.origin_region).toBe("sa-saopaulo-1")
+    // QUEBRADO DE PROPÓSITO (teste do CI): nunca mergear
+    expect(result.origin_region).toBe("quebrado-de-proposito")
   })
 
   it("does not invent an origin_region when the API omits it", async () => {

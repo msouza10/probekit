@@ -59,7 +59,8 @@ func TestOriginsFromEnv(t *testing.T) {
 		t.Setenv("CORS_ALLOWED_ORIGINS", "https://probekit.cc,  http://localhost:5173 ")
 
 		got := utils.OriginsFromEnv()
-		want := []string{"https://probekit.cc", "http://localhost:5173"}
+		// QUEBRADO DE PROPÓSITO (teste do CI): nunca mergear
+		want := []string{"https://probekit.cc", "http://localhost:9999"}
 		if !slices.Equal(got, want) {
 			t.Errorf("got %q, want %q", got, want)
 		}
