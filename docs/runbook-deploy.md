@@ -57,7 +57,12 @@ Mudanças só em `infra/` ou `frontend/` não geram release.
 
 ### 3.3 Deploy completo (infra, certificado, script)
 
-Actions → **Deploy** → *Run workflow*. Ele aplica o Terraform, espera o cloud-init, entrega o certificado e a chave e executa o `deploy-api-go.sh` nas duas VMs. Leia o `terraform plan` no log antes de aprovar a continuação, quando houver aprovação configurada.
+Actions → **Deploy** → *Run workflow* (só na `main`). O workflow tem dois jobs:
+
+1. **`Plan deploy`** (ambiente `plan`, sem pausa): roda `terraform plan`, cifra o plano e o sobe como artefato de 1 dia.
+2. **`Deploy`** (ambiente `production`): **espera a sua aprovação**. Antes de aprovar, leia o `terraform plan` no log do job `Plan deploy`. Depois de aprovado, ele baixa e decifra o plano, aplica **esse** plano, espera o cloud-init, entrega o certificado e a chave e executa o `deploy-api-go.sh` nas duas VMs.
+
+Dois *Deploy* nunca rodam juntos: o segundo espera na fila. Se o estado mudar entre o plano e a aprovação, o `apply` do plano salvo falha em vez de aplicar algo diferente do que você leu.
 
 > **Ordem importante.** Se a release nova exige algo que só o *Deploy* entrega (um arquivo, uma variável de ambiente), rode o *Deploy* **logo depois** da release. Até lá o timer pode ter instalado o binário novo em uma VM que ainda não tem o que ele precisa ([ADR-0005](./adr/0005-atualizacao-das-vms-e-deploy-inicial.md)).
 

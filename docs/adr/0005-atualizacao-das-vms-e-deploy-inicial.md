@@ -64,6 +64,7 @@ Foi cogitado e descartado: o workflow entrega o script por SSH, o que também pe
 
 - O *Deploy* manual rodou com sucesso mais de uma vez, inclusive repetido sobre VMs já configuradas (três execuções bem-sucedidas em 2026-10-17, após as releases 1.1.0 e 1.2.0).
 - Releases publicadas: 1.0.0, 1.1.0 (TLS) e 1.2.0 (CORS).
+- Em 2026-10-20 o *Deploy* passou a ter dois jobs, `plan` (sem pausa) e `deploy` (com a aprovação do ambiente `production`), com o plano cifrado entre eles ([ADR-0007](./0007-gestao-de-segredos-com-infisical.md)). O primeiro run nesse formato passou, com "No changes" no plano e 0 recursos alterados no `apply`. A decisão acima, de aplicar o plano salvo, continua valendo.
 - Verificação do timer em uma VM: `systemctl list-timers autodeploy-api-go.timer` e `journalctl -u autodeploy-api-go -n 30`.
 
 ## Referências

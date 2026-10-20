@@ -66,7 +66,11 @@ Verificado em 2026-10-20, pela API do GitHub e só pelos **nomes** dos secrets:
 - o ambiente `plan` não tem revisor e aceita só a branch `main`;
 - os secrets do `production` são `OCI_PRIVATE_KEY`, `SSH_PRIVATE_KEY`, `TLS_CERT_FILE` e `TLS_KEY_FILE`, e o do `plan` é `OCI_PRIVATE_KEY`; não há secret no nível do repositório.
 
-Falta confirmar, no primeiro *Deploy* depois do merge da separação em dois jobs, que a identidade do Infisical aceita o ambiente `plan` e entrega a senha do plano aos dois jobs. Quando isso for verificado, registre aqui o resultado com a data.
+Verificado em 2026-10-20, no *Deploy* com dois jobs (run `39440535935`, depois de corrigir uma linha de claim em branco na identidade do Infisical):
+
+- o login por OIDC passou nos ambientes `plan` e `production`, e a senha do plano chegou aos dois jobs (a guarda da senha, a cifragem, a decifragem e o `apply` do plano salvo passaram);
+- o artefato do plano tem 1 dia de retenção e é um arquivo cifrado (cabeçalho `Salted__`, sem texto legível do Terraform);
+- a aprovação do `production` ficou registrada, e o job `Deploy` só começou cerca de 48 segundos depois do fim do `plan`.
 
 ## Referências
 
