@@ -25,6 +25,10 @@ Este documento descreve como publicar o Probekit, como conferir que deu certo e 
 
 O nome `TLS_*_FILE` engana: o secret guarda o texto do PEM, e o workflow o grava em arquivo. As demais configurações da OCI (ids, região, etc.) vêm do **Infisical**, por OIDC.
 
+**GitHub, ambiente `plan`** (sem aprovação, só a branch `main`): apenas `OCI_PRIVATE_KEY`, que o `terraform plan` exige. A chave SSH e o certificado ficam só no `production`.
+
+**Infisical:** além das configurações da OCI e das variáveis do Terraform, guarda a `TFPLAN_PASSPHRASE`, a senha que cifra o plano do Terraform entre o job `plan` e o job `deploy`. Por que dois lugares: [ADR-0007](./adr/0007-gestao-de-segredos-com-infisical.md).
+
 **Cloudflare (hoje só na máquina do criador):** o `wrangler login` autentica na conta. Quando o deploy do site for automatizado serão necessários `CLOUDFLARE_API_TOKEN` (escopo Workers) e `CLOUDFLARE_ACCOUNT_ID`.
 
 **Painel da Cloudflare:**

@@ -11,8 +11,76 @@ permissions:
   contents: read
 
 jobs:
+  plan-deploy:
+    name: Plan deploy
+    runs-on: ubuntu-latest
+    environment:
+      name: plan
+    permissions:
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: infra/terraform
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get Credentials infisical
+        id: infisical
+        uses: Infisical/secrets-action@v1.0.16
+        with:
+          method: "oidc"
+          domain: "https://app.infisical.com"
+          identity-id: "4d055d81-89da-4750-9957-5a7567e65de8"
+          project-slug: "probekit-xb-qb"
+          env-slug: "prod"
+          export-type: "env"
+          recursive: true
+
+      - name: Write OCI private key to file
+        env:
+          OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$OCI_PRIVATE_KEY" > ~/.ssh/private_key_oci.pem
+          chmod 600 ~/.ssh/private_key_oci.pem
+          echo "TF_VAR_private_key_path=$HOME/.ssh/private_key_oci.pem" >> $GITHUB_ENV
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -input=false -out=tfplan
+
+      - name: Check tfplan passphrase
+        run: |
+          test -n "$TFPLAN_PASSPHRASE" || { echo "TFPLAN_PASSPHRASE vazia ou ausente"; exit 1; }
+
+      - name: Encrypt tfplan file
+        run: |
+          openssl enc -pbkdf2 -aes-256-cbc -salt -in tfplan -out tfplan-workflow-encrypted-${{ github.run_id }}.enc -pass env:TFPLAN_PASSPHRASE
+
+      - name: Archive terraform plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-workflow-${{ github.run_id }}
+          path: infra/terraform/tfplan-workflow-encrypted-${{ github.run_id }}.enc
+          retention-days: 1
+          if-no-files-found: error
+
   deploy:
     name: Deploy
+    needs: plan-deploy
     runs-on: ubuntu-latest
     environment:
       name: production
@@ -63,13 +131,23 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -input=false -out=tfplan
+      - name: Download plan file
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan-workflow-${{ github.run_id }}
+          path: infra/terraform
+
+      - name: Check tfplan passphrase
+        run: |
+          test -n "$TFPLAN_PASSPHRASE" || { echo "TFPLAN_PASSPHRASE vazia ou ausente"; exit 1; }
+
+      - name: Decrypt tfplan file
+        run: |
+          openssl enc -d -pbkdf2 -aes-256-cbc -in tfplan-workflow-encrypted-${{ github.run_id }}.enc -out tfplan-workflow-decrypt-${{ github.run_id }} -pass env:TFPLAN_PASSPHRASE
 
       - name: Terraform Apply
         id: apply
-        run: terraform apply -input=false tfplan
+        run: terraform apply -input=false tfplan-workflow-decrypt-${{ github.run_id }}
 
       - name: Set variables
         run: |
@@ -92,10 +170,10 @@ jobs:
             done
             if [ "$ready" != true ]; then
               echo "VM $ip not ready"
-              exit 1 
+              exit 1
             fi
           done
-      
+
       - name: Write cert and key to file on vm
         env:
           TLS_CERT_FILE: ${{ secrets.TLS_CERT_FILE }}
@@ -114,23 +192,7 @@ jobs:
       - name: Execute deploy api go in first vm
         run: |
           ssh -o StrictHostKeyChecking=accept-new -i ~/.ssh/probekit.pem ubuntu@$VM_API_01 'sudo bash -s' < ../shellscript/deploy-api-go.sh
-          
+
       - name: Execute deploy api go in second vm
         run: |
           ssh -o StrictHostKeyChecking=accept-new -i ~/.ssh/probekit.pem ubuntu@$VM_API_02 'sudo bash -s' < ../shellscript/deploy-api-go.sh
-          
-          
-
-
-          
-          
-          
-          
-        
-        
-      
-      
-    
-      
-    
-  
