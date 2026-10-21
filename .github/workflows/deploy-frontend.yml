@@ -116,11 +116,6 @@ jobs:
           bash verify-sites.sh
 
       - name: Verify the API accepts the site origin
+        working-directory: ./infra/shellscript
         run: |
-          code=$(curl -sS -o /dev/null -w "%{http_code}" -X OPTIONS "https://api.probekit.cc/api/ping" \
-            -H "Origin: https://probekit.cc" -H "Access-Control-Request-Method: GET" || true)
-          if [ "$code" != "204" ]; then
-            echo "FALHOU: a API nao liberou a origem do site (preflight respondeu $code)"
-            exit 1
-          fi
-          echo "preflight -> 204"
+          bash verify-api-routes.sh
