@@ -129,7 +129,7 @@ O workflow *Deploy Frontend* (`.github/workflows/deploy-frontend.yml`) dispara a
 
 Dois deploys do site não rodam juntos: o segundo espera na fila.
 
-Verificado em 2026-10-21, em um run manual: os dois jobs passaram, com a aprovação do `production` entre eles. Pendente de confirmação: o disparo por push em `frontend/**`.
+Verificado em 2026-10-21 (run manual) e em 2026-10-22 (disparo por push em `frontend/**`): os dois jobs passaram, com a aprovação do `production` entre eles.
 
 ### 5.2 Manual (plano B)
 
