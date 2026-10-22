@@ -58,7 +58,9 @@ Verificado em 2026-10-21, em um run manual do workflow (run `39539547916`):
 - a aprovação do `production` ficou registrada, e o `Deploy Frontend` só começou cerca de 38 segundos depois do fim do `Build Frontend`;
 - o artefato do `dist` ficou com retenção de 1 dia.
 
-Falta confirmar: o disparo por push em `frontend/**` e o teste do rollback em produção. Quando forem verificados, registre aqui o resultado com a data.
+Verificado em 2026-10-22: o disparo por push em `frontend/**` (run `39698488264`, evento `push` na `main`, com uma mudança só no `frontend/README.md`): os dois jobs passaram, com a aprovação do `production` registrada.
+
+Verificado em 2026-10-22: o rollback em produção com `wrangler rollback`. A versão ativa passou de `f0e2ba05` para a anterior (`782d862d`) em um novo deployment, e o site continuou respondendo 200. As duas versões serviam os mesmos arquivos, então o teste não alterou o conteúdo no ar.
 
 ## Referências
 
