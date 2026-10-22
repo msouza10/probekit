@@ -1,6 +1,6 @@
 # Runbook: publicar e diagnosticar a API e o site
 
-Este documento descreve como publicar o Probekit, como conferir que deu certo e o que fazer quando algo falha. Tudo aqui foi verificado em produção em 2026-10-17. Decisões e motivos estão nos [ADRs](./adr/); a arquitetura, em [`architecture/arch.md`](./architecture/arch.md).
+Este documento descreve como publicar o Probekit, como conferir que deu certo e o que fazer quando algo falha. Tudo aqui foi verificado em produção em 2026-10-17, exceto o que estiver marcado como pendente de confirmação. Decisões e motivos estão nos [ADRs](./adr/); a arquitetura, em [`architecture/arch.md`](./architecture/arch.md).
 
 > Nunca coloque valores de secrets, certificados ou chaves neste documento nem no repositório. Aqui só aparecem **nomes**.
 
@@ -8,9 +8,9 @@ Este documento descreve como publicar o Probekit, como conferir que deu certo e 
 
 | Parte | Endereço | Como é publicada |
 |---|---|---|
-| Site | `https://probekit.cc` e `https://www.probekit.cc` | **Manual**, com o Wrangler (seção 5) |
-| API | `https://api.probekit.cc` | Release automática + workflow *Deploy* manual (seção 3) |
-| Infraestrutura | OCI e Cloudflare | Terraform, dentro do workflow *Deploy* |
+| Site | `https://probekit.cc` e `https://www.probekit.cc` | Workflow *Deploy Frontend*, com aprovação (seção 5); manual com o Wrangler como plano B |
+| API | `https://api.probekit.cc` | Release automática + workflow *Deploy API* manual (seção 3) |
+| Infraestrutura | OCI e Cloudflare | Terraform, dentro do workflow *Deploy API* |
 
 ## 2. Secrets e configuração
 
@@ -22,6 +22,8 @@ Este documento descreve como publicar o Probekit, como conferir que deu certo e 
 | `OCI_PRIVATE_KEY` | chave da API OCI, gravada em arquivo para o Terraform |
 | `TLS_CERT_FILE` | **conteúdo** do certificado Origin CA (PEM completo, com as linhas `BEGIN/END`) |
 | `TLS_KEY_FILE` | **conteúdo** da chave privada do certificado (PEM completo) |
+| `CF_API_TOKEN` | token da API da Cloudflare, só para publicar o site (o workflow o passa ao Wrangler como `CLOUDFLARE_API_TOKEN`) |
+| `CF_ACCOUNT_ID` | id da conta da Cloudflare, lido pelo Wrangler como `CLOUDFLARE_ACCOUNT_ID` |
 
 O nome `TLS_*_FILE` engana: o secret guarda o texto do PEM, e o workflow o grava em arquivo. As demais configurações da OCI (ids, região, etc.) vêm do **Infisical**, por OIDC.
 
@@ -29,7 +31,7 @@ O nome `TLS_*_FILE` engana: o secret guarda o texto do PEM, e o workflow o grava
 
 **Infisical:** além das configurações da OCI e das variáveis do Terraform, guarda a `TFPLAN_PASSPHRASE`, a senha que cifra o plano do Terraform entre o job `plan` e o job `deploy`. Por que dois lugares: [ADR-0007](./adr/0007-gestao-de-segredos-com-infisical.md).
 
-**Cloudflare (hoje só na máquina do criador):** o `wrangler login` autentica na conta. Quando o deploy do site for automatizado serão necessários `CLOUDFLARE_API_TOKEN` (escopo Workers) e `CLOUDFLARE_ACCOUNT_ID`.
+**Cloudflare:** o deploy do site usa `CF_API_TOKEN` e `CF_ACCOUNT_ID`, do ambiente `production` (decisão e motivo em [ADR-0008](./adr/0008-deploy-do-site-pelo-github-actions.md)). O token deve ter só o mínimo para publicar o Worker e ligar os domínios (permissões de Workers Scripts e Account Settings na conta e de Workers Routes na zona `probekit.cc`; a lista vigente fica no painel da Cloudflare). Se o token tiver data de validade, o deploy do site falha quando ela vencer: crie outro e atualize o secret. `CF_ACCESSKEY_ID`, `CF_SECRET_ACCESSKEY` e `CF_S3_ENDPOINT` também estão no ambiente, reservados para uso futuro, e nenhum workflow os usa. O deploy manual (seção 5.2) continua podendo usar `wrangler login`.
 
 **Painel da Cloudflare:**
 
@@ -57,14 +59,14 @@ Mudanças só em `infra/` ou `frontend/` não geram release.
 
 ### 3.3 Deploy completo (infra, certificado, script)
 
-Actions → **Deploy** → *Run workflow* (só na `main`). O workflow tem dois jobs:
+Actions → **Deploy API** → *Run workflow* (só na `main`). O workflow tem dois jobs:
 
 1. **`Plan deploy`** (ambiente `plan`, sem pausa): roda `terraform plan`, cifra o plano e o sobe como artefato de 1 dia.
 2. **`Deploy`** (ambiente `production`): **espera a sua aprovação**. Antes de aprovar, leia o `terraform plan` no log do job `Plan deploy`. Depois de aprovado, ele baixa e decifra o plano, aplica **esse** plano, espera o cloud-init, entrega o certificado e a chave e executa o `deploy-api-go.sh` nas duas VMs.
 
-Dois *Deploy* nunca rodam juntos: o segundo espera na fila. Se o estado mudar entre o plano e a aprovação, o `apply` do plano salvo falha em vez de aplicar algo diferente do que você leu.
+Dois *Deploy API* nunca rodam juntos: o segundo espera na fila. Se o estado mudar entre o plano e a aprovação, o `apply` do plano salvo falha em vez de aplicar algo diferente do que você leu.
 
-> **Ordem importante.** Se a release nova exige algo que só o *Deploy* entrega (um arquivo, uma variável de ambiente), rode o *Deploy* **logo depois** da release. Até lá o timer pode ter instalado o binário novo em uma VM que ainda não tem o que ele precisa ([ADR-0005](./adr/0005-atualizacao-das-vms-e-deploy-inicial.md)).
+> **Ordem importante.** Se a release nova exige algo que só o *Deploy API* entrega (um arquivo, uma variável de ambiente), rode o *Deploy API* **logo depois** da release. Até lá o timer pode ter instalado o binário novo em uma VM que ainda não tem o que ele precisa ([ADR-0005](./adr/0005-atualizacao-das-vms-e-deploy-inicial.md)).
 
 ### 3.4 Verificar a API
 
@@ -103,10 +105,10 @@ No portal da OCI: **Networking → Network Load Balancers → api-probekit → B
 | `521` | a Cloudflare não alcança a origem | serviço parado, backend *Critical* no NLB ou porta 443 bloqueada |
 | `525` | falha no handshake TLS entre a Cloudflare e a VM | certificado e chave não formam par, ou o serviço está sem eles |
 | `526` | certificado da origem inválido no modo Full (strict) | hostname da API fora da lista do certificado, ou expirado |
-| `/api/ping` responde 500 e o `dns-lookup` funciona | `net.ipv4.ping_group_range` em `1 0` (ICMP sem privilégio desligado) | rodar o *Deploy*; o script grava o gid do usuário em `/etc/sysctl.d/99-probekit-ping.conf` |
-| API fora do ar logo após uma release | binário novo sem o arquivo ou a variável que exige | rodar o *Deploy*; ver `journalctl -u probekit` |
+| `/api/ping` responde 500 e o `dns-lookup` funciona | `net.ipv4.ping_group_range` em `1 0` (ICMP sem privilégio desligado) | rodar o *Deploy API*; o script grava o gid do usuário em `/etc/sysctl.d/99-probekit-ping.conf` |
+| API fora do ar logo após uma release | binário novo sem o arquivo ou a variável que exige | rodar o *Deploy API*; ver `journalctl -u probekit` |
 | `journalctl` cheio de `TLS handshake error ... EOF` | health check TCP do NLB, que fecha sem fazer TLS | ignorar, é esperado |
-| Navegador bloqueia a chamada do site (CORS) | `CORS_ALLOWED_ORIGINS` sem a origem, ou vazia | conferir `systemctl cat probekit`; corrigir no script e rodar o *Deploy* |
+| Navegador bloqueia a chamada do site (CORS) | `CORS_ALLOWED_ORIGINS` sem a origem, ou vazia | conferir `systemctl cat probekit`; corrigir no script e rodar o *Deploy API* |
 | Script de deploy sai com "arquivo de certificado ou chave nao encontrado" | secrets `TLS_*` ausentes ou o passo do certificado não rodou | conferir os secrets e a ordem dos passos no workflow |
 
 Conferir se o certificado e a chave formam um par, sem imprimir a chave:
@@ -116,7 +118,20 @@ openssl x509 -in origin-ca.pem -noout -pubkey | openssl sha256
 openssl pkey -in origin-ca-key.pem -pubout | openssl sha256     # os dois hashes devem ser iguais
 ```
 
-## 5. Publicar o site (manual)
+## 5. Publicar o site
+
+### 5.1 Automático (padrão)
+
+O workflow *Deploy Frontend* (`.github/workflows/deploy-frontend.yml`) dispara a cada push na `main` que mude algo em `frontend/**`, e também à mão: Actions → **Deploy Frontend** → *Run workflow*. Tem dois jobs:
+
+1. **`Build Frontend`** (sem token): `npm ci`, lint, formatação, testes e build com `VITE_API_BASE_URL=https://api.probekit.cc`; confere que o `dist/` contém essa URL e sobe o `dist` como artefato de 1 dia.
+2. **`Deploy Frontend`** (ambiente `production`): **espera a sua aprovação**, que só é pedida depois de o build passar. Baixa o `dist`, publica com `npx wrangler deploy` e roda `verify-sites.sh` e `verify-api-routes.sh`. Qualquer falha deixa o job vermelho.
+
+Dois deploys do site não rodam juntos: o segundo espera na fila.
+
+Verificado em 2026-10-21, em um run manual: os dois jobs passaram, com a aprovação do `production` entre eles. Pendente de confirmação: o disparo por push em `frontend/**`.
+
+### 5.2 Manual (plano B)
 
 Pré-requisitos: Node recente (o Wrangler 4 exige), dependências instaladas (`npm ci`) e uma conta da Cloudflare que seja dona da zona `probekit.cc`.
 
@@ -129,37 +144,53 @@ npx wrangler deploy
 
 Pontos de atenção:
 
-- **O `VITE_API_BASE_URL` é obrigatório no build.** Ele é embutido no momento do `vite build`. Sem ele, as chamadas ficam relativas e vão para o próprio Worker, que só serve arquivos.
+- **O `VITE_API_BASE_URL` é obrigatório no build.** Ele é embutido no momento do `vite build`. Sem ele, as chamadas ficam relativas e vão para o próprio Worker, que só serve arquivos. O workflow falha se o `dist/` não contiver a URL esperada.
 - O `wrangler.toml` liga os domínios `probekit.cc` e `www.probekit.cc` com `custom_domain = true`: a Cloudflare cria o DNS e o certificado sozinha. Se já existir um registro manual para o mesmo nome (ex.: um `A` em `www`), o deploy falha por conflito; apague o registro antes.
 - O primeiro acesso após criar um domínio pode levar alguns minutos até o certificado ser emitido.
 - Para validar a configuração e o empacotamento sem publicar: `npx wrangler deploy --dry-run`.
 
-### Verificar o site
+### 5.3 Verificar o site
 
 ```bash
-for u in https://probekit.cc/ https://www.probekit.cc/ https://probekit.cc/ping https://probekit.cc/dns-lookup; do
-  curl -sS -o /dev/null -w "$u -> %{http_code}\n" "$u"
-done
+bash infra/shellscript/verify-sites.sh        # o site: os quatro endereços respondem 200
+bash infra/shellscript/verify-api-routes.sh   # a API: saúde, preflight de CORS (204) e origem bloqueada (403)
 ```
 
-Todos devem responder 200. No navegador, abra `/ping` e `/dns-lookup`, execute uma consulta e confirme o resultado vindo da API (aba Rede: a chamada vai para `api.probekit.cc` e a resposta traz `access-control-allow-origin`).
+No navegador, abra `/ping` e `/dns-lookup`, execute uma consulta e confirme o resultado vindo da API (aba Rede: a chamada vai para `api.probekit.cc` e a resposta traz `access-control-allow-origin`).
 
 Uma rota inexistente também responde 200: o Worker devolve o `index.html` e o React mostra a página de "não encontrado". É o comportamento do fallback de SPA.
 
-### Diagnóstico do site
+### 5.4 Voltar o site à versão anterior
+
+O Worker guarda as versões publicadas. O rollback muda só a versão **ativa**; o repositório não muda.
+
+```bash
+cd frontend
+npx wrangler deployments list                 # anote o id da versão para a qual voltar
+npx wrangler rollback <id-da-versao> --message "motivo"
+```
+
+Também dá para voltar pelo painel da Cloudflare (Workers → `probekit` → Deployments). O próximo push em `frontend/**` publica de novo a partir da `main` e desfaz o rollback: para uma correção permanente, reverta o commit na `main`.
+
+Pendente de confirmação: o teste deste procedimento em produção. Registre aqui a data quando for feito.
+
+### 5.5 Diagnóstico do site
 
 | Sintoma | Causa provável | O que fazer |
 |---|---|---|
 | Ping e DNS dão erro "Não foi possível conectar à API" | build feito sem `VITE_API_BASE_URL`, ou CORS bloqueando | refazer o build com a variável; ver a seção 4 para o CORS |
+| O job `Build Frontend` falha em `Check API URL in the build` | `VITE_API_BASE_URL` errada ou vazia no passo de build do workflow | corrigir o valor no workflow |
+| O passo `Deploy Frontend` falha por autenticação | token da Cloudflare vencido, revogado ou sem permissão | criar outro token e atualizar `CF_API_TOKEN` no ambiente `production` |
+| `Verify the site is up` falha depois de publicar | propagação lenta ou o site realmente fora | rodar `verify-sites.sh`; se persistir, voltar a versão (5.4) |
 | Falha de `wrangler deploy` por domínio já existente | registro DNS manual no mesmo nome | remover o registro e repetir |
 | `wrangler login` não autentica | conta ou navegador errado | `npx wrangler whoami` mostra a conta atual |
 
 ## 6. Trocar o certificado
 
 1. Gerar um novo par (seção 3.1) e atualizar os secrets `TLS_CERT_FILE` e `TLS_KEY_FILE`.
-2. Rodar o workflow *Deploy*. Ele copia o novo par para as VMs e o script o instala em `/etc/probekit/`.
+2. Rodar o workflow *Deploy API*. Ele copia o novo par para as VMs e o script o instala em `/etc/probekit/`.
 3. O serviço lê o certificado ao iniciar. Se o par instalado for novo e o serviço já estiver rodando, reinicie-o (`sudo systemctl restart probekit`) em cada VM, de uma por vez, para o NLB manter ao menos um backend de pé.
 
 ## 7. Reverter
 
-Não há rollback automático: o binário antigo é sobrescrito antes da validação. Para voltar a uma versão anterior, reverta o commit problemático na `main` e publique uma nova release. No site, reconstrua a partir de um commit anterior e rode `npx wrangler deploy` de novo (o Wrangler também guarda versões do Worker no painel da Cloudflare).
+Não há rollback automático: o binário antigo é sobrescrito antes da validação. Para voltar a uma versão anterior, reverta o commit problemático na `main` e publique uma nova release. No site, use o rollback do Wrangler ou do painel (seção 5.4), ou reverta o commit na `main` e deixe o workflow publicar de novo.
