@@ -1,0 +1,137 @@
+name: Rollback Frontend
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "previous = volta uma versao; specific = volta para o version_id informado"
+        required: true
+        type: choice
+        options:
+          - previous
+          - specific
+      version_id:
+        description: "ID da versao do Worker (so para specific)"
+        required: false
+        type: string
+      reason:
+        description: "Motivo do rollback (ate 70 caracteres)"
+        required: false
+        default: "rollback pelo workflow"
+        type: string
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Plan rollback
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    timeout-minutes: 10
+    outputs:
+      active: ${{ steps.target.outputs.active }}
+      target: ${{ steps.target.outputs.target }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: |
+          npm ci
+
+      - name: Select rollback target
+        id: target
+        working-directory: ./frontend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          MODE: ${{ inputs.action }}
+          VERSION_ID: ${{ inputs.version_id }}
+          REASON: ${{ inputs.reason }}
+        run: |
+          bash ../infra/shellscript/select-rollback-target.sh select
+
+  rollback:
+    name: Rollback Frontend
+    needs: check
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: |
+          npm ci
+
+      - name: Check the active version has not changed
+        working-directory: ./frontend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          PLANNED_ACTIVE: ${{ needs.check.outputs.active }}
+        run: |
+          current=$(bash ../infra/shellscript/select-rollback-target.sh active)
+          if [ "$current" != "$PLANNED_ACTIVE" ]; then
+            echo "A versao ativa mudou depois do plano (era $PLANNED_ACTIVE, agora $current). Rode o workflow de novo."
+            exit 1
+          fi
+
+      - name: Rollback frontend
+        working-directory: ./frontend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          TARGET: ${{ needs.check.outputs.target }}
+          REASON: ${{ inputs.reason }}
+          ACTOR: ${{ github.actor }}
+        run: |
+          if ! [[ "$TARGET" =~ ^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$ ]]; then
+            echo "Versao alvo invalida"
+            exit 1
+          fi
+          npx wrangler rollback "$TARGET" --message "${REASON:-rollback pelo workflow} (por $ACTOR)" --yes
+
+      - name: Check the rollback took effect
+        working-directory: ./frontend
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          TARGET: ${{ needs.check.outputs.target }}
+        run: |
+          current=$(bash ../infra/shellscript/select-rollback-target.sh active)
+          if [ "$current" != "$TARGET" ]; then
+            echo "A versao ativa e $current, e nao $TARGET"
+            exit 1
+          fi
+          echo "Versao ativa: $current"
+
+      - name: Verify the site is up
+        run: |
+          bash infra/shellscript/verify-sites.sh
