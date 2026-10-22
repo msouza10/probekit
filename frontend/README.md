@@ -49,7 +49,9 @@ O proxy do Vite (`vite.config.ts`) encaminha `/api` para `https://localhost:8443
 
 O site é um **Cloudflare Worker com assets estáticos**, definido em [`wrangler.toml`](./wrangler.toml): o Worker `probekit` serve o conteúdo de `dist/`, devolve o `index.html` para rotas desconhecidas (o React Router assume, inclusive para `/ping` e `/dns-lookup` acessados direto) e liga os domínios `probekit.cc` e `www.probekit.cc`, para os quais a Cloudflare cria o DNS e o certificado.
 
-Hoje o deploy é **manual**:
+O deploy é **automático**: o workflow _Deploy Frontend_ roda a cada push na `main` que mude algo em `frontend/**` (ou à mão, em Actions), faz o build com `VITE_API_BASE_URL=https://api.probekit.cc`, espera a aprovação do ambiente `production` e publica com o Wrangler, verificando o site e a API depois. O passo a passo, o rollback e o diagnóstico estão no [runbook](../docs/runbook-deploy.md#5-publicar-o-site).
+
+Como plano B, o deploy manual:
 
 ```bash
 cd frontend
@@ -61,5 +63,3 @@ npx wrangler deploy
 Para validar a configuração sem publicar nada: `npx wrangler deploy --dry-run`.
 
 Efeito colateral do fallback de SPA: rotas inexistentes respondem **HTTP 200** com a página de "não encontrado" do React, não 404.
-
-O workflow de deploy automático (`cloudflare/wrangler-action` na `main`) ainda não existe; está no plano do primeiro deploy, Task 12.
