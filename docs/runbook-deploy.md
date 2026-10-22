@@ -162,18 +162,32 @@ Uma rota inexistente também responde 200: o Worker devolve o `index.html` e o R
 
 ### 5.4 Voltar o site à versão anterior
 
-O Worker guarda as versões publicadas. O rollback muda só a versão **ativa**; o repositório não muda.
+**Pelo workflow** *Rollback Frontend* (Actions → **Rollback Frontend** → *Run workflow*, só na `main`). Entradas:
+
+- `action = previous`: volta uma versão (a imediatamente mais antiga que a ativa);
+- `action = specific` + `version_id`: volta (ou avança) para a versão informada;
+- `reason`: motivo, opcional, até 70 caracteres.
+
+Tem dois jobs, e **cada um pede a aprovação** do ambiente `production`:
+
+1. **`Plan rollback`** calcula o alvo e escreve no **resumo do run** a tabela dos deployments e a frase "Vai voltar da versão X para a Y". Leia o resumo antes de aprovar o próximo job.
+2. **`Rollback Frontend`** confere que a versão ativa continua a do plano (se alguém publicou nesse meio-tempo, falha), aplica o `wrangler rollback`, confere que o alvo ficou ativo e roda o `verify-sites.sh`.
+
+O workflow entra na mesma fila do deploy do site (`deploy-frontend`), então os dois não correm juntos, e nunca imprime o e-mail do autor dos deployments. Os ids de versão estão na tabela do resumo; o script que escolhe o alvo é `infra/shellscript/select-rollback-target.sh`.
+
+O rollback muda só a versão **ativa** do Worker; o repositório não muda. O próximo push em `frontend/**` publica de novo a partir da `main` e desfaz o rollback: para uma correção permanente, reverta o commit na `main`.
+
+**Plano B, manual** (com o token na sessão do terminal), se o workflow estiver indisponível:
 
 ```bash
 cd frontend
-npx wrangler deployments list                 # anote o id da versão para a qual voltar
+npx wrangler deployments list --json          # os ids de versão (tem o e-mail do autor: não cole em lugar público)
 npx wrangler rollback <id-da-versao>          # pergunta uma mensagem opcional e pede confirmação (yes)
 npx wrangler deployments status               # mostra a versão ativa
 ```
+Também dá para voltar pelo painel da Cloudflare (Workers → `probekit` → Deployments).
 
-Também dá para voltar pelo painel da Cloudflare (Workers → `probekit` → Deployments). O próximo push em `frontend/**` publica de novo a partir da `main` e desfaz o rollback: para uma correção permanente, reverta o commit na `main`.
-
-Verificado em 2026-10-22: o `rollback` de `f0e2ba05` para `782d862d` criou um novo deployment (mensagem `Rollback`), a versão ativa passou a ser a anterior e o site continuou respondendo 200. As duas versões serviam os mesmos arquivos (o deploy da mais nova terminou com "No updated asset files to upload"), então o teste não mudou nada para quem visita.
+Verificado em 2026-10-22, em dois runs do workflow: `previous` (de `782d862d` para `aa524c5a`) e `specific` (de `aa524c5a` para `f0e2ba05`). Nos dois, as duas aprovações foram registradas, o alvo ficou ativo, o site respondeu 200 e o log não trouxe nenhum e-mail. Antes disso, em 2026-10-22, o comando manual também foi verificado.
 
 ### 5.5 Diagnóstico do site
 
@@ -194,4 +208,4 @@ Verificado em 2026-10-22: o `rollback` de `f0e2ba05` para `782d862d` criou um no
 
 ## 7. Reverter
 
-Não há rollback automático: o binário antigo é sobrescrito antes da validação. Para voltar a uma versão anterior, reverta o commit problemático na `main` e publique uma nova release. No site, use o rollback do Wrangler ou do painel (seção 5.4), ou reverta o commit na `main` e deixe o workflow publicar de novo.
+Não há rollback automático: o binário antigo é sobrescrito antes da validação. Para voltar a uma versão anterior, reverta o commit problemático na `main` e publique uma nova release. No site, use o workflow *Rollback Frontend* (seção 5.4), ou reverta o commit na `main` e deixe o workflow publicar de novo.

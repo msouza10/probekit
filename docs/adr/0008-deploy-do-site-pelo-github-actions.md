@@ -62,6 +62,8 @@ Verificado em 2026-10-22: o disparo por push em `frontend/**` (run `39698488264`
 
 Verificado em 2026-10-22: o rollback em produção com `wrangler rollback`. A versão ativa passou de `f0e2ba05` para a anterior (`782d862d`) em um novo deployment, e o site continuou respondendo 200. As duas versões serviam os mesmos arquivos, então o teste não alterou o conteúdo no ar.
 
+Verificado em 2026-10-22: o workflow *Rollback Frontend* (issue #29), em dois runs (`previous` e `specific`), com as duas aprovações do `production` registradas em cada um, o alvo conferido como ativo depois do rollback e o site respondendo 200. O log dos runs não trouxe nenhum e-mail.
+
 ## Referências
 
 - [Runbook de deploy](../runbook-deploy.md), seção 5
