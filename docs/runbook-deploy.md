@@ -167,12 +167,13 @@ O Worker guarda as versões publicadas. O rollback muda só a versão **ativa**;
 ```bash
 cd frontend
 npx wrangler deployments list                 # anote o id da versão para a qual voltar
-npx wrangler rollback <id-da-versao> --message "motivo"
+npx wrangler rollback <id-da-versao>          # pergunta uma mensagem opcional e pede confirmação (yes)
+npx wrangler deployments status               # mostra a versão ativa
 ```
 
 Também dá para voltar pelo painel da Cloudflare (Workers → `probekit` → Deployments). O próximo push em `frontend/**` publica de novo a partir da `main` e desfaz o rollback: para uma correção permanente, reverta o commit na `main`.
 
-Pendente de confirmação: o teste deste procedimento em produção. Registre aqui a data quando for feito.
+Verificado em 2026-10-22: o `rollback` de `f0e2ba05` para `782d862d` criou um novo deployment (mensagem `Rollback`), a versão ativa passou a ser a anterior e o site continuou respondendo 200. As duas versões serviam os mesmos arquivos (o deploy da mais nova terminou com "No updated asset files to upload"), então o teste não mudou nada para quem visita.
 
 ### 5.5 Diagnóstico do site
 
