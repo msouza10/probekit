@@ -43,6 +43,8 @@ Entradas e condições que o plano implica e que mais provavelmente quebram, mai
 | `docs/adr/NNNN-…` (novo) | decisão sobre expor a versão | 5 |
 | `infra/shellscript/smoke-test.sh` (novo) + passo no *Deploy* | fumaça pós-deploy | 6 |
 | `.github/workflows/deploy-frontend.yml` (novo) | deploy do site | 7 |
+| `.github/workflows/rollback-frontend.yml` (novo) | rollback do site por workflow | 8 |
+| `.github/workflows/rollback-api.yml` (novo) | rollback manual da API por workflow | 9 |
 
 ## Ordem e dependências
 
@@ -51,10 +53,12 @@ Entradas e condições que o plano implica e que mais provavelmente quebram, mai
 3 rollback do updater (paralelo)               ├─► (epic fecha)
 4 concurrency + aprovação (paralelo)           │
 5 decisão: versão ──► 6 fumaça ────────────────┤
-7 deploy do site (quando existirem os secrets)─┘
+7 deploy do site (quando existirem os secrets)─┤
+7 ──► 8 rollback do site por workflow ─────────┤
+3 ──► 9 rollback manual da API por workflow ───┘
 ```
 
-Tasks 1, 3, 4 e 5 não dependem entre si.
+Tasks 1, 3, 4 e 5 não dependem entre si. A 8 depende da 7 (o ambiente e os secrets do site), e a 9 depende da 3 (o updater precisa ter a proteção de rollback antes de aceitar versões antigas).
 
 ---
 
@@ -144,10 +148,44 @@ Tasks 1, 3, 4 e 5 não dependem entre si.
 - [ ] Depois do deploy, `curl` em `/`, `/ping` e `/dns-lookup` esperando 200.
 - [ ] **Verificar:** mudar um texto do frontend, mergear e ver o site atualizado; `npx wrangler deployments list` mostra a versão nova. Rollback do site: `wrangler rollback`.
 
+### Task 8: Rollback do site por workflow **[Criador]**
+
+**Issue:** `ci(pipeline): workflow de rollback do site`
+
+**Files:** Create `.github/workflows/rollback-frontend.yml`; Modify `docs/runbook-deploy.md` (seção 5.4: o workflow como caminho principal, o comando do Wrangler como plano B).
+
+**Interfaces:**
+- Consumes: os secrets `CF_API_TOKEN` e `CF_ACCOUNT_ID` e o ambiente `production` (Task 7); `verify-sites.sh`.
+- Produces: o workflow *Rollback Frontend* (`workflow_dispatch`).
+
+- [ ] Entradas do `workflow_dispatch`: `version_id` (opcional) e `reason`. **Sem `version_id`, o workflow só lista** os deployments (`wrangler deployments list`) e termina, para saber a versão sem token na máquina.
+- [ ] Ambiente `production` (aprovação), o mesmo `concurrency` do deploy (`deploy-frontend`, sem cancelar), para rollback e deploy não correrem juntos.
+- [ ] Passar as entradas ao shell por `env:` (nunca interpolar `${{ inputs.* }}` no `run`) e **validar o formato do `version_id`** (UUID) e o tamanho do `reason` (até 120 caracteres) antes de chamar o Wrangler.
+- [ ] Com `version_id`: `npx wrangler rollback "$VERSION_ID" --message "$REASON" --yes`, depois `npx wrangler deployments status` e `bash infra/shellscript/verify-sites.sh`.
+- [ ] **Verificar:** rodar só listando; rodar com um `version_id` malformado e ver o job falhar **antes** do Wrangler; voltar para a versão anterior e avançar de novo pelo mesmo workflow (as versões têm o mesmo conteúdo, então é inofensivo).
+- O rollback não altera o repositório: o próximo push em `frontend/**` publica de novo a partir da `main`. Dizer isso no runbook.
+
+### Task 9: Rollback manual da API por workflow **[Criador]**
+
+**Issue:** `ci(pipeline): workflow de rollback manual da API`
+
+**Files:** Create `.github/workflows/rollback-api.yml`; Modify `docs/runbook-deploy.md` (seção 7).
+
+**Interfaces:**
+- Consumes: o updater das VMs da Task 3 (instala sempre que a versão de `releases/latest` difere da instalada, inclusive para uma anterior).
+- Produces: o workflow *Rollback API* (`workflow_dispatch`).
+
+- [ ] Entradas: `tag` (a release para a qual voltar) e `reason`. Passá-las por `env:` e **validar** `tag` contra `^probekit-linux-amd64-api-go-[0-9]+\.[0-9]+\.[0-9]+$`.
+- [ ] Conferir que a release existe (`gh release view`) e então `gh release edit "$TAG" --latest`. Sem SSH e sem credencial das VMs; só `contents: write` no job, ambiente `production` (aprovação).
+- [ ] As VMs convergem pelo timer em até 5 minutos; o workflow mostra a release marcada como `latest` e instrui a conferir as VMs (se a Task 5 expuser a versão, conferir por ela).
+- [ ] **Só voltar para tags que já incluem a proteção da Task 3.** O updater reinstala também o **próprio script** a partir da tag instalada: voltar para uma release anterior à Task 3 tira a proteção de rollback das VMs. Documentar e, de preferência, impedir isso no workflow.
+- [ ] **Verificar:** marcar uma release anterior como `latest` e ver as VMs instalarem; marcar a mais nova de volta; tag malformada ou inexistente falha antes de editar a release.
+- O efeito dura até a próxima release (ela vira `latest` sozinha). Para uma correção permanente, reverter o commit e publicar.
+
 ---
 
 ## Self-Review
 
-- **Cobertura:** as sete issues do epic têm Task; o objetivo (testes antes do merge, `main` protegida, rollback, site pelo CI) está coberto pelas Tasks 1, 2, 3 e 7; fila, aprovação e fumaça (4 e 6) endurecem o deploy; a 5 destrava a verificação por versão.
+- **Cobertura:** as sete issues iniciais do epic têm as Tasks 1 a 7, e as Tasks 8 e 9 acrescentam o rollback do site e o manual da API por workflow; o objetivo (testes antes do merge, `main` protegida, rollback, site pelo CI) está coberto pelas Tasks 1, 2, 3 e 7; fila, aprovação e fumaça (4 e 6) endurecem o deploy; a 5 destrava a verificação por versão.
 - **Nomes:** `Go`, `NPM` e `Terraform` aparecem iguais nas Tasks 1 e 2.
 - **Sem estado:** nenhum "pendente" ou "feito" neste arquivo; o andamento está nas issues. Ao fechar a última sub-issue, este plano ganha o banner de concluído.
