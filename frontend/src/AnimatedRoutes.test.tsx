@@ -51,6 +51,17 @@ describe("AnimatedRoutes", () => {
     ).toBeInTheDocument()
   })
 
+  it("keeps a single page while the exit animation runs", () => {
+    render(
+      <MemoryRouter initialEntries={["/ping"]}>
+        <NavigateButton to="/sobre" />
+        <AnimatedRoutes />
+      </MemoryRouter>,
+    )
+    fireEvent.click(screen.getByRole("button", { name: /go to \/sobre/i }))
+    expect(screen.getAllByRole("heading", { level: 1 }).length).toBe(1)
+  })
+
   it("does not leave two pages mounted after navigating between routes in sequence", () => {
     render(
       <MemoryRouter initialEntries={["/ping"]}>

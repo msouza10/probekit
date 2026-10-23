@@ -412,21 +412,6 @@
   .hero-scroll svg {
     animation: scroll-hint 1600ms 1100ms 3;
   }
-  .reveal-visible {
-    animation: rise-in 550ms both;
-  }
-  .execution-steps.reveal-visible {
-    animation: none;
-  }
-  .execution-steps.reveal-visible > div {
-    animation: rise-in 550ms both;
-  }
-  .execution-steps.reveal-visible > div:nth-child(2) {
-    animation-delay: 100ms;
-  }
-  .execution-steps.reveal-visible > div:nth-child(3) {
-    animation-delay: 200ms;
-  }
   [data-slot="button"],
   .tool-icon,
   .site-header a,
