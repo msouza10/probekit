@@ -36,7 +36,10 @@ describe("AnimatedRoutes", () => {
       </MemoryRouter>,
     )
     expect(
-      screen.getByRole("heading", { name: /sobre o probekit/i }),
+      screen.getByRole("heading", {
+        level: 1,
+        name: /laboratório para aprender fazendo/i,
+      }),
     ).toBeInTheDocument()
   })
 

@@ -17,4 +17,27 @@ describe("NotFound", () => {
       screen.getByRole("link", { name: /voltar para a página inicial/i }),
     ).toHaveAttribute("href", "/")
   })
+
+  it("não usa o jargão de erro do visual antigo", () => {
+    const { container } = render(
+      <MemoryRouter>
+        <NotFound />
+      </MemoryRouter>,
+    )
+    const text = container.textContent ?? ""
+    expect(text).not.toContain("404_ROUTE")
+    expect(text.trim().startsWith("//")).toBe(false)
+    expect(screen.queryByText(/^\s*\/\//)).toBeNull()
+  })
+
+  it("o link de volta se chama Voltar para a página inicial", () => {
+    render(
+      <MemoryRouter>
+        <NotFound />
+      </MemoryRouter>,
+    )
+    expect(
+      screen.getByRole("link", { name: "Voltar para a página inicial" }),
+    ).toHaveAttribute("href", "/")
+  })
 })

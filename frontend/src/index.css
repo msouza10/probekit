@@ -311,8 +311,7 @@
 }
 
 /*
- * Classes herdadas ainda em uso: .type-eyebrow (Header, Footer) e
- * .page-title/.section-title (Ping, DNS Lookup e Sobre, migradas nas próximas tasks).
+ * Classe herdada ainda em uso: .type-eyebrow (Header, Footer).
  */
 .type-eyebrow {
   font-size: 11px;
@@ -320,18 +319,6 @@
   line-height: 1.6;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-}
-.page-title {
-  font-size: clamp(1.8rem, 5vw, 3rem);
-  font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: -0.025em;
-}
-.section-title {
-  font-size: clamp(1.2rem, 2.4vw, 1.625rem);
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: -0.02em;
 }
 pre,
 code {
