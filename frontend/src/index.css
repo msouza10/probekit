@@ -1,69 +1,149 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Fallbacks com métricas ajustadas. Enquanto a fonte do site carrega
+ * (font-display: swap, nos CSS do @fontsource importados em main.tsx), o
+ * navegador desenha o texto com uma fonte do sistema esticada para ocupar o
+ * mesmo espaço, e a troca não empurra o layout. Valores calculados com
+ * @capsizecss/metrics (largura média e ascendente/descendente de cada família).
+ */
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Times New Roman"), local("Liberation Serif"), local("Tinos");
+  size-adjust: 105.48%;
+  ascent-override: 69.68%;
+  descent-override: 25.12%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial"), local("Liberation Sans"), local("Arimo");
+  size-adjust: 107.12%;
+  ascent-override: 90.44%;
+  descent-override: 22.52%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "JetBrains Mono Fallback";
+  src: local("Courier New"), local("Liberation Mono"), local("Cousine");
+  size-adjust: 99.98%;
+  ascent-override: 102.02%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
 @theme {
-  /* Raw design tokens — see ../design.md */
-  --color-blue-cornflower: #8bb5ff;
-  --color-page-ink: #0b111b;
-  --color-card-carbon: #151f2d;
-  --color-deep-coal: #101925;
-  --color-onyx: #000000;
-  --color-steel-border: #29374a;
-  --color-graphite: #40516a;
-  --color-fog: #94a3b8;
-  --color-ash: #b2bfd0;
-  --color-snow: #f0f4fa;
-  --color-signal-red: #e5484d;
-  --color-signal-red-surface: #2a1214;
+  /* Tipografia — ver ../design.md. Serifa para ler, sans para operar, mono só para código e dados. */
+  --font-serif:
+    "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman",
+    serif;
+  --font-sans:
+    "Inter Variable", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    "JetBrains Mono Variable", "JetBrains Mono Fallback", ui-monospace,
+    SFMono-Regular, Menlo, Consolas, monospace;
 
-  --font-jetbrains-mono:
-    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    monospace;
-  --font-sans: var(--font-jetbrains-mono);
-  --font-mono: var(--font-jetbrains-mono);
-
-  --text-caption: 12px;
-  --text-body-sm: 14px;
-  --text-body: 15px;
-  --text-body-lg: 18px;
-  --text-body--line-height: 1.8;
-  --text-body-sm--line-height: 1.75;
+  --text-caption: 0.8125rem;
   --text-caption--line-height: 1.5;
-  --text-heading-sm--line-height: 1.35;
-  --text-subheading: 20px;
-  --text-heading-sm: 24px;
-  --text-heading: 40px;
-  --text-heading-lg: 56px;
-  --text-display: 64px;
+  --text-body-sm: 0.9375rem;
+  --text-body-sm--line-height: 1.6;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.65;
+  --text-body-lg: 1.25rem;
+  --text-body-lg--line-height: 1.6;
+  --text-subheading: 1.375rem;
+  --text-subheading--line-height: 1.35;
+  --text-heading-sm: 1.625rem;
+  --text-heading-sm--line-height: 1.3;
+  --text-heading: 2.5rem;
+  --text-heading--line-height: 1.15;
+  --text-heading-lg: 3.25rem;
+  --text-heading-lg--line-height: 1.1;
+  --text-display: 4rem;
+  --text-display--line-height: 1.05;
+
+  /*
+   * Nomes antigos (paleta azul-marinho), mantidos só como alias enquanto as
+   * páginas são migradas uma a uma. Código novo usa os tokens semânticos
+   * (background, foreground, muted-foreground, border, highlight, bench...).
+   * O design-guard.test.ts proíbe estes nomes nos arquivos já migrados.
+   */
+  --color-page-ink: var(--background);
+  --color-card-carbon: var(--card);
+  --color-deep-coal: var(--muted);
+  --color-onyx: var(--card);
+  --color-steel-border: var(--border);
+  --color-graphite: var(--input);
+  --color-fog: var(--muted-foreground);
+  --color-ash: var(--muted-foreground);
+  --color-snow: var(--foreground);
+  --color-blue-cornflower: var(--highlight);
+  --color-signal-red: var(--destructive);
+  --color-signal-red-surface: var(--destructive-surface);
+  --color-emerald-400: var(--success);
+  --color-emerald-500: var(--success);
 }
 
 /*
- * shadcn/ui semantic mapping — see frontend/design.md, "shadcn/ui Theme
- * Mapping". Kept as plain CSS variables (not @theme) so they can be
- * reassigned independently later (e.g. if a light theme is ever added).
- * Probekit is dark-only today, so there is a single :root block.
+ * Paleta. Claro = papel e tinta de caderno; escuro = o mesmo caderno à noite
+ * (marrom-escuro quente, desenhado à parte, não invertido). Uma única cor de
+ * destaque, âmbar de marca-texto. Contrastes medidos (WCAG) no relatório da
+ * task 1 e em ../design.md.
  */
 :root {
-  --background: var(--color-page-ink);
-  --foreground: var(--color-snow);
-  --card: var(--color-card-carbon);
-  --card-foreground: var(--color-snow);
-  --popover: var(--color-card-carbon);
-  --popover-foreground: var(--color-snow);
-  --primary: var(--color-snow);
-  --primary-foreground: var(--color-page-ink);
-  --secondary: var(--color-card-carbon);
-  --secondary-foreground: var(--color-snow);
-  --muted: var(--color-deep-coal);
-  --muted-foreground: var(--color-ash);
-  --accent: var(--color-card-carbon);
-  --accent-foreground: var(--color-snow);
-  --destructive: var(--color-signal-red);
-  --destructive-foreground: var(--color-snow);
-  --border: var(--color-steel-border);
-  --input: var(--color-graphite);
-  --ring: var(--color-blue-cornflower);
+  color-scheme: light;
+  --background: #faf8f4;
+  --foreground: #1d1b17;
+  --card: #f4f0e8;
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: var(--card);
+  --secondary-foreground: var(--foreground);
+  --muted: #efeae0;
+  --muted-foreground: #5e584d;
+  --accent: var(--muted);
+  --accent-foreground: var(--foreground);
+  --destructive: #a8321f;
+  --destructive-foreground: var(--background);
+  --destructive-surface: #f8e9e4;
+  --success: #2f6a3c;
+  --border: #e2dccf;
+  --input: #958c7c;
+  --highlight: #8a5410;
+  --ring: var(--highlight);
   --radius: 0.5rem;
+
+  /*
+   * Bancada: o painel escuro onde as ferramentas mostram a saída. É escura nos
+   * dois temas, então os valores não mudam com data-theme.
+   */
+  --bench: #100e0b;
+  --bench-foreground: #ece8e1;
+  --bench-muted: #9b9486;
+  --bench-border: #3a342b;
+  --bench-ok: #8fb98a;
+  --bench-highlight: #e2a85e;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #1c1915;
+  --foreground: #ece6da;
+  --card: #24201a;
+  --popover: #24201a;
+  --muted: #28231d;
+  --muted-foreground: #a8a092;
+  --destructive: #ef8a78;
+  --destructive-foreground: #1c1915;
+  --destructive-surface: #3a1d17;
+  --success: #9cc596;
+  --border: #38322a;
+  --input: #6f675a;
+  --highlight: #e2a85e;
 }
 
 @theme inline {
@@ -83,9 +163,19 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-surface: var(--destructive-surface);
+  --color-success: var(--success);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-highlight: var(--highlight);
+
+  --color-bench: var(--bench);
+  --color-bench-foreground: var(--bench-foreground);
+  --color-bench-muted: var(--bench-muted);
+  --color-bench-border: var(--bench-border);
+  --color-bench-ok: var(--bench-ok);
+  --color-bench-highlight: var(--bench-highlight);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -97,28 +187,55 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-jetbrains-mono);
-    font-weight: 400;
-    font-size: 15px;
-    font-synthesis: none;
-    font-variant-numeric: tabular-nums slashed-zero;
-    min-width: 320px;
-    background-image:
-      radial-gradient(ellipse at 80% 0%, #20375480 0%, transparent 48%),
-      radial-gradient(ellipse at 0% 45%, #173b3e30 0%, transparent 45%);
-    background-repeat: no-repeat;
-    -webkit-font-smoothing: antialiased;
-  }
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 2rem;
-    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-serif);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: 400;
+    font-synthesis: none;
+    font-optical-sizing: auto;
+    min-width: 320px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   ::selection {
-    background: #8bb5ff40;
-    color: #fff;
+    background: color-mix(in oklab, var(--highlight) 24%, transparent);
+    color: var(--foreground);
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  /* Interface: controles e navegação em sans. */
+  button,
+  input,
+  select,
+  textarea,
+  label,
+  nav {
+    font-family: var(--font-sans);
+  }
+  /* Código, saída de comando e dados: mono, com algarismos alinhados. */
+  pre,
+  code,
+  kbd,
+  samp {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums slashed-zero;
   }
   button,
   a,
@@ -129,18 +246,13 @@
   a {
     cursor: pointer;
   }
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: from-font;
+  }
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 4px;
-  }
-  p {
-    line-height: 1.8;
-    text-wrap: pretty;
-  }
-  h1,
-  h2,
-  h3 {
-    text-wrap: balance;
   }
 }
 
@@ -148,15 +260,15 @@
   font-size: clamp(1.65rem, 5.5vw, 4.5rem);
   font-weight: 300;
   line-height: 1.2;
-  letter-spacing: -0.06em;
+  letter-spacing: -0.025em;
 }
 
 .tool-card {
-  background: linear-gradient(145deg, #182434, #111b28);
+  background: linear-gradient(145deg, var(--card), var(--muted));
   box-shadow: 0 1px 0 #ffffff05 inset;
 }
 .tool-card:hover {
-  border-color: #526c8f;
+  border-color: var(--input);
   transform: translateY(-3px);
   box-shadow: 0 16px 32px -24px #000;
 }
@@ -167,7 +279,7 @@
 .site-header {
   height: var(--header-height);
   flex-shrink: 0;
-  background: #0b111be8;
+  background: color-mix(in oklab, var(--background) 92%, transparent);
   box-shadow:
     0 0 0 1px #ffffff03,
     0 12px 32px -24px #000;
@@ -344,7 +456,8 @@
     transform: translateY(-1px);
   }
   .hero-cta:hover {
-    box-shadow: 0 6px 24px #8bb5ff26;
+    box-shadow: 0 6px 24px
+      color-mix(in oklab, var(--highlight) 15%, transparent);
   }
 }
 
@@ -368,7 +481,7 @@
   padding: 16px 8px 8px;
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: #111b28;
+  background: var(--popover);
   box-shadow: 0 20px 60px #0008;
 }
 .tool-menu-link {
@@ -381,7 +494,7 @@
 }
 .tool-menu-link:hover,
 .tool-menu-link:focus-visible {
-  background: #203047;
+  background: var(--muted);
 }
 .tool-menu-icon {
   display: flex;
@@ -398,7 +511,7 @@
   position: fixed;
   inset: 0;
   z-index: 70;
-  background: #02060bbd;
+  background: #100e0b8c;
   backdrop-filter: blur(6px);
 }
 .search-dialog {
@@ -412,7 +525,7 @@
   overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: #111b28;
+  background: var(--popover);
   box-shadow: 0 32px 100px #0009;
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -421,11 +534,11 @@
   }
 }
 
-/* JetBrains hierarchy: light display, medium headings, regular reading text. */
+/* Hierarquia herdada; o tracking foi afrouxado para a serifa (as tasks seguintes reescrevem). */
 .hero-title > span {
   font-weight: 500;
   font-style: italic;
-  letter-spacing: -0.065em;
+  letter-spacing: -0.025em;
 }
 .hero-description {
   font-size: clamp(0.875rem, 1.4vw, 1.0625rem);
@@ -443,19 +556,19 @@
   font-size: clamp(1.8rem, 5vw, 3rem);
   font-weight: 400;
   line-height: 1.2;
-  letter-spacing: -0.055em;
+  letter-spacing: -0.025em;
 }
 .section-title {
   font-size: clamp(1.2rem, 2.4vw, 1.625rem);
   font-weight: 500;
   line-height: 1.4;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
 }
 .tool-card [data-slot="card-title"] {
   font-size: 16px;
   font-weight: 500;
   line-height: 1.45;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.015em;
 }
 .tool-card [data-slot="card-content"] > p {
   font-size: 13px;
@@ -525,56 +638,19 @@ code {
   }
 }
 
-/* Re-map the shared palette so all tool and result surfaces follow the theme. */
-:root[data-theme="light"] {
-  color-scheme: light;
-  --color-page-ink: #f7f9fc;
-  --color-card-carbon: #ffffff;
-  --color-deep-coal: #edf2f8;
-  --color-onyx: #ffffff;
-  --color-steel-border: #cdd7e4;
-  --color-graphite: #99abc2;
-  --color-fog: #52647c;
-  --color-ash: #435670;
-  --color-snow: #14233b;
-  --color-blue-cornflower: #245fc2;
-  --color-signal-red: #bd2734;
-  --color-signal-red-surface: #fff0f1;
-  --color-emerald-400: #047857;
-  --color-emerald-500: #047857;
-}
-:root[data-theme="light"] body {
-  background-image:
-    radial-gradient(ellipse at 80% 0%, #dbe9ff90 0%, transparent 48%),
-    radial-gradient(ellipse at 0% 45%, #e0f1ed80 0%, transparent 45%);
-}
-:root[data-theme="light"] ::selection {
-  background: #245fc22b;
-  color: #14233b;
-}
+/* Sombras herdadas no tema claro, mais leves (somem quando cada componente for migrado). */
 :root[data-theme="light"] .site-header {
-  background: #f7f9fcf0;
-  box-shadow: 0 12px 32px -24px #263c5b40;
+  box-shadow: 0 12px 32px -24px #3a2f1f40;
 }
 :root[data-theme="light"] .tool-card {
-  background: linear-gradient(145deg, #ffffff, #f0f5fc);
-  box-shadow: 0 2px 8px #263c5b05;
+  box-shadow: 0 2px 8px #3a2f1f05;
 }
 :root[data-theme="light"] .tool-card:hover {
-  border-color: #829aba;
-  box-shadow: 0 16px 32px -24px #263c5b50;
+  box-shadow: 0 16px 32px -24px #3a2f1f50;
 }
 :root[data-theme="light"] .tools-popover,
 :root[data-theme="light"] .search-dialog {
-  background: #ffffff;
-  box-shadow: 0 24px 60px #263c5b26;
-}
-:root[data-theme="light"] .tool-menu-link:hover,
-:root[data-theme="light"] .tool-menu-link:focus-visible {
-  background: #edf3fc;
-}
-:root[data-theme="light"] .search-overlay {
-  background: #20304755;
+  box-shadow: 0 24px 60px #3a2f1f26;
 }
 @media (prefers-reduced-motion: no-preference) {
   .theme-toggle-thumb {
