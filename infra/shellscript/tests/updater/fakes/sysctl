@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# sysctl simulado: no conteiner /proc/sys e somente leitura.
+exit 0

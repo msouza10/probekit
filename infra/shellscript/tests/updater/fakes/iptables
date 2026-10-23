@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# iptables simulado: toda regra "ja existe" e toda insercao funciona.
+exit 0
