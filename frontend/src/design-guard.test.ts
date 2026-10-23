@@ -21,6 +21,7 @@ const redesigned: string[] = [
   "src/components/ThemeToggle.tsx",
   "src/pages/Home.tsx",
   "src/pages/Ping.tsx",
+  "src/pages/DnsLookup.tsx",
 ]
 
 const frontendRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")

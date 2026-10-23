@@ -1,16 +1,37 @@
-import { useState } from "react"
-import {
-  AlertTriangle,
-  CheckCircle2,
-  Copy,
-  Globe,
-  RefreshCw,
-  Search,
-} from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { type ReactNode, useState } from "react"
+import { Bench } from "@/components/Bench"
+import { Reveal } from "@/components/Reveal"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { type DnsLookupResult, PROBE_PROVIDER, runDnsLookup } from "@/lib/api"
+
+const prose = "max-w-[38rem] text-body text-foreground/90"
+const fieldClass =
+  "min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm text-foreground placeholder:text-muted-foreground"
+const labelClass = "text-body-sm font-medium text-foreground"
+const groupTitle = "text-xs tracking-wider text-bench-muted uppercase"
+const emptyNote = "text-bench-muted"
+const th = "pb-1 pr-6 text-left text-xs font-normal text-bench-muted"
+const td = "py-1 pr-6 align-top break-all"
+
+function Group({
+  title,
+  count,
+  children,
+}: {
+  title: string
+  count?: number
+  children: ReactNode
+}) {
+  return (
+    <section className="flex flex-col gap-2 border-t border-bench-border pt-4 first:border-t-0 first:pt-0">
+      <h3 className={groupTitle}>
+        {title}
+        {count !== undefined ? ` (${count})` : ""}
+      </h3>
+      {children}
+    </section>
+  )
+}
 
 export function DnsLookup() {
   const [domain, setDomain] = useState("")
@@ -95,444 +116,314 @@ export function DnsLookup() {
   }
 
   return (
-    <main className="flex flex-col gap-10 py-10 sm:py-16">
-      {/* Header */}
-      <div className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-steel-border bg-deep-coal px-3 py-1 font-mono text-caption text-blue-cornflower">
-            <Globe className="h-3.5 w-3.5 text-blue-cornflower" />
-            <span>FERRAMENTA DE REDE // CONSULTA AUTORITATIVA</span>
-          </div>
-          <span className="font-mono text-caption text-fog">
-            Origem: {PROBE_PROVIDER}
-          </span>
-        </div>
-        <h1 className="page-title text-foreground">DNS Lookup</h1>
-        <p className="max-w-[70ch] text-body text-muted-foreground">
-          Consulte e inspecione a zona de registros DNS de qualquer domínio.
-          Retorna registros A, AAAA, CNAME, MX, TXT, NS e suporte a SRV a partir
-          de resolvers externos.
+    <main className="flex flex-col gap-12 pt-12 pb-8 sm:gap-14 sm:pt-20">
+      <Reveal className="flex flex-col gap-5">
+        <h1 className="text-[2.125rem] leading-[1.12] font-medium tracking-[-0.02em] text-foreground sm:text-heading-lg">
+          DNS Lookup
+        </h1>
+        <p className="max-w-[36rem] text-body-lg text-muted-foreground">
+          Mostra os registros DNS de um domínio: endereços (A e AAAA), CNAME,
+          servidores de e-mail (MX), TXT e nameservers (NS). Também consulta
+          registros SRV, se você informar serviço e protocolo.
         </p>
-      </div>
+      </Reveal>
 
-      {/* Input console card */}
-      <Card className="border-steel-border bg-card">
-        <CardContent className="flex flex-col gap-5 p-6">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              handleLookup()
-            }}
-            className="flex flex-col gap-4"
+      <form
+        onSubmit={(e) => {
+          e.preventDefault()
+          handleLookup()
+        }}
+        className="flex max-w-[44rem] flex-col gap-6 font-sans"
+      >
+        <div className="flex flex-col gap-2">
+          <label htmlFor="dns-domain" className={labelClass}>
+            Domínio
+          </label>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              id="dns-domain"
+              type="text"
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck={false}
+              placeholder="cloudflare.com ou github.com"
+              value={domain}
+              onChange={(e) => setDomain(e.target.value)}
+              className={`${fieldClass} flex-1 font-mono`}
+            />
+            <Button
+              type="submit"
+              size="lg"
+              disabled={!domain.trim() || status === "loading"}
+              className="min-h-11 sm:px-8"
+            >
+              {status === "loading" ? "Consultando..." : "Consultar DNS"}
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="mr-1 text-body-sm text-muted-foreground">
+            Atalhos:
+          </span>
+          {presets.map((p) => (
+            <Button
+              key={p}
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => handleLookup(p)}
+              className="min-h-11 sm:min-h-8"
+            >
+              {p}
+            </Button>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            aria-expanded={showSrv}
+            aria-controls="dns-srv"
+            onClick={() => setShowSrv(!showSrv)}
+            className="inline-flex min-h-11 w-fit items-center text-body-sm font-medium text-foreground underline decoration-highlight/50 underline-offset-4 transition-colors hover:decoration-highlight"
           >
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <div className="relative flex-1">
-                <Globe className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            {showSrv ? "Ocultar consulta SRV" : "Incluir consulta SRV"}
+          </button>
+
+          {showSrv && (
+            <div
+              id="dns-srv"
+              className="grid grid-cols-1 gap-4 border-t border-border pt-4 sm:grid-cols-2"
+            >
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="dns-service" className={labelClass}>
+                  Serviço (ex: _sip ou _xmpp)
+                </label>
                 <input
+                  id="dns-service"
                   type="text"
-                  placeholder="Informe o domínio (ex: cloudflare.com ou github.com)..."
-                  value={domain}
-                  onChange={(e) => setDomain(e.target.value)}
-                  className="w-full rounded-md border border-graphite bg-deep-coal py-2.5 pl-10 pr-4 font-mono text-body-sm text-snow placeholder:text-fog focus:border-blue-cornflower focus:outline-none"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  placeholder="_sip"
+                  value={service}
+                  onChange={(e) => setService(e.target.value)}
+                  className={`${fieldClass} font-mono`}
                 />
               </div>
-              <Button
-                type="submit"
-                disabled={!domain.trim() || status === "loading"}
-                className="bg-snow text-page-ink hover:bg-snow/90 font-medium px-6 h-10"
-              >
-                {status === "loading" ? (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin text-page-ink" />
-                    <span>Consultando...</span>
-                  </>
-                ) : (
-                  <>
-                    <Search className="mr-2 h-4 w-4" />
-                    <span>Consultar DNS</span>
-                  </>
-                )}
-              </Button>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="dns-proto" className={labelClass}>
+                  Protocolo (ex: _tcp ou _udp)
+                </label>
+                <input
+                  id="dns-proto"
+                  type="text"
+                  autoComplete="off"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  placeholder="_tcp"
+                  value={proto}
+                  onChange={(e) => setProto(e.target.value)}
+                  className={`${fieldClass} font-mono`}
+                />
+              </div>
             </div>
+          )}
+        </div>
+      </form>
 
-            {/* Presets */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <span className="font-mono text-caption text-fog">
-                Sugestões rápidas:
-              </span>
-              {presets.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => handleLookup(p)}
-                  className="rounded border border-steel-border bg-deep-coal px-2.5 py-1 font-mono text-[11px] text-ash hover:border-graphite hover:text-snow transition-colors"
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
-
-            {/* SRV toggle */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => setShowSrv(!showSrv)}
-                className="font-mono text-caption text-blue-cornflower hover:underline flex items-center gap-1"
-              >
-                <span>{showSrv ? "[-] Ocultar" : "[+] Incluir"}</span> pesquisa
-                de registro SRV
-              </button>
-
-              {showSrv && (
-                <div className="mt-3 grid grid-cols-1 gap-4 rounded-md border border-steel-border/70 bg-deep-coal p-4 sm:grid-cols-2">
-                  <div className="flex flex-col gap-1.5">
-                    <label className="font-mono text-caption text-ash">
-                      Service (ex: _sip ou _xmpp)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="_sip"
-                      value={service}
-                      onChange={(e) => setService(e.target.value)}
-                      className="rounded border border-steel-border bg-page-ink px-3 py-1.5 font-mono text-body-sm text-snow focus:border-blue-cornflower focus:outline-none"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label className="font-mono text-caption text-ash">
-                      Protocolo (ex: _tcp ou _udp)
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="_tcp"
-                      value={proto}
-                      onChange={(e) => setProto(e.target.value)}
-                      className="rounded border border-steel-border bg-page-ink px-3 py-1.5 font-mono text-body-sm text-snow focus:border-blue-cornflower focus:outline-none"
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-
-      {/* 4 Visual States */}
-
-      {/* State 1: Idle */}
       {status === "idle" && (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="flex flex-col gap-2 rounded-lg border border-steel-border bg-deep-coal/40 p-5">
-            <span className="font-mono text-caption text-blue-cornflower">
-              REGISTROS A / AAAA
-            </span>
-            <p className="text-body-sm text-muted-foreground">
-              Mapeamento de endereço IPv4 (32-bit) e IPv6 (128-bit) do host.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-2 rounded-lg border border-steel-border bg-deep-coal/40 p-5">
-            <span className="font-mono text-caption text-blue-cornflower">
-              REGISTROS MX
-            </span>
-            <p className="text-body-sm text-muted-foreground">
-              Servidores de troca de e-mail (Mail Exchange) com respectivas
-              prioridades.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-2 rounded-lg border border-steel-border bg-deep-coal/40 p-5">
-            <span className="font-mono text-caption text-blue-cornflower">
-              REGISTROS TXT & NS
-            </span>
-            <p className="text-body-sm text-muted-foreground">
-              Políticas de segurança SPF/DMARC e nameservers autoritativos do
-              domínio.
-            </p>
-          </div>
+        <div className="flex flex-col gap-4">
+          <p className={prose}>
+            A consulta sai de uma VM na {PROBE_PROVIDER}, em Ashburn, na
+            Virgínia (EUA), e usa o resolvedor de DNS do sistema dessa máquina.
+            Ela não pergunta direto aos servidores autoritativos do domínio.
+          </p>
+          <p className={prose}>
+            Cada MX vem com a sua prioridade: quanto menor o número, mais cedo
+            aquele servidor é tentado. Os registros TXT costumam carregar
+            políticas de e-mail, como SPF, e códigos de verificação de domínio.
+          </p>
         </div>
       )}
 
-      {/* State 2: Loading */}
-      {status === "loading" && (
-        <Card className="border-steel-border bg-deep-coal/60 p-10">
-          <div className="flex flex-col items-center justify-center gap-4 text-center">
-            <div className="relative flex h-16 w-16 items-center justify-center rounded-full border border-blue-cornflower/40 bg-blue-cornflower/10">
-              <Globe className="h-8 w-8 animate-pulse text-blue-cornflower" />
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-cornflower opacity-25"></span>
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="font-mono text-caption text-blue-cornflower">
-                RESOLVENDO ZONA DNS...
-              </span>
-              <h3 className="text-heading-sm font-semibold text-snow">
-                Consultando registros de {domain}
-              </h3>
-              <p className="text-body-sm text-fog font-mono">
-                Resolver autoritativo via {PROBE_PROVIDER}
-              </p>
-            </div>
-          </div>
-        </Card>
-      )}
+      <div aria-live="polite">
+        {status === "loading" && (
+          <p
+            role="status"
+            className="max-w-[38rem] break-words text-body text-muted-foreground"
+          >
+            Consultando os registros de {domain}, a partir de {PROBE_PROVIDER}
+            ...
+          </p>
+        )}
+      </div>
 
-      {/* State 3: Success */}
       {status === "success" && result && (
-        <div className="flex flex-col gap-6 animate-in fade-in duration-300">
-          {/* Metadata banner */}
-          <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-steel-border bg-deep-coal p-4">
-            <div className="flex items-center gap-3">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400">
-                <CheckCircle2 className="h-5 w-5" />
-              </span>
-              <div>
-                <span className="font-mono text-caption text-fog">
-                  DOMÍNIO CONSULTADO
-                </span>
-                <p className="font-mono text-body font-semibold text-snow">
-                  {result.domain}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {result.origin_region && (
-                <Badge
-                  variant="outline"
-                  className="border-steel-border bg-page-ink font-mono text-caption text-ash"
-                >
-                  {result.origin_region}
-                </Badge>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopyJson}
-                className="border-steel-border bg-card text-caption text-ash hover:text-snow"
-              >
-                <Copy className="mr-1.5 h-3.5 w-3.5" />
-                {copied ? "Copiado!" : "Copiar JSON"}
-              </Button>
-            </div>
-          </div>
-
-          {/* Records Display Grid */}
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            {/* A / AAAA / CNAME */}
-            <Card className="border-steel-border bg-card">
-              <CardHeader className="border-b border-steel-border/60 pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-body font-medium text-snow">
-                    Endereços IP (A & AAAA)
-                  </CardTitle>
-                  <span className="rounded bg-page-ink border border-steel-border px-2 py-0.5 font-mono text-[11px] text-blue-cornflower">
-                    {result.addrs?.length || 0} registros
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 flex flex-col gap-2">
+        <Reveal className="flex max-w-[44rem] flex-col gap-3">
+          <Bench label="Registros" meta={result.origin_region}>
+            <p className="break-all text-base text-bench-foreground">
+              {result.domain}
+            </p>
+            <div className="mt-4 flex flex-col gap-4">
+              <Group title="A e AAAA" count={result.addrs?.length || 0}>
                 {result.cname && (
-                  <div className="rounded border border-steel-border/50 bg-deep-coal p-2.5 font-mono text-body-sm text-ash">
-                    <span className="text-fog">CNAME: </span>
-                    <span className="text-blue-cornflower">{result.cname}</span>
-                  </div>
+                  <p className="break-all">
+                    <span className="text-bench-muted">CNAME </span>
+                    {result.cname}
+                  </p>
                 )}
                 {result.addrs && result.addrs.length > 0 ? (
-                  <div className="flex flex-col gap-1.5">
+                  <ul className="flex flex-col gap-1">
                     {result.addrs.map((addr, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between rounded border border-steel-border/40 bg-page-ink px-3 py-2 font-mono text-body-sm text-snow"
-                      >
-                        <span>{addr}</span>
-                        <span className="text-[11px] text-fog">
-                          {addr.includes(":") ? "AAAA (IPv6)" : "A (IPv4)"}
+                      <li key={idx} className="flex flex-wrap gap-x-4">
+                        <span className="break-all">{addr}</span>
+                        <span className="text-bench-muted">
+                          {addr.includes(":") ? "IPv6" : "IPv4"}
                         </span>
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 ) : (
-                  <p className="text-body-sm text-fog">
-                    Nenhum registro A/AAAA encontrado.
-                  </p>
+                  <p className={emptyNote}>Nenhum registro A/AAAA encontrado.</p>
                 )}
-              </CardContent>
-            </Card>
+              </Group>
 
-            {/* MX Records */}
-            <Card className="border-steel-border bg-card">
-              <CardHeader className="border-b border-steel-border/60 pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-body font-medium text-snow">
-                    Servidores de E-mail (MX)
-                  </CardTitle>
-                  <span className="rounded bg-page-ink border border-steel-border px-2 py-0.5 font-mono text-[11px] text-blue-cornflower">
-                    {result.mx?.length || 0} registros
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 flex flex-col gap-2">
+              <Group title="MX" count={result.mx?.length || 0}>
                 {result.mx && result.mx.length > 0 ? (
-                  <div className="flex flex-col gap-1.5">
-                    {result.mx.map((mx, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between rounded border border-steel-border/40 bg-page-ink px-3 py-2 font-mono text-body-sm text-snow"
-                      >
-                        <span className="truncate pr-2">{mx.host}</span>
-                        <span className="rounded bg-deep-coal border border-steel-border px-1.5 py-0.5 text-[11px] text-blue-cornflower shrink-0">
-                          Pref: {mx.priority}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  <table className="w-full">
+                    <thead>
+                      <tr>
+                        <th scope="col" className={th}>
+                          Prioridade
+                        </th>
+                        <th scope="col" className={th}>
+                          Servidor
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.mx.map((mx, idx) => (
+                        <tr key={idx}>
+                          <td className={td}>{mx.priority}</td>
+                          <td className={td}>{mx.host}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 ) : (
-                  <p className="text-body-sm text-fog">
-                    Nenhum registro MX encontrado.
-                  </p>
+                  <p className={emptyNote}>Nenhum registro MX encontrado.</p>
                 )}
-              </CardContent>
-            </Card>
+              </Group>
 
-            {/* NS Records */}
-            <Card className="border-steel-border bg-card">
-              <CardHeader className="border-b border-steel-border/60 pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-body font-medium text-snow">
-                    Nameservers Autoritativos (NS)
-                  </CardTitle>
-                  <span className="rounded bg-page-ink border border-steel-border px-2 py-0.5 font-mono text-[11px] text-blue-cornflower">
-                    {result.ns?.length || 0} registros
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 flex flex-col gap-2">
+              <Group title="NS" count={result.ns?.length || 0}>
                 {result.ns && result.ns.length > 0 ? (
-                  <div className="flex flex-col gap-1.5">
+                  <ul className="flex flex-col gap-1">
                     {result.ns.map((ns, idx) => (
-                      <div
-                        key={idx}
-                        className="rounded border border-steel-border/40 bg-page-ink px-3 py-2 font-mono text-body-sm text-snow"
-                      >
+                      <li key={idx} className="break-all">
                         {ns}
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 ) : (
-                  <p className="text-body-sm text-fog">
-                    Nenhum registro NS encontrado.
-                  </p>
+                  <p className={emptyNote}>Nenhum registro NS encontrado.</p>
                 )}
-              </CardContent>
-            </Card>
+              </Group>
 
-            {/* TXT Records */}
-            <Card className="border-steel-border bg-card">
-              <CardHeader className="border-b border-steel-border/60 pb-3">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-body font-medium text-snow">
-                    Registros TXT (SPF, DKIM, Verificação)
-                  </CardTitle>
-                  <span className="rounded bg-page-ink border border-steel-border px-2 py-0.5 font-mono text-[11px] text-blue-cornflower">
-                    {result.txt?.length || 0} registros
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 flex flex-col gap-2">
+              <Group title="TXT" count={result.txt?.length || 0}>
                 {result.txt && result.txt.length > 0 ? (
-                  <div className="flex flex-col gap-1.5">
+                  <ul className="flex flex-col gap-2">
                     {result.txt.map((txt, idx) => (
-                      <div
-                        key={idx}
-                        className="rounded border border-steel-border/40 bg-page-ink p-2.5 font-mono text-[12px] text-ash break-all leading-relaxed"
-                      >
+                      <li key={idx} className="break-all leading-6">
                         {txt}
-                      </div>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 ) : (
-                  <p className="text-body-sm text-fog">
-                    Nenhum registro TXT encontrado.
-                  </p>
+                  <p className={emptyNote}>Nenhum registro TXT encontrado.</p>
                 )}
-              </CardContent>
-            </Card>
-          </div>
+              </Group>
 
-          {/* SRV Records if present */}
-          {result.srv && result.srv.length > 0 && (
-            <Card className="border-steel-border bg-card">
-              <CardHeader className="border-b border-steel-border/60 pb-3">
-                <CardTitle className="text-body font-medium text-snow">
-                  Registros de Serviço (SRV)
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {result.srv.map((srv, idx) => (
-                    <div
-                      key={idx}
-                      className="flex flex-col gap-1 rounded border border-steel-border bg-page-ink p-3 font-mono text-body-sm"
-                    >
-                      <span className="text-blue-cornflower font-medium">
-                        {srv.name}:{srv.port}
-                      </span>
-                      <span className="text-caption text-fog">
-                        Prioridade: {srv.priority} • Peso: {srv.weight}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Raw JSON block */}
-          <div className="overflow-hidden rounded-lg border border-steel-border bg-deep-coal">
-            <div className="flex items-center justify-between border-b border-steel-border bg-page-ink/80 px-4 py-2 text-[11px] font-mono text-fog">
-              <span>RESPOSTA DNS BRUTA</span>
-              <span>FORMATO: JSON / RFC 1035</span>
+              {result.srv && result.srv.length > 0 && (
+                <Group title="SRV" count={result.srv.length}>
+                  <table className="w-full">
+                    <thead>
+                      <tr>
+                        <th scope="col" className={th}>
+                          Nome
+                        </th>
+                        <th scope="col" className={th}>
+                          Porta
+                        </th>
+                        <th scope="col" className={th}>
+                          Prioridade
+                        </th>
+                        <th scope="col" className={th}>
+                          Peso
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {result.srv.map((srv, idx) => (
+                        <tr key={idx}>
+                          <td className={td}>{srv.name}</td>
+                          <td className={td}>{srv.port}</td>
+                          <td className={td}>{srv.priority}</td>
+                          <td className={td}>{srv.weight}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Group>
+              )}
             </div>
-            <pre className="p-4 font-mono text-[12px] text-ash overflow-x-auto leading-relaxed">
+            <pre className="mt-6 border-t border-bench-border pt-4 text-[0.8125rem] leading-6 text-bench-foreground">
               {JSON.stringify(result, null, 2)}
             </pre>
+          </Bench>
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleCopyJson}
+              className="min-h-11 font-sans sm:min-h-8"
+            >
+              {copied ? "Copiado!" : "Copiar JSON"}
+            </Button>
           </div>
-        </div>
+        </Reveal>
       )}
 
-      {/* State 4: Error */}
       {status === "error" && (
-        <Card className="border-signal-red bg-signal-red-surface p-6 animate-in fade-in duration-200">
-          <div className="flex items-start gap-4">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-signal-red/20 text-signal-red">
-              <AlertTriangle className="h-6 w-6" />
-            </div>
-            <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
-                <h3 className="text-body font-semibold text-signal-red">
-                  Falha na consulta DNS
-                </h3>
-                {errorCode && (
-                  <span className="rounded bg-signal-red/30 px-2 py-0.5 font-mono text-[11px] text-snow">
-                    {errorCode}
-                  </span>
-                )}
-              </div>
-              <p className="text-body-sm text-snow/90 leading-relaxed">
-                {errorMessage}
-              </p>
-              <div className="mt-2 flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleLookup("cloudflare.com")}
-                  className="border-signal-red/40 bg-page-ink text-snow hover:bg-deep-coal text-caption"
-                >
-                  Tentar com domínio padrão (cloudflare.com)
-                </Button>
-              </div>
-            </div>
+        <div
+          role="alert"
+          className="flex max-w-[44rem] flex-col gap-3 rounded-md border border-destructive bg-destructive-surface p-5 font-sans"
+        >
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h2 className="text-body font-semibold text-destructive">
+              Falha na consulta DNS
+            </h2>
+            {errorCode && (
+              <code className="rounded-sm border border-destructive/40 px-1.5 py-0.5 text-caption text-destructive">
+                {errorCode}
+              </code>
+            )}
           </div>
-        </Card>
+          <p className="break-words text-body-sm text-foreground">
+            {errorMessage}
+          </p>
+          <div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleLookup("cloudflare.com")}
+              className="min-h-11 border-destructive text-foreground sm:min-h-8"
+            >
+              Tentar com domínio padrão (cloudflare.com)
+            </Button>
+          </div>
+        </div>
       )}
     </main>
   )
