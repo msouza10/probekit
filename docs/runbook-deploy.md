@@ -71,7 +71,15 @@ Dois *Deploy API* nunca rodam juntos: o segundo espera na fila. Se o estado muda
 
 ### 3.4 Verificar a API
 
-De qualquer lugar (sem `-k`; o certificado que você vê é o da borda da Cloudflare):
+O último passo do *Deploy API* (`Verify the public API`) já faz isso sozinho: roda `bash infra/shellscript/verify-api-routes.sh full` com `EXPECTED_VERSION` igual à versão da release `latest`, e **falha o deploy** se algum caso não bater ou se a API servir outra versão. Não usa segredos (só o token automático do GitHub para ler a `latest`). A mesma checagem roda na sua máquina:
+
+```bash
+EXPECTED_VERSION=1.3.0 bash infra/shellscript/verify-api-routes.sh full   # sem EXPECTED_VERSION, não confere a versão
+```
+
+Se o updater desfez uma release ruim (seção 7), a API serve a versão anterior e esse passo falha de propósito: é o aviso de que a `latest` não é a que está no ar.
+
+Para olhar caso a caso, de qualquer lugar (sem `-k`; o certificado que você vê é o da borda da Cloudflare):
 
 ```bash
 curl https://api.probekit.cc/                                        # {"message":"OK","version":"X.Y.Z"}

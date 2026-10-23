@@ -196,3 +196,11 @@ jobs:
       - name: Execute deploy api go in second vm
         run: |
           ssh -o StrictHostKeyChecking=accept-new -i ~/.ssh/probekit.pem ubuntu@$VM_API_02 'sudo bash -s' < ../shellscript/deploy-api-go.sh
+
+      - name: Verify the public API
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          tag=$(gh api "repos/$REPO/releases/latest" --jq .tag_name)
+          EXPECTED_VERSION="${tag##*-}" bash ../shellscript/verify-api-routes.sh full
