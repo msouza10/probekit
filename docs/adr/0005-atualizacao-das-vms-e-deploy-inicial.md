@@ -64,6 +64,7 @@ Foi cogitado e descartado: o workflow entrega o script por SSH, o que também pe
 
 - O *Deploy* manual rodou com sucesso mais de uma vez, inclusive repetido sobre VMs já configuradas (três execuções bem-sucedidas em 2026-10-17, após as releases 1.1.0 e 1.2.0).
 - Releases publicadas: 1.0.0, 1.1.0 (TLS) e 1.2.0 (CORS).
+- Em 2026-10-22 o updater das VMs ganhou **rollback automático** (issue #16, PR #34): guarda o binário anterior, só grava a versão depois que a API responde, restaura o anterior se a release nova não sobe e marca a versão como ruim para não tentá-la de novo. A consequência negativa "Não há rollback automático", acima, descreve o estado de quando a decisão foi tomada. Verificado em contêiner (9 cenários, 33 verificações); falta confirmar numa VM de verdade, o que depende de o updater novo chegar às VMs com a próxima release da API.
 - Em 2026-10-20 o *Deploy* passou a ter dois jobs, `plan` (sem pausa) e `deploy` (com a aprovação do ambiente `production`), com o plano cifrado entre eles ([ADR-0007](./0007-gestao-de-segredos-com-infisical.md)). O primeiro run nesse formato passou, com "No changes" no plano e 0 recursos alterados no `apply`. A decisão acima, de aplicar o plano salvo, continua valendo.
 - Verificação do timer em uma VM: `systemctl list-timers autodeploy-api-go.timer` e `journalctl -u autodeploy-api-go -n 30`.
 
