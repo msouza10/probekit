@@ -208,4 +208,12 @@ Verificado em 2026-10-22, em dois runs do workflow: `previous` (de `782d862d` pa
 
 ## 7. Reverter
 
-Não há rollback automático: o binário antigo é sobrescrito antes da validação. Para voltar a uma versão anterior, reverta o commit problemático na `main` e publique uma nova release. No site, use o workflow *Rollback Frontend* (seção 5.4), ou reverta o commit na `main` e deixe o workflow publicar de novo.
+**API, automático.** O updater das VMs reverte sozinho uma release que não sobe. Ele guarda o binário anterior (`/opt/probekit/api-service-golang.prev`), só grava a versão depois que a API responde e, se a validação falha, restaura o anterior, reinicia e valida de novo. A versão que falhou fica anotada em `/opt/probekit/BAD_VERSION`, e o updater não a tenta de novo; uma release diferente é instalada normalmente. Para ver o que aconteceu, em cada VM: `journalctl -u autodeploy-api-go -n 40` (procure "a release X falhou, voltei para Y"). Para deixar o updater tentar de novo a mesma tag, apague o `BAD_VERSION`.
+
+Só reverte quando houve troca de versão naquela execução: se a API cair sem uma release nova (certificado, disco...), o binário não é rebaixado e a rodada termina com erro.
+
+Esse updater chega às VMs com a primeira release da API depois do PR do rollback; até lá elas rodam o updater antigo, sem rollback. Verificado em 2026-10-22 em contêiner (`infra/shellscript/tests/updater/`, 9 cenários). Pendente de confirmação: o teste numa VM de verdade.
+
+**API, por decisão sua.** Reverta o commit problemático na `main` e publique uma nova release.
+
+**Site.** Use o workflow *Rollback Frontend* (seção 5.4), ou reverta o commit na `main` e deixe o workflow publicar de novo.
