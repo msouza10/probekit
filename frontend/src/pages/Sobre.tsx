@@ -15,11 +15,13 @@ const stack = [
   },
   {
     term: "Servidor",
-    detail: "Uma máquina no free tier da Oracle Cloud, criada com Terraform.",
+    detail:
+      "Duas máquinas no free tier da Oracle Cloud, criadas com Terraform.",
   },
   {
     term: "Entrega",
-    detail: "GitHub Actions: testes, build e deploy a cada mudança.",
+    detail:
+      "GitHub Actions: verificações em pull requests, release da API e deploy da API e do site, com aprovação antes de publicar.",
   },
   {
     term: "Site",
@@ -43,9 +45,8 @@ export function Sobre() {
         <Reveal delay={0.08} className="flex flex-col gap-4">
           <p className="max-w-[36rem] text-body-lg text-muted-foreground">
             O Probekit é um laboratório pessoal. Estou aprendendo Go e DevOps
-            construindo ferramentas de rede de verdade, em vez de seguir
-            exercícios de curso, e deixei tudo aberto para quem quiser usar ou
-            olhar como foi feito.
+            construindo ferramentas de rede de verdade, e deixei tudo aberto
+            para quem quiser usar ou olhar como foi feito.
           </p>
           <p className="max-w-[36rem] text-body-lg text-muted-foreground">
             Por enquanto são duas ferramentas, ping e consulta DNS. As próximas
@@ -112,10 +113,10 @@ export function Sobre() {
         </h2>
         <Reveal className="flex flex-col gap-5">
           <p className={prose}>
-            Escrevo uma especificação antes de construir cada parte e registro
-            as escolhas difíceis em ADRs, que são notas curtas sobre o que foi
-            decidido e por quê. Ficam em <code>docs/</code> no repositório,
-            junto com o código, que é MIT.
+            Costumo escrever uma especificação antes de construir cada parte e
+            registro as escolhas difíceis em ADRs, que são notas curtas sobre o
+            que foi decidido e por quê. Ficam em <code>docs/</code> no
+            repositório, junto com o código, que é MIT.
           </p>
           <ul className="flex flex-col gap-1 font-sans text-body-sm">
             {[
