@@ -1,0 +1,118 @@
+name: Rollback API GoLang
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "previous = volta uma versao; specific = volta para a versao informada"
+        required: true
+        type: choice
+        options:
+          - previous
+          - specific
+      version:
+        description: "Versao X.Y.Z (so para specific), ex.: 1.3.0"
+        required: false
+        type: string
+      reason:
+        description: "Motivo do rollback"
+        required: false
+        default: "rollback pelo workflow"
+        type: string
+
+concurrency:
+  group: deploy-api-golang
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Plan rollback
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    timeout-minutes: 10
+    outputs:
+      active: ${{ steps.target.outputs.active }}
+      target: ${{ steps.target.outputs.target }}
+      tag: ${{ steps.target.outputs.tag }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select rollback target
+        id: target
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: ${{ inputs.action }}
+          VERSION: ${{ inputs.version }}
+          REASON: ${{ inputs.reason }}
+        run: |
+          bash infra/shellscript/select-api-rollback-target.sh
+
+  rollback:
+    name: Rollback API
+    needs: check
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check the latest has not changed
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          PLANNED_ACTIVE: ${{ needs.check.outputs.active }}
+        run: |
+          current=$(gh release view --json tagName --jq '.tagName | sub("^probekit-linux-amd64-api-go-"; "")')
+          if [ "$current" != "$PLANNED_ACTIVE" ]; then
+            echo "A latest mudou depois do plano (era $PLANNED_ACTIVE, agora $current). Rode o workflow de novo."
+            exit 1
+          fi
+
+      - name: Mark the release as latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.check.outputs.tag }}
+        run: |
+          if ! [[ "$TAG" =~ ^probekit-linux-amd64-api-go-[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag alvo invalida: $TAG"
+            exit 1
+          fi
+          gh release edit "$TAG" --latest
+
+      - name: Check the rollback took effect
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.check.outputs.tag }}
+        run: |
+          current=$(gh release view --json tagName --jq .tagName)
+          if [ "$current" != "$TAG" ]; then
+            echo "A latest e $current, e nao $TAG"
+            exit 1
+          fi
+          echo "latest: $current"
+
+      - name: Summary
+        env:
+          TAG: ${{ needs.check.outputs.tag }}
+        run: |
+          {
+            echo "### Release marcada como latest"
+            echo
+            echo "\`$TAG\` é a latest. As VMs puxam sozinhas em até uns 5,5 minutos (timer de 5 min + até 30 s)."
+            echo
+            echo "Para conferir depois:"
+            echo
+            echo '```bash'
+            echo "EXPECTED_VERSION=${TAG##*-} bash infra/shellscript/verify-api-routes.sh full"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

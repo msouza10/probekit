@@ -227,6 +227,15 @@ Só reverte quando houve troca de versão naquela execução: se a API cair sem 
 
 Esse updater chega às VMs com a primeira release da API depois do PR do rollback; até lá elas rodam o updater antigo, sem rollback. Verificado em 2026-10-22 em contêiner (`infra/shellscript/tests/updater/`, 9 cenários). Pendente de confirmação: o teste numa VM de verdade.
 
-**API, por decisão sua.** Reverta o commit problemático na `main` e publique uma nova release.
+**API, por decisão sua, rápido.** Rode o workflow *Rollback API GoLang* (`action`: `previous` ou `specific` com `version` X.Y.Z, mais um `reason`). Ele marca uma release anterior como `latest`, sem SSH nem credencial das VMs, e o updater de cada VM a instala em até uns 5,5 minutos (timer de 5 min + até 30 s):
+
+1. **`Plan rollback`** (ambiente `production`, espera aprovação) escolhe a release e escreve no resumo a tabela das versões e o alvo. Falha antes de editar qualquer coisa se a versão for malformada, não existir, já for a `latest` ou for **anterior à 1.3.0**.
+2. **`Rollback API`** (também em `production`) confere que a `latest` continua a do plano, roda `gh release edit --latest` e confere que ela ficou marcada.
+
+O piso 1.3.0 existe porque o updater reinstala o próprio script a partir da tag instalada: voltar para uma release anterior troca o updater das VMs por um sem rollback automático. O valor está em `MIN_VERSION` no `infra/shellscript/select-api-rollback-target.sh`; mude-o quando a proteção mudar. O workflow entra na mesma fila do *Deploy API* (`deploy-api-golang`).
+
+Depois, confira (as VMs levam alguns minutos): `EXPECTED_VERSION=<X.Y.Z> bash infra/shellscript/verify-api-routes.sh full`. O efeito dura até a próxima release, que vira `latest` sozinha; para uma correção permanente, faça o próximo caminho.
+
+**API, por decisão sua, permanente.** Reverta o commit problemático na `main` e publique uma nova release.
 
 **Site.** Use o workflow *Rollback Frontend* (seção 5.4), ou reverta o commit na `main` e deixe o workflow publicar de novo.
