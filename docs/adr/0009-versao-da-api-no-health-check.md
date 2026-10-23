@@ -2,7 +2,7 @@
 
 ## Status
 
-Aceita (2026-10-22). A implementação ainda não foi feita.
+Aceita (2026-10-22). Implementação na issue #36.
 
 ## Contexto
 
@@ -66,7 +66,7 @@ A versão vai num cabeçalho, sem mudar corpo nem rotas.
 
 ## Validação
 
-Decisão tomada em 2026-10-22; nada foi verificado ainda. Falta implementar (campo, `-ldflags` na release e testes) e confirmar em produção que `GET /` devolve a versão da release no ar.
+Verificado localmente em 2026-10-22: a suíte do backend passa (inclui testes do campo `version` e do binário), e um binário compilado com a mesma linha de build da release (`-trimpath -ldflags="-s -w -X main.version=1.3.0"`) responde `{"message":"OK","version":"1.3.0"}` no `GET /`; em build local o valor é `dev`. Falta confirmar em produção, depois da release que levar essa mudança.
 
 ## Referências
 

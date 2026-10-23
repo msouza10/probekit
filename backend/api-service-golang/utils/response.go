@@ -8,6 +8,7 @@ import (
 type Response struct {
 	Message string `json:"message"`
 	Code    string `json:"code,omitempty"`
+	Version string `json:"version,omitempty"`
 }
 
 type ErrorResponse struct {

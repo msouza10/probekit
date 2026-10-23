@@ -54,6 +54,7 @@ O outro cartão da mesma tela, *Authenticated Origin Pulls*, é uma proteção d
 1. Fazer o merge na `main` de uma mudança em `backend/api-service-golang/` com commit `feat:`, `fix:` ou `perf:`.
 2. O workflow *Build & Release API* roda os testes e publica `probekit-linux-amd64-api-go-X.Y.Z`.
 3. As VMs baixam a versão nova sozinhas em até cerca de 5 minutos.
+4. Conferir a versão no ar: `curl -s https://api.probekit.cc/` deve mostrar `"version":"X.Y.Z"`, a da release. As duas VMs atualizam em momentos diferentes (até uns 5 a 6 minutos), então por um curto período as respostas podem trazer versões diferentes.
 
 Mudanças só em `infra/` ou `frontend/` não geram release.
 
@@ -73,7 +74,7 @@ Dois *Deploy API* nunca rodam juntos: o segundo espera na fila. Se o estado muda
 De qualquer lugar (sem `-k`; o certificado que você vê é o da borda da Cloudflare):
 
 ```bash
-curl https://api.probekit.cc/                                        # {"message":"OK"}
+curl https://api.probekit.cc/                                        # {"message":"OK","version":"X.Y.Z"}
 curl "https://api.probekit.cc/api/ping?target=1.1.1.1&count=2&timeout=3"
 curl "https://api.probekit.cc/api/dns-lookup?domain=example.com"
 curl "https://api.probekit.cc/api/ping?target=10.0.0.1"              # 400 private_ip_not_allowed
@@ -91,8 +92,11 @@ systemctl status probekit --no-pager
 systemctl cat probekit | grep -E 'TLS_|CORS_'
 sysctl net.ipv4.ping_group_range         # gid do probekit repetido, não "1 0"
 journalctl -u probekit -n 30 --no-pager
-curl -k https://localhost/               # direto na VM, com -k
+curl -k https://localhost/               # direto na VM, com -k (mostra a versão)
+cat /opt/probekit/VERSION                # a tag instalada, ex.: probekit-linux-amd64-api-go-1.3.0
 ```
+
+O `version` do `GET /` é a versão da release (`1.3.0`), e o `/opt/probekit/VERSION` de cada VM guarda a **tag completa** (`probekit-linux-amd64-api-go-1.3.0`): para comparar os dois, tire o prefixo da tag. Em build local o `version` é `dev` ([ADR-0009](./adr/0009-versao-da-api-no-health-check.md)).
 
 No portal da OCI: **Networking → Network Load Balancers → api-probekit → Backend sets**. Os dois backends devem estar *OK*. Logo após um restart eles podem demorar alguns ciclos de health check (10 s cada) para voltar.
 
@@ -110,6 +114,7 @@ No portal da OCI: **Networking → Network Load Balancers → api-probekit → B
 | `journalctl` cheio de `TLS handshake error ... EOF` | health check TCP do NLB, que fecha sem fazer TLS | ignorar, é esperado |
 | Navegador bloqueia a chamada do site (CORS) | `CORS_ALLOWED_ORIGINS` sem a origem, ou vazia | conferir `systemctl cat probekit`; corrigir no script e rodar o *Deploy API* |
 | Script de deploy sai com "arquivo de certificado ou chave nao encontrado" | secrets `TLS_*` ausentes ou o passo do certificado não rodou | conferir os secrets e a ordem dos passos no workflow |
+| `GET /` mostra `"version":"dev"` em produção | binário compilado sem o `-ldflags` (build manual, ou o passo *Build Linux AMD64* sem a versão) | conferir o passo de build do workflow *Build & Release API* e publicar uma release nova |
 
 Conferir se o certificado e a chave formam um par, sem imprimir a chave:
 

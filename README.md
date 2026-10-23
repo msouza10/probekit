@@ -70,7 +70,7 @@ O servidor fica disponível em `https://localhost:8443`. O certificado de teste 
 
 #### Rotas disponíveis
 
-- `GET /` — health check (`{"message":"OK"}`).
+- `GET /` — health check e versão no ar (`{"message":"OK","version":"1.3.0"}`). A release embute a versão no binário; em build local o valor é `dev`. Decisão no [ADR-0009](docs/adr/0009-versao-da-api-no-health-check.md).
 - `GET /api/ping?target=<host>&count=<n>&timeout=<segundos>` — ping ICMP real. `count` (default `5`, máximo `10`) e `timeout` em segundos (default `1`, máximo `5`) são opcionais. Rejeita IPs/hosts privados ou reservados.
 - `GET /api/dns-lookup?domain=<domain>&service=<service>&proto=<proto>` — resolve A, AAAA, CNAME, MX, TXT e NS do domínio. `service`/`proto` são opcionais e, se os dois forem passados, incluem registros SRV na resposta.
 
@@ -108,7 +108,7 @@ npm run dev
 
 ## Publicação
 
-**API.** Um merge na `main` que altere `backend/api-service-golang/` dispara o workflow *Build & Release API*: roda os testes, calcula a versão pelos commits (`feat:` sobe o minor, `fix:`/`perf:` o patch, `!:` ou `BREAKING CHANGE:` o major) e publica a release com o binário e o `SHA256SUMS`. As VMs consultam a última release a cada 5 minutos e se atualizam. O workflow *Deploy* (manual) aplica o Terraform, entrega o certificado e executa o script de deploy nas VMs.
+**API.** Um merge na `main` que altere `backend/api-service-golang/` dispara o workflow *Build & Release API*: roda os testes, calcula a versão pelos commits (`feat:` sobe o minor, `fix:`/`perf:` o patch, `!:` ou `BREAKING CHANGE:` o major) e publica a release com o binário e o `SHA256SUMS` (a versão vai embutida no binário, e o `GET /` a informa). As VMs consultam a última release a cada 5 minutos e se atualizam. O workflow *Deploy* (manual) aplica o Terraform, entrega o certificado e executa o script de deploy nas VMs.
 
 **Site.** Hoje o deploy é manual, a partir da máquina do criador. O build de produção precisa apontar para a API:
 

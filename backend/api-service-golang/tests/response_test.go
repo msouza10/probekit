@@ -5,10 +5,56 @@ import (
 	"math"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"api-service-golang/utils"
 )
+
+// Contrato (ADR-0009): utils.Response ganha o campo Version, serializado como
+// "version" e omitido quando vazio (omitempty). Usa reflexão pra o pacote de
+// testes continuar compilando enquanto o campo ainda não existe.
+func TestResponseVersionField(t *testing.T) {
+	field, ok := reflect.TypeOf(utils.Response{}).FieldByName("Version")
+	if !ok {
+		t.Fatal("utils.Response precisa do campo Version (string, tag json:\"version,omitempty\")")
+	}
+	if field.Type.Kind() != reflect.String {
+		t.Fatalf("Version é %s, want string", field.Type.Kind())
+	}
+	if tag := field.Tag.Get("json"); tag != "version,omitempty" {
+		t.Errorf("tag json = %q, want %q", tag, "version,omitempty")
+	}
+
+	encode := func(version string) map[string]any {
+		var res utils.Response
+		res.Message = "OK"
+		reflect.ValueOf(&res).Elem().FieldByName("Version").SetString(version)
+
+		rec := httptest.NewRecorder()
+		utils.SetJSON(rec, http.StatusOK, res)
+
+		var body map[string]any
+		if err := json.NewDecoder(rec.Body).Decode(&body); err != nil {
+			t.Fatalf("decoding response body: %v", err)
+		}
+		return body
+	}
+
+	t.Run("includes version when set", func(t *testing.T) {
+		body := encode("1.3.0")
+		if body["message"] != "OK" || body["version"] != "1.3.0" {
+			t.Errorf("body = %v, want message=OK version=1.3.0", body)
+		}
+	})
+
+	t.Run("omits version when empty", func(t *testing.T) {
+		body := encode("")
+		if _, present := body["version"]; present {
+			t.Errorf("body = %v, want no version key when empty", body)
+		}
+	})
+}
 
 func TestSetJSON(t *testing.T) {
 	t.Run("sets status, content-type and encodes the body", func(t *testing.T) {
