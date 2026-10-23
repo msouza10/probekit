@@ -41,4 +41,15 @@ describe("Bench", () => {
       screen.getByRole("region", { name: "Resultado do ping" }),
     ).toHaveAttribute("data-slot", "bench")
   })
+
+  it("a área de conteúdo é focável por teclado e tem nome", () => {
+    render(
+      <Bench label="Saída">
+        <pre>conteúdo longo</pre>
+      </Bench>,
+    )
+    const content = screen.getByRole("group", { name: "Saída, conteúdo" })
+    expect(content).toHaveAttribute("tabindex", "0")
+    expect(content).toHaveClass("overflow-x-auto")
+  })
 })
