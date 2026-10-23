@@ -10,7 +10,12 @@ import { describe, expect, it } from "vitest"
  * linguagem visual; a partir daí eles não podem voltar a usar gradiente,
  * sombra, hover que levanta ou os nomes antigos de token.
  */
-const redesigned: string[] = []
+const redesigned: string[] = [
+  "src/components/ui/button.tsx",
+  "src/components/ui/card.tsx",
+  "src/components/ui/badge.tsx",
+  "src/components/ui/separator.tsx",
+]
 
 const frontendRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const read = (relativePath: string) =>
