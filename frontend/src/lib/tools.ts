@@ -5,6 +5,8 @@ export interface Tool {
   category?: "Rede" | "DNS" | "Segurança" | "Utilitários"
   status?: "Disponível" | "Em breve" | "Planejado"
   tags?: string[]
+  /** Por que a ferramenta existe no laboratório (texto da Home, em primeira pessoa). */
+  why?: string
   iconName?:
     "Activity" | "Globe" | "Network" | "ShieldCheck" | "FileCode2" | "Clock"
 }
@@ -13,20 +15,22 @@ export const tools: Tool[] = [
   {
     name: "Ping",
     description:
-      "Meça latência, perda de pacotes e jitter com ICMP nativo a partir do nó de nuvem.",
+      "Latência, perda de pacotes e jitter até um host, medidos com ICMP de verdade.",
     href: "/ping",
     category: "Rede",
-    status: "Em breve",
+    status: "Disponível",
+    why: "Queria medir a distância até um servidor em vez de supor. Mandar ICMP de verdade, de uma máquina minha na nuvem, é o jeito mais direto que achei de praticar rede.",
     tags: ["ICMP", "Latência", "Jitter", "Perda"],
     iconName: "Activity",
   },
   {
     name: "DNS Lookup",
     description:
-      "Consulte e inspecione registros DNS autoritativos (A, AAAA, CNAME, MX, TXT, NS e SRV).",
+      "Registros A, AAAA, CNAME, MX, TXT e NS de um domínio, e SRV quando pedido.",
     href: "/dns-lookup",
     category: "DNS",
-    status: "Em breve",
+    status: "Disponível",
+    why: "Muito problema estranho de rede acaba sendo DNS. Ver os registros crus, do jeito que o resolvedor devolve, me ajuda a entender o que um domínio anuncia de fato.",
     tags: ["A / AAAA", "MX", "TXT", "NS", "SRV"],
     iconName: "Globe",
   },
