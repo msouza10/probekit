@@ -161,8 +161,8 @@ export function Home() {
           <p className={prose}>
             O diagnóstico não acontece no seu navegador. Quando você pede um
             ping ou uma consulta DNS, a página manda o pedido para uma API em Go
-            que fica numa VM da Oracle Cloud em Ashburn, nos Estados Unidos. É
-            de lá que os pacotes saem.
+            que roda na Oracle Cloud, em Ashburn, nos Estados Unidos. É de lá
+            que os pacotes saem.
           </p>
           <p className={prose}>
             Antes de testar, a API resolve o nome e recusa endereços privados e
@@ -172,9 +172,9 @@ export function Home() {
             você e o alvo.
           </p>
           <p className={prose}>
-            A VM é uma só e o limite é dividido entre todo mundo: 50 pedidos por
-            endereço a cada cinco minutos. Por isso esta página não testa nada
-            sozinha ao abrir; o exemplo lá em cima é só texto.
+            Para não esgotar a máquina, cada endereço pode fazer 50 pedidos a
+            cada cinco minutos. Por isso esta página não testa nada sozinha ao
+            abrir; o exemplo lá em cima é só texto.
           </p>
         </Reveal>
       </section>
