@@ -50,19 +50,19 @@ export function ThemeToggle() {
       aria-label="Modo escuro"
       title={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}
       onClick={toggle}
-      className="theme-toggle relative flex h-9 w-16 shrink-0 items-center justify-between rounded-full border border-border bg-muted px-2"
+      className="relative flex h-9 w-16 shrink-0 items-center justify-between rounded-full border border-border bg-muted px-2"
     >
       <span
         aria-hidden="true"
-        className={`theme-toggle-thumb absolute top-1 h-7 w-7 rounded-full border border-border bg-card shadow-sm ${theme === "dark" ? "left-[31px]" : "left-1"}`}
+        className={`absolute top-1 h-7 w-7 rounded-full border border-input bg-background motion-safe:transition-[left] motion-safe:duration-150 ${theme === "dark" ? "left-[31px]" : "left-1"}`}
       />
       <Sun
         aria-hidden="true"
-        className={`relative h-4 w-4 ${theme === "light" ? "text-blue-cornflower" : "text-fog"}`}
+        className={`relative h-4 w-4 ${theme === "light" ? "text-highlight" : "text-muted-foreground"}`}
       />
       <Moon
         aria-hidden="true"
-        className={`relative h-4 w-4 ${theme === "dark" ? "text-blue-cornflower" : "text-fog"}`}
+        className={`relative h-4 w-4 ${theme === "dark" ? "text-highlight" : "text-muted-foreground"}`}
       />
     </button>
   )

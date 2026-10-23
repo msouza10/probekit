@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { describe, expect, it } from "vitest"
@@ -45,7 +45,61 @@ describe("Header", () => {
   })
 })
 
+describe("Header navegação", () => {
+  it("não oferece Artigos, Linha do tempo nem Arquitetura", async () => {
+    const user = userEvent.setup()
+    const { container } = render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+    await user.click(screen.getByRole("button", { name: /^ferramentas$/i }))
+    expect(container.textContent).not.toMatch(
+      /artigos|linha do tempo|arquitetura/i,
+    )
+    expect(document.body.textContent).not.toMatch(
+      /artigos|linha do tempo|arquitetura/i,
+    )
+  })
+
+  it("a navegação principal tem só Ferramentas e Sobre", () => {
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+    const nav = screen.getByRole("navigation", { name: "Navegação principal" })
+    expect(within(nav).getAllByRole("link")).toHaveLength(1)
+    expect(within(nav).getAllByRole("button")).toHaveLength(1)
+  })
+})
+
 describe("Header search", () => {
+  it("encontra DNS e abre /dns-lookup", async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <Header />
+        <Routes>
+          <Route path="/dns-lookup" element={<h1>Consulta DNS</h1>} />
+          <Route path="/" element={null} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    await user.click(screen.getByRole("button", { name: "Buscar ferramentas" }))
+    await user.type(
+      screen.getByRole("textbox", { name: "Pesquisar ferramentas" }),
+      "DNS",
+    )
+    expect(
+      screen.getByRole("button", { name: /DNS Lookup/ }),
+    ).toBeInTheDocument()
+    await user.keyboard("{Enter}")
+    expect(
+      screen.getByRole("heading", { name: "Consulta DNS" }),
+    ).toBeInTheDocument()
+  })
+
   it("filters by unaccented terms and opens a result with Enter", async () => {
     const user = userEvent.setup()
     render(

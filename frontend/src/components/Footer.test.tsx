@@ -27,4 +27,22 @@ describe("Footer", () => {
       screen.getByRole("link", { name: /repositório github/i }),
     ).toHaveAttribute("href", "https://github.com/msouza10/probekit")
   })
+
+  it("só aponta para fora com links do repositório, em primeira pessoa", () => {
+    render(
+      <MemoryRouter>
+        <Footer />
+      </MemoryRouter>,
+    )
+    const external = screen
+      .getAllByRole("link")
+      .filter((link) => /^https?:/.test(link.getAttribute("href") ?? ""))
+    expect(external.length).toBeGreaterThan(0)
+    for (const link of external) {
+      expect(link.getAttribute("href")).toMatch(
+        /^https:\/\/github\.com\/msouza10\/probekit/,
+      )
+    }
+    expect(screen.getByText(/aprender|estudar/i)).toBeInTheDocument()
+  })
 })

@@ -1,14 +1,7 @@
 import { useState } from "react"
 import { Link, NavLink, useNavigate } from "react-router-dom"
 import { Dialog, Popover } from "radix-ui"
-import {
-  Activity,
-  ArrowRight,
-  ChevronDown,
-  Globe,
-  Search,
-  X,
-} from "lucide-react"
+import { ChevronDown, Search, X } from "lucide-react"
 import { tools } from "@/lib/tools"
 import { ThemeToggle } from "./ThemeToggle"
 import { GithubIcon } from "./icons/GithubIcon"
@@ -18,6 +11,10 @@ const normalize = (value: string) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
+const navLink =
+  "rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+const menuRow =
+  "block rounded-md px-3 py-3 hover:bg-muted focus-visible:bg-muted"
 const implementedTools = tools.filter((tool) => tool.status !== "Planejado")
 
 export function Header() {
@@ -38,90 +35,84 @@ export function Header() {
   }
 
   return (
-    <header className="site-header sticky top-0 z-40 flex items-center justify-between border-b border-border">
-      <div className="flex items-center gap-8">
+    <header className="sticky top-0 z-40 -mx-4 grid h-[var(--header-height)] grid-cols-[1fr_auto] content-center gap-x-3 gap-y-1 border-b border-border bg-background px-4 sm:-mx-8 sm:flex sm:items-center sm:justify-between sm:px-8">
+      <div className="contents sm:flex sm:items-center sm:gap-8">
         <Link
           to="/"
-          className="flex items-center gap-2.5 font-semibold text-foreground"
+          className="font-serif text-subheading font-medium tracking-tight text-foreground"
           aria-label="Probekit início"
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-blue-cornflower/25 bg-blue-cornflower/10 text-blue-cornflower">
-            <Activity className="h-5 w-5" />
-          </span>
-          <span className="text-subheading tracking-tight">Probekit</span>
+          Probekit
         </Link>
         <nav
-          className="header-nav flex items-center gap-1"
+          className="col-span-2 row-start-2 -ml-3 flex items-center gap-1 sm:ml-0"
           aria-label="Navegação principal"
         >
           <Popover.Root open={menuOpen} onOpenChange={setMenuOpen}>
             <Popover.Trigger
-              className="header-nav-link flex items-center gap-2"
+              className={`${navLink} flex items-center gap-2 data-[state=open]:bg-muted data-[state=open]:text-foreground`}
               aria-label="Ferramentas"
             >
               Ferramentas{" "}
               <ChevronDown
-                className={`h-3.5 w-3.5 transition-transform ${menuOpen ? "rotate-180" : ""}`}
+                aria-hidden="true"
+                className={`h-3.5 w-3.5 ${menuOpen ? "rotate-180" : ""}`}
               />
             </Popover.Trigger>
             <Popover.Portal>
               <Popover.Content
                 align="start"
-                sideOffset={16}
+                sideOffset={8}
                 collisionPadding={16}
-                className="tools-popover"
+                className="z-60 max-h-(--radix-popover-content-available-height) w-[360px] max-w-[calc(100vw-32px)] overflow-y-auto rounded-lg border border-border bg-popover p-2 text-popover-foreground motion-safe:data-[state=open]:animate-[rise-in_160ms_ease-out]"
                 aria-label="Menu de ferramentas"
               >
-                <p className="px-3 pb-3 text-[11px] uppercase tracking-widest text-fog">
+                <p className="type-eyebrow px-3 pt-2 pb-2 text-muted-foreground">
                   Diagnósticos
                 </p>
-                {implementedTools.map((tool) => {
-                  const Icon = tool.iconName === "Globe" ? Globe : Activity
-                  return (
-                    <Link
-                      key={tool.href}
-                      to={tool.href}
-                      onClick={() => setMenuOpen(false)}
-                      className="tool-menu-link group"
-                    >
-                      <span className="tool-menu-icon">
-                        <Icon className="h-5 w-5" />
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-medium text-foreground">
-                          {tool.name}
-                        </span>
-                        <span className="mt-1 block text-xs text-muted-foreground">
-                          {tool.name === "Ping"
-                            ? "Latência e perda de pacotes"
-                            : "Registros e resolução de domínios"}
-                        </span>
-                      </span>
-                      <ArrowRight className="h-4 w-4 shrink-0 text-fog transition-transform group-hover:translate-x-1" />
-                    </Link>
-                  )
-                })}
-                <div className="mt-3 border-t border-border px-3 pt-3">
-                  <p className="mb-3 text-xs leading-relaxed text-fog">
+                {implementedTools.map((tool) => (
+                  <Link
+                    key={tool.href}
+                    to={tool.href}
+                    onClick={() => setMenuOpen(false)}
+                    className={menuRow}
+                  >
+                    <span className="block text-sm font-medium text-foreground">
+                      {tool.name}
+                    </span>
+                    <span className="mt-1 block text-xs text-muted-foreground">
+                      {tool.name === "Ping"
+                        ? "Latência e perda de pacotes"
+                        : "Registros e resolução de domínios"}
+                    </span>
+                  </Link>
+                ))}
+                <div className="mt-2 border-t border-border px-3 pt-3 pb-1">
+                  <p className="mb-2 text-xs leading-relaxed text-muted-foreground">
                     CIDR, SSL e outros utilitários estão no roadmap.
                   </p>
                   <a
                     href="/#ferramentas"
                     onClick={() => setMenuOpen(false)}
-                    className="flex items-center justify-between py-2 text-xs text-blue-cornflower"
+                    className="inline-flex min-h-11 items-center text-xs font-medium text-highlight underline underline-offset-4"
                   >
-                    Explorar catálogo <ArrowRight className="h-4 w-4" />
+                    Explorar catálogo
                   </a>
                 </div>
               </Popover.Content>
             </Popover.Portal>
           </Popover.Root>
-          <NavLink to="/sobre" className="header-nav-link">
+          <NavLink
+            to="/sobre"
+            className={({ isActive }) =>
+              `${navLink} ${isActive ? "bg-muted text-foreground" : ""}`
+            }
+          >
             Sobre
           </NavLink>
         </nav>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="col-start-2 row-start-1 flex items-center gap-1.5 sm:gap-2">
         <Dialog.Root
           open={searchOpen}
           onOpenChange={(open) => {
@@ -131,14 +122,14 @@ export function Header() {
         >
           <Dialog.Trigger
             aria-label="Buscar ferramentas"
-            className="header-search flex h-10 items-center gap-2 rounded-lg border border-border px-3 text-xs text-muted-foreground hover:border-graphite hover:text-foreground"
+            className="flex h-10 items-center gap-2 rounded-md border border-border px-3 text-xs text-muted-foreground hover:border-input hover:text-foreground"
           >
             <Search className="h-4 w-4" />
             <span className="hidden sm:inline">Buscar ferramenta…</span>
           </Dialog.Trigger>
           <Dialog.Portal>
-            <Dialog.Overlay className="search-overlay" />
-            <Dialog.Content className="search-dialog">
+            <Dialog.Overlay className="fixed inset-0 z-70 bg-bench/60" />
+            <Dialog.Content className="fixed top-[min(18svh,140px)] left-1/2 z-80 max-h-[80svh] w-[min(580px,calc(100vw-32px))] -translate-x-1/2 overflow-y-auto rounded-lg border border-border bg-popover text-popover-foreground">
               <Dialog.Title className="sr-only">
                 Buscar ferramentas
               </Dialog.Title>
@@ -156,23 +147,29 @@ export function Header() {
                   if (first) openTool(first.href)
                 }}
               >
-                <Search className="h-5 w-5 shrink-0 text-blue-cornflower" />
+                <Search
+                  aria-hidden="true"
+                  className="h-5 w-5 shrink-0 text-muted-foreground"
+                />
                 <input
                   aria-label="Pesquisar ferramentas"
                   placeholder="Nome, protocolo ou categoria…"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  className="min-w-0 flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-fog"
+                  className="min-w-0 flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 />
                 <Dialog.Close
                   aria-label="Fechar busca"
-                  className="rounded-md p-2 text-fog hover:bg-card hover:text-foreground"
+                  className="rounded-md p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
                 >
                   <X className="h-4 w-4" />
                 </Dialog.Close>
               </form>
               <div className="max-h-[min(55svh,420px)] overflow-y-auto p-3">
-                <p role="status" className="px-3 py-2 text-xs text-fog">
+                <p
+                  role="status"
+                  className="px-3 py-2 text-xs text-muted-foreground"
+                >
                   {results.length}{" "}
                   {results.length === 1
                     ? "ferramenta encontrada"
@@ -182,27 +179,24 @@ export function Header() {
                   tool.status === "Planejado" ? (
                     <div
                       key={tool.href}
-                      className="flex items-center justify-between gap-3 rounded-lg px-3 py-3 text-xs text-fog"
+                      className="flex items-center justify-between gap-3 rounded-md px-3 py-3 text-xs text-muted-foreground"
                     >
                       <span>{tool.name}</span>
-                      <span className="shrink-0 text-[10px]">Planejado</span>
+                      <span className="shrink-0 text-[11px]">Planejado</span>
                     </div>
                   ) : (
                     <button
                       key={tool.href}
                       type="button"
                       onClick={() => openTool(tool.href)}
-                      className="tool-menu-link w-full text-left"
+                      className={`${menuRow} w-full text-left`}
                     >
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm text-foreground">
-                          {tool.name}
-                        </span>
-                        <span className="mt-1 block text-xs text-fog">
-                          {tool.category} · {tool.tags?.slice(0, 2).join(" / ")}
-                        </span>
+                      <span className="block text-sm text-foreground">
+                        {tool.name}
                       </span>
-                      <ArrowRight className="h-4 w-4 text-blue-cornflower" />
+                      <span className="mt-1 block text-xs text-muted-foreground">
+                        {tool.category} · {tool.tags?.slice(0, 2).join(" / ")}
+                      </span>
                     </button>
                   ),
                 )}
@@ -213,7 +207,7 @@ export function Header() {
                   </p>
                 )}
               </div>
-              <p className="border-t border-border px-6 py-3 text-[11px] text-fog">
+              <p className="border-t border-border px-6 py-3 text-[11px] text-muted-foreground">
                 Enter para abrir · Esc para fechar
               </p>
             </Dialog.Content>
@@ -225,7 +219,7 @@ export function Header() {
           target="_blank"
           rel="noreferrer"
           aria-label="Código fonte no GitHub"
-          className="flex h-10 w-10 items-center justify-center rounded-lg text-muted-foreground hover:bg-card hover:text-foreground"
+          className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground max-[360px]:hidden"
         >
           <GithubIcon className="h-4 w-4" />
         </a>
