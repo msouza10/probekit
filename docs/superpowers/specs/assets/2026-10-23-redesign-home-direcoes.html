@@ -1,0 +1,117 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=JetBrains+Mono:wght@400&display=swap');
+.pk{font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+.pk *{box-sizing:border-box}
+.pk a{color:inherit;text-decoration:none}
+
+/* A — Caderno (claro, editorial) */
+.pa{background:#faf8f4;color:#1c1b19;padding:28px 36px 40px}
+.pa nav{display:flex;gap:22px;align-items:baseline;font-size:13px;color:#6b675f;border-bottom:1px solid #e6e1d6;padding-bottom:14px}
+.pa nav b{font-family:'Newsreader',serif;font-size:20px;color:#1c1b19;font-weight:600;margin-right:auto}
+.pa h1{font-family:'Newsreader',serif;font-weight:500;font-size:40px;line-height:1.12;letter-spacing:-0.02em;margin:44px 0 14px;max-width:560px}
+.pa .lede{font-family:'Newsreader',serif;font-size:19px;color:#4a463f;max-width:540px;margin:0 0 34px}
+.pa h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a857a;font-weight:500;margin:0 0 6px}
+.pa .row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;padding:14px 0;border-top:1px solid #e6e1d6;align-items:baseline}
+.pa .row:last-child{border-bottom:1px solid #e6e1d6}
+.pa .row .n{font-family:'JetBrains Mono',monospace;font-size:12px;color:#a09a8c}
+.pa .row .t{font-family:'Newsreader',serif;font-size:21px;font-weight:500}
+.pa .row .d{font-size:14px;color:#6b675f;margin-top:2px}
+.pa .row .s{font-size:12px;color:#8a857a}
+
+/* B — Bancada (escuro, neutro, Cursor) */
+.pb{background:#14120f;color:#ece8e1;padding:28px 36px 40px}
+.pb nav{display:flex;gap:22px;align-items:center;font-size:13px;color:#8d877c}
+.pb nav b{color:#ece8e1;font-weight:600;margin-right:auto;font-size:15px;letter-spacing:-0.01em}
+.pb h1{font-weight:600;font-size:38px;line-height:1.1;letter-spacing:-0.035em;margin:56px 0 14px;max-width:560px}
+.pb h1 em{font-family:'Newsreader',serif;font-style:italic;font-weight:400;color:#c9c2b4}
+.pb .lede{font-size:16px;color:#a39d90;max-width:520px;margin:0 0 28px}
+.pb .term{border:1px solid #2a2722;background:#1a1814;border-radius:6px;padding:16px 18px;font-family:'JetBrains Mono',monospace;font-size:12.5px;color:#a39d90;line-height:1.8}
+.pb .term .p{color:#e8a35a}
+.pb .term .ok{color:#8fb98a}
+.pb .grid{display:grid;grid-template-columns:1fr 1fr;gap:0;margin-top:22px;border:1px solid #2a2722;border-radius:6px;overflow:hidden}
+.pb .cell{padding:16px 18px;border-right:1px solid #2a2722}
+.pb .cell:last-child{border-right:0}
+.pb .cell b{font-weight:500;font-size:15px}
+.pb .cell p{margin:4px 0 0;font-size:13px;color:#8d877c}
+.pb .cell .tag{font-family:'JetBrains Mono',monospace;font-size:11px;color:#6f695e;margin-top:10px;display:block}
+
+/* C — Híbrido (claro para ler, bancada escura para as ferramentas) */
+.pc{background:#fbfaf7;color:#1c1b19;padding:28px 36px 40px}
+.pc nav{display:flex;gap:22px;align-items:baseline;font-size:13px;color:#6b675f}
+.pc nav b{font-family:'Newsreader',serif;font-size:20px;color:#1c1b19;font-weight:600;margin-right:auto}
+.pc h1{font-family:'Newsreader',serif;font-weight:500;font-size:38px;line-height:1.12;letter-spacing:-0.02em;margin:40px 0 12px;max-width:540px}
+.pc .lede{font-family:'Newsreader',serif;font-size:18px;color:#4a463f;max-width:520px;margin:0 0 26px}
+.pc .bench{background:#14120f;color:#ece8e1;border-radius:8px;padding:18px 20px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.8}
+.pc .bench .top{display:flex;justify-content:space-between;color:#8d877c;margin-bottom:8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.pc .bench .ok{color:#8fb98a}
+.pc .cols{display:grid;grid-template-columns:1.4fr 1fr;gap:28px;margin-top:30px}
+.pc h4{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8a857a;font-weight:500;margin:0 0 10px}
+.pc .post{padding:10px 0;border-top:1px solid #e9e4d9}
+.pc .post .t{font-family:'Newsreader',serif;font-size:19px;font-weight:500;line-height:1.25}
+.pc .post .m{font-size:12px;color:#8a857a;margin-top:3px}
+</style>
+
+<h2>Qual dessas direções parece mais com o Probekit?</h2>
+<p class="subtitle">Mesmo conteúdo nas três (texto de exemplo meu). Muda o tom, a tipografia e onde as ferramentas ficam. Clique na que mais se aproxima, e depois me diga no terminal o que mudaria.</p>
+
+<div class="options" style="margin-bottom:18px">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content"><h3>Caderno</h3><p>Fundo claro de papel, título em serifa, lista numerada no lugar de cards. O mais perto do Medium: lê como um texto, não como um app.</p></div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content"><h3>Bancada</h3><p>Escuro e quente (sem o azul-marinho de hoje), Inter com um toque de serifa itálica, ferramentas como painéis. O mais perto do Cursor.</p></div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content"><h3>Híbrido</h3><p>Texto e artigos em claro com serifa, e um painel escuro de terminal no meio da página para as ferramentas, como uma bancada dentro do caderno.</p></div>
+  </div>
+</div>
+
+<div class="mockup"><div class="mockup-header">A — Caderno</div><div class="mockup-body" style="padding:0">
+<div class="pk pa">
+  <nav><b>probekit</b><a>Ferramentas</a><a>Artigos</a><a>Linha do tempo</a><a>Arquitetura</a><a>Sobre</a></nav>
+  <h1>Um laboratório de rede que eu construo para aprender.</h1>
+  <p class="lede">Aqui ficam as ferramentas que escrevo para entender como a internet funciona por baixo, e as anotações do que deu certo, do que quebrou e do porquê.</p>
+  <h4>Na bancada agora</h4>
+  <div>
+    <div class="row"><span class="n">01</span><div><div class="t">Ping</div><div class="d">ICMP de verdade, de uma VM em Ashburn. Aprendi Go escrevendo isso.</div></div><span class="s">no ar</span></div>
+    <div class="row"><span class="n">02</span><div><div class="t">DNS Lookup</div><div class="d">A, AAAA, MX, TXT e o que cada resposta quer dizer.</div></div><span class="s">no ar</span></div>
+    <div class="row"><span class="n">03</span><div><div class="t">Próximo experimento</div><div class="d">Ainda sem nome. Vai nascer de uma dúvida minha.</div></div><span class="s">em estudo</span></div>
+  </div>
+</div></div></div>
+
+<div class="mockup"><div class="mockup-header">B — Bancada</div><div class="mockup-body" style="padding:0">
+<div class="pk pb">
+  <nav><b>probekit</b><a>Ferramentas</a><a>Artigos</a><a>Linha do tempo</a><a>Arquitetura</a><a>Sobre</a></nav>
+  <h1>Meu laboratório de rede. <em>Funciona, e eu escrevo o que aprendo.</em></h1>
+  <p class="lede">Ferramentas reais, feitas por mim para estudar. Sem cadastro, sem pitch. Cada uma vem com a história de como foi construída.</p>
+  <div class="term"><span class="p">$</span> ping probekit.cc<br>64 bytes de probekit.cc: <span class="ok">rtt=11.2 ms</span><br><span style="color:#6f695e"># rodando agora, na VM de Ashburn</span></div>
+  <div class="grid">
+    <div class="cell"><b>Ping</b><p>Latência, perda e jitter.</p><span class="tag">go · icmp · v1.3</span></div>
+    <div class="cell"><b>DNS Lookup</b><p>Registros e o que significam.</p><span class="tag">go · net · v1.3</span></div>
+  </div>
+</div></div></div>
+
+<div class="mockup"><div class="mockup-header">C — Híbrido</div><div class="mockup-body" style="padding:0">
+<div class="pk pc">
+  <nav><b>probekit</b><a>Ferramentas</a><a>Artigos</a><a>Linha do tempo</a><a>Arquitetura</a><a>Sobre</a></nav>
+  <h1>Um laboratório feito para mim, aberto para quem quiser olhar.</h1>
+  <p class="lede">Eu construo ferramentas de rede para estudar e escrevo o que descubro. Pode usar as ferramentas, ou só ler como elas foram feitas.</p>
+  <div class="bench">
+    <div class="top"><span>bancada · ping</span><span>ashburn, us</span></div>
+    <div>$ ping probekit.cc</div>
+    <div><span class="ok">3/3</span> respostas · média 11.2 ms · jitter 0.4 ms</div>
+  </div>
+  <div class="cols">
+    <div><h4>Últimos artigos</h4>
+      <div class="post"><div class="t">Por que o ICMP não funcionava na VM</div><div class="m">Go · 12 min</div></div>
+      <div class="post"><div class="t">Terminando TLS no próprio binário</div><div class="m">Infra · 9 min</div></div>
+    </div>
+    <div><h4>Linha do tempo</h4>
+      <div class="post"><div class="t">Out 2026 · site no ar</div></div>
+      <div class="post"><div class="t">Out 2026 · API com rollback</div></div>
+    </div>
+  </div>
+</div></div></div>
