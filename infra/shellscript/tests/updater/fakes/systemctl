@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# systemctl simulado. Reiniciar o servico "executa" o binario instalado:
+# um binario "GOOD ..." fica saudavel, qualquer outro cai.
+W=/world
+echo "$*" >>"$W/log/systemctl.log"
+
+case "${1:-}" in
+    start|restart)
+        if [[ -f "$W/state/force_unhealthy" ]]; then
+            # falha que nao depende do binario (certificado, porta, disco...)
+            echo crashed >"$W/state/service"
+        elif [[ -f /opt/probekit/api-service-golang ]]; then
+            if [[ "$(head -n1 /opt/probekit/api-service-golang)" == GOOD* ]]; then
+                echo healthy >"$W/state/service"
+            else
+                echo crashed >"$W/state/service"
+            fi
+        else
+            echo stopped >"$W/state/service"
+        fi
+        ;;
+    stop)
+        echo stopped >"$W/state/service"
+        ;;
+    is-active)
+        [[ "$(cat "$W/state/service")" == "healthy" ]] || exit 3
+        ;;
+    *)
+        :
+        ;;
+esac

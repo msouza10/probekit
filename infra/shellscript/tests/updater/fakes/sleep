@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# sleep simulado: os testes nao esperam de verdade.
+exit 0

@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# curl simulado: serve o "mundo" de /world em vez da internet.
+W=/world
+echo "curl $*" >>"$W/log/curl.log"
+
+out=""
+url=""
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -o|--output) out="$2"; shift 2 ;;
+        -H|--header|--max-time|--connect-timeout) shift 2 ;;
+        http://*|https://*) url="$1"; shift ;;
+        *) shift ;;
+    esac
+done
+
+case "$url" in
+    https://api.github.com/repos/*/releases/latest)
+        if [[ -s "$W/latest" ]]; then
+            printf '{"tag_name":"%s"}\n' "$(cat "$W/latest")"
+        else
+            echo '{"message":"Not Found"}'
+        fi
+        ;;
+    https://github.com/*/releases/download/*/*)
+        tag="${url#*/releases/download/}"
+        tag="${tag%%/*}"
+        file="${url##*/}"
+        src="$W/releases/$tag/$file"
+        if [[ ! -f "$src" ]]; then
+            echo "curl: (22) The requested URL returned error: 404" >&2
+            exit 22
+        fi
+        cp "$src" "$out"
+        ;;
+    https://raw.githubusercontent.com/*)
+        cp /under-test/deploy-api-go.sh "$out"
+        ;;
+    https://localhost:443/*)
+        if [[ "$(cat "$W/state/service")" == "healthy" ]]; then
+            echo '{"message":"OK"}'
+        else
+            echo "curl: (7) Failed to connect to localhost port 443" >&2
+            exit 7
+        fi
+        ;;
+    *)
+        echo "fake curl: URL inesperada: $url" >&2
+        exit 6
+        ;;
+esac

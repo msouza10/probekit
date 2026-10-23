@@ -8,6 +8,7 @@ APP_USER="probekit"
 ASSET="probekit-linux-amd64-api-go"
 BIN_PATH="$APP_DIR/api-service-golang"
 VERSION_FILE="$APP_DIR/VERSION"
+BAD_VERSION_FILE="$APP_DIR/BAD_VERSION"
 UPDATER_PATH="/usr/local/sbin/autodeploy-api-go.sh"
 TLS_CERT_FILE="/etc/probekit/origin-ca.pem"
 TLS_KEY_FILE="/etc/probekit/origin-ca-key.pem"
@@ -91,11 +92,9 @@ install_dependencies() {
 free_ports() {
     for port in "$@"; do
         iptables -C INPUT -p tcp --dport "$port" -j ACCEPT 2>/dev/null || iptables -I INPUT 1 -p tcp --dport "$port" -j ACCEPT
-        # IPv6 e opcional aqui: se falhar, nao pode derrubar o deploy.
         ip6tables -C INPUT -p tcp --dport "$port" -j ACCEPT 2>/dev/null || ip6tables -I INPUT 1 -p tcp --dport "$port" -j ACCEPT || log "ip6tables falhou na porta $port (ignorando)"
     done
 
-    # Sem isso as regras somem no reboot (o timer recoloca, mas ha uma janela).
     if command -v netfilter-persistent >/dev/null 2>&1; then
         netfilter-persistent save || log "netfilter-persistent save falhou (ignorando)"
     fi
@@ -128,10 +127,13 @@ install_binary() {
 
     (cd "$TMP_DIR" && sha256sum -c SHA256SUMS)
 
+    rm -f "$BIN_PATH.prev"
+    if [ -f "$BIN_PATH" ]; then
+        cp -p "$BIN_PATH" "$BIN_PATH.prev"
+    fi
+
     install -o root -g root -m 0755 "$TMP_DIR/$ASSET" "$BIN_PATH.new"
     mv "$BIN_PATH.new" "$BIN_PATH"
-
-    echo "$tag" > "$VERSION_FILE"
 }
 
 write_api_service() {
@@ -209,7 +211,23 @@ validate_api() {
 
     log "API nao respondeu"
     journalctl -u probekit -n 20 --no-pager || true
-    exit 1
+    return 1
+}
+
+is_bad_version() {
+    [ -f "$BAD_VERSION_FILE" ] && [ "$(cat "$BAD_VERSION_FILE")" = "$1" ]
+}
+
+rollback() {
+    if [ ! -f "$BIN_PATH.prev" ]; then
+        log "nao ha binario anterior para restaurar" >&2
+        return 1
+    fi
+
+    mv "$BIN_PATH.prev" "$BIN_PATH"
+    log "binario revertido para o anterior"
+    systemctl restart probekit
+    validate_api
 }
 
 main() {
@@ -227,7 +245,6 @@ main() {
     install_dependencies
     allow_icmp
 
-    # Antes dos downloads: se algo depois falhar, a porta ja esta aberta.
     free_ports 22 443
 
     local latest installed="" changed=false
@@ -236,11 +253,13 @@ main() {
         installed=$(cat "$VERSION_FILE")
     fi
 
-    if [ "$latest" != "$installed" ]; then
+    if [ "$latest" = "$installed" ]; then
+        log "ja esta na versao $latest"
+    elif is_bad_version "$latest"; then
+        log "a versao $latest esta marcada como ruim, ignorando"
+    else
         install_binary "$latest"
         changed=true
-    else
-        log "ja esta na versao $latest"
     fi
 
     write_api_service
@@ -254,7 +273,22 @@ main() {
         systemctl restart probekit
     fi
 
-    validate_api
+    if validate_api; then
+        if [ "$changed" = true ]; then
+            echo "$latest" > "$VERSION_FILE"
+        fi
+    else
+        if [ "$changed" = true ]; then
+            if rollback; then
+                echo "$latest" > "$BAD_VERSION_FILE"
+                log "a release $latest falhou, voltei para $installed"
+                exit 0
+            else
+                log "rollback falhou"
+            fi
+        fi
+        exit 1
+    fi
 }
 
 main "$@"
