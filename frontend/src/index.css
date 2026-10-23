@@ -184,6 +184,13 @@
 }
 
 @layer base {
+  /* A bancada é escura nos dois temas: só consome os tokens --bench-*. */
+  .bench {
+    color-scheme: dark;
+    background-color: var(--bench);
+    color: var(--bench-foreground);
+    border-color: var(--bench-border);
+  }
   * {
     @apply border-border outline-ring/50;
   }
