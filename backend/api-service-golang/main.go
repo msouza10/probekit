@@ -9,6 +9,8 @@ import (
 	"os"
 )
 
+var version = "dev"
+
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
@@ -21,6 +23,7 @@ func main() {
 
 		res := utils.Response{
 			Message: "OK",
+			Version: version,
 		}
 
 		utils.SetJSON(w, http.StatusOK, res)
@@ -65,6 +68,7 @@ func main() {
 	}
 
 	log.Printf("Server running (HTTPS) on %s", addr)
+	log.Printf("Version: %s", version)
 
 	log.Println("root endpoint - /")
 

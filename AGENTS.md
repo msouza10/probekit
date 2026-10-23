@@ -20,6 +20,26 @@ Este documento define como o criador e o assistente (Claude Code) trabalham junt
 - Quando o criador está escrevendo código (Go/Python) como exercício de aprendizado, ensina com conceitos e exemplos análogos — não com a solução exata da tarefa em questão — mesmo quando essa ferramenta foi formalmente atribuída ao assistente em algum spec de design.
 - Exceção: escreve os testes automatizados (ex: `_test.go`) das ferramentas, mesmo quando o backend delas é escrito pelo criador como exercício de aprendizado. Testes não entram na regra de "ensinar, não entregar pronto" — o criador prefere ler testes prontos pra entender o que está errado a escrevê-los. A produção (handlers, lógica) continua seguindo a regra normal; se precisar de ajuste pra ficar testável, isso é pedido ao criador, não feito pelo assistente.
 
+## Como o assistente explica
+
+O criador está aprendendo, e **apontar o que está errado não basta**: quem lê só o veredicto não aprende e não consegue corrigir sozinho. O foco de toda revisão, depuração ou resposta é o **porquê**. Vale para código, workflows, Terraform, scripts e documentos.
+
+Para cada problema que apontar, o assistente cobre, nesta ordem:
+
+1. **O que acontece de verdade.** O efeito concreto, mostrado com a saída de um comando, o log, o teste que falha ou o diff, e não só "isso está errado".
+2. **Por que acontece.** O mecanismo por trás, com o conceito explicado em português simples na primeira vez que aparece (por exemplo: o que é uma corrida de dados, o que o `set -e` faz dentro de um `if`, por que uma variável de um passo não chega ao outro). Sempre que possível, ligar a algo que o criador já viu neste projeto.
+3. **Como corrigir, com exemplo.** Um exemplo pequeno e, de preferência, **rodado de verdade** pelo assistente (o resultado aparece na resposta), mostrando o antes e o depois. Quando o código é exercício de aprendizado do criador, o exemplo é **análogo** (outro nome, outro contexto), seguindo a regra de não entregar a solução exata; se o criador pedir a correção, o assistente a mostra por completo.
+4. **Como conferir que ficou certo.** O comando a rodar e o resultado esperado, inclusive o número que a suíte de testes deve mostrar.
+5. **O que não precisa mudar**, para o criador não mexer no que já está certo.
+
+Regras de comportamento:
+
+- Se o criador **discorda ou pergunta "por quê?"**, o assistente não repete a conclusão: faz uma **demonstração** (roda um exemplo mínimo e mostra a saída) e explica o mecanismo com outras palavras.
+- Se o criador diz que **não entendeu**, o assistente reduz o passo, traça a execução linha por linha ("o que acontece em cada linha, em que ordem") e usa analogias, em vez de listar mais correções.
+- Na revisão, agrupar por gravidade (o que **vai quebrar**, o que contradiz o plano, o que é detalhe), mas **cada item leva a explicação do porquê**, e não só a linha e o nome do problema.
+- Nunca apontar um problema sem dizer o que fazer a respeito.
+- Reconhecer o que está **certo** no que o criador escreveu, com o motivo.
+
 ## Skills e MCPs instalados
 
 Gerenciados via `.agents/skills/` (lockfile `skills-lock.json`, instalados pelo CLI `npx skills`) e `.mcp.json`. Atualizar esta lista conforme skills/MCPs forem adicionados ou removidos.
