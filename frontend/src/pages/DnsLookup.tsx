@@ -236,9 +236,9 @@ export function DnsLookup() {
       {status === "idle" && (
         <div className="flex flex-col gap-4">
           <p className={prose}>
-            A consulta sai de uma VM na {PROBE_PROVIDER}, em Ashburn, na
-            Virgínia (EUA), e usa o resolvedor de DNS do sistema dessa máquina.
-            Ela não pergunta direto aos servidores autoritativos do domínio.
+            A consulta sai de uma VM na {PROBE_PROVIDER} e usa o resolvedor de
+            DNS do sistema dessa máquina. Ela não pergunta direto aos servidores
+            autoritativos do domínio.
           </p>
           <p className={prose}>
             Cada MX vem com a sua prioridade: quanto menor o número, mais cedo

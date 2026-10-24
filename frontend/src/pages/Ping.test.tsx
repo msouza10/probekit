@@ -21,7 +21,7 @@ const result: PingResult = {
   min_rtt: "11.9ms",
   avg_rtt: "12.1ms",
   max_rtt: "12.4ms",
-  origin_region: "us-ashburn-1",
+  origin_region: "sa-saopaulo-1",
 }
 
 // Atenção: nunca usar o código "backend_unreachable" nos erros destes testes.

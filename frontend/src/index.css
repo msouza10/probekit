@@ -281,13 +281,9 @@
 @media (prefers-reduced-motion: no-preference) {
   [data-slot="button"] {
     transition:
-      transform 180ms ease,
       background-color 180ms ease,
       border-color 180ms ease,
       color 180ms ease;
-  }
-  [data-slot="button"]:active {
-    transform: scale(0.97);
   }
 }
 

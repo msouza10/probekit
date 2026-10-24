@@ -21,7 +21,7 @@ const stack = [
   {
     term: "Entrega",
     detail:
-      "GitHub Actions: verificações em pull requests, release da API e deploy da API e do site, com aprovação antes de publicar.",
+      "GitHub Actions: verificações em pull requests, release da API e deploy da API e do site, estes com aprovação antes de publicar.",
   },
   {
     term: "Site",

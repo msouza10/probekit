@@ -87,7 +87,7 @@ export function Home() {
           </Bench>
           <p className="max-w-[30ch] font-sans text-body-sm text-muted-foreground">
             Este é o formato da resposta, não uma medição. A de verdade sai de
-            uma VM em Ashburn, nos Estados Unidos.{" "}
+            uma VM na Oracle Cloud.{" "}
             <Link
               to="/ping"
               className="inline-flex min-h-11 items-center font-medium text-foreground underline decoration-highlight underline-offset-4 transition-colors hover:text-highlight"
@@ -161,20 +161,19 @@ export function Home() {
           <p className={prose}>
             O diagnóstico não acontece no seu navegador. Quando você pede um
             ping ou uma consulta DNS, a página manda o pedido para uma API em Go
-            que roda na Oracle Cloud, em Ashburn, nos Estados Unidos. É de lá
-            que os pacotes saem.
+            que roda na Oracle Cloud. É de lá que os pacotes saem.
           </p>
           <p className={prose}>
             Antes de testar, a API resolve o nome e recusa endereços privados e
             internos (loopback, link-local), para que o laboratório não sirva de
             ponte para a rede de ninguém. O ping usa ICMP de verdade, então a
-            latência que aparece é a distância entre Ashburn e o alvo, não entre
-            você e o alvo.
+            latência que aparece é a distância entre a máquina que roda o teste
+            e o alvo, não entre você e o alvo.
           </p>
           <p className={prose}>
-            Para não esgotar a máquina, cada endereço pode fazer 50 pedidos a
-            cada cinco minutos. Por isso esta página não testa nada sozinha ao
-            abrir; o exemplo lá em cima é só texto.
+            Para não esgotar a máquina, há um limite de 50 pedidos a cada cinco
+            minutos por endereço de origem. Por isso esta página não testa nada
+            sozinha ao abrir; o exemplo lá em cima é só texto.
           </p>
         </Reveal>
       </section>

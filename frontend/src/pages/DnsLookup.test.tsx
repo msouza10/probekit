@@ -21,7 +21,7 @@ const result: DnsLookupResult = {
   ns: ["ns1.example.com"],
   srv: [{ name: "sip.example.com", port: 5060, priority: 7, weight: 13 }],
   ip: ["192.0.2.10"],
-  origin_region: "us-ashburn-1",
+  origin_region: "sa-saopaulo-1",
 }
 
 // Atenção: nunca usar o código "backend_unreachable" nos erros destes testes.

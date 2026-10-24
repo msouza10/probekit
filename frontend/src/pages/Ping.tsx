@@ -199,9 +199,9 @@ export function Ping() {
       {status === "idle" && (
         <div className="flex flex-col gap-4">
           <p className={prose}>
-            Os pacotes saem de uma VM na {PROBE_PROVIDER}, em Ashburn, na
-            Virgínia (EUA). A latência que aparece é a do caminho entre essa
-            máquina e o destino, não entre você e ele.
+            Os pacotes saem de uma VM na {PROBE_PROVIDER}. A latência que
+            aparece é a do caminho entre essa máquina e o destino, não entre
+            você e ele.
           </p>
           <p className={prose}>
             Endereços privados e reservados (10.0.0.0/8, 172.16.0.0/12,
