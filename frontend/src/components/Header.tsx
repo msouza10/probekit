@@ -156,7 +156,7 @@ export function Header() {
                   placeholder="Nome, protocolo ou categoria…"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  className="min-w-0 flex-1 bg-transparent py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                  className="min-w-0 flex-1 bg-transparent py-2 text-sm text-foreground placeholder:text-muted-foreground"
                 />
                 <Dialog.Close
                   aria-label="Fechar busca"

@@ -90,7 +90,9 @@ describe("Ping (comportamento)", () => {
     // atribuir); espiona o writeText dele.
     const writeText = vi.spyOn(navigator.clipboard, "writeText")
 
-    await user.click(await screen.findByRole("button", { name: /copiar json/i }))
+    await user.click(
+      await screen.findByRole("button", { name: /copiar json/i }),
+    )
     await waitFor(() =>
       expect(writeText).toHaveBeenCalledWith(JSON.stringify(result, null, 2)),
     )

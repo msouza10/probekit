@@ -1,32 +1,27 @@
 /// <reference types="node" />
-import { readFileSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 
 /*
  * Guarda do redesign (ver docs/superpowers/specs/2026-10-23-probekit-frontend-redesign-design.md).
- * Cada task do redesign acrescenta aqui os arquivos que migrou para a nova
- * linguagem visual; a partir daí eles não podem voltar a usar gradiente,
- * sombra, hover que levanta ou os nomes antigos de token.
+ * Vale para src/index.css e para todo .tsx de produção em src: nenhum pode
+ * usar gradiente, sombra, hover que levanta ou os nomes antigos de token.
  */
+const frontendRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
+
 const redesigned: string[] = [
-  "src/components/ui/button.tsx",
-  "src/components/ui/card.tsx",
-  "src/components/ui/badge.tsx",
-  "src/components/ui/separator.tsx",
-  "src/components/Bench.tsx",
-  "src/components/Header.tsx",
-  "src/components/Footer.tsx",
-  "src/components/ThemeToggle.tsx",
-  "src/pages/Home.tsx",
-  "src/pages/Ping.tsx",
-  "src/pages/DnsLookup.tsx",
-  "src/pages/Sobre.tsx",
-  "src/pages/NotFound.tsx",
+  "src/index.css",
+  ...readdirSync(resolve(frontendRoot, "src"), {
+    recursive: true,
+    encoding: "utf8",
+  })
+    .filter((file) => file.endsWith(".tsx") && !file.endsWith(".test.tsx"))
+    .map((file) => `src/${file}`)
+    .sort(),
 ]
 
-const frontendRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const read = (relativePath: string) =>
   readFileSync(resolve(frontendRoot, relativePath), "utf8")
 
@@ -36,7 +31,14 @@ const liftingHover = /hover:-?translate-y|hover:scale/
 const legacyTokenClass =
   /\b(text|bg|border|ring|fill|stroke)-(snow|ash|fog|graphite|page-ink|card-carbon|deep-coal|steel-border|blue-cornflower)\b/
 
+const legacyTokenDefinition =
+  /--color-(snow|ash|fog|graphite|page-ink|card-carbon|deep-coal|onyx|steel-border|blue-cornflower|signal-red(-surface)?)\b/
+
 describe("design guard", () => {
+  it("index.css não define mais os aliases dos nomes antigos de token", () => {
+    expect(read("src/index.css")).not.toMatch(legacyTokenDefinition)
+  })
+
   it("index.html não carrega fontes do Google e mantém o script de tema", () => {
     const html = read("index.html")
     expect(html).not.toContain("fonts.googleapis.com")

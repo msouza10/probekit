@@ -286,7 +286,9 @@ export function DnsLookup() {
                     ))}
                   </ul>
                 ) : (
-                  <p className={emptyNote}>Nenhum registro A/AAAA encontrado.</p>
+                  <p className={emptyNote}>
+                    Nenhum registro A/AAAA encontrado.
+                  </p>
                 )}
               </Group>
 

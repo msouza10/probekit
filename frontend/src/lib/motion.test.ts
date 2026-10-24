@@ -23,6 +23,12 @@ describe("entrance", () => {
   it("passes the delay to the transition", () => {
     expect(entrance(false, 0.3).transition).toMatchObject({ delay: 0.3 })
   })
+  it("releases the blur filter after the entrance so no stacking context stays", () => {
+    const animate = entrance(false).animate as {
+      transitionEnd?: { filter?: string }
+    }
+    expect(animate.transitionEnd).toEqual({ filter: "none" })
+  })
   it("only fades when reduced motion is requested", () => {
     expect(entrance(true).initial).toEqual({ opacity: 0 })
   })
@@ -38,12 +44,16 @@ describe("routeTransition", () => {
     expect(t.initial).toMatchObject({ opacity: 0 })
     expect((t.initial as { filter: string }).filter).toContain("blur(")
     expect((t.exit as { filter: string }).filter).toContain("blur(")
-    expect((t.transition as { duration: number }).duration).toBeLessThanOrEqual(0.6)
+    expect((t.transition as { duration: number }).duration).toBeLessThanOrEqual(
+      0.6,
+    )
   })
   it("only fades when reduced motion is requested", () => {
     const t = routeTransition(true)
     expect(t.initial).toEqual({ opacity: 0 })
     expect(t.exit).toEqual({ opacity: 0 })
-    expect((t.transition as { duration: number }).duration).toBeLessThanOrEqual(0.15)
+    expect((t.transition as { duration: number }).duration).toBeLessThanOrEqual(
+      0.15,
+    )
   })
 })

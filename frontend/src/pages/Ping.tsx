@@ -212,15 +212,17 @@ export function Ping() {
         </div>
       )}
 
-      {status === "loading" && (
-        <p
-          role="status"
-          className="max-w-[38rem] break-words text-body text-muted-foreground"
-        >
-          Enviando {count} {count === 1 ? "pacote" : "pacotes"} para {target},
-          a partir de {PROBE_PROVIDER}...
-        </p>
-      )}
+      <div aria-live="polite">
+        {status === "loading" && (
+          <p
+            role="status"
+            className="max-w-[38rem] break-words text-body text-muted-foreground"
+          >
+            Enviando {count} {count === 1 ? "pacote" : "pacotes"} para {target},
+            a partir de {PROBE_PROVIDER}...
+          </p>
+        )}
+      </div>
 
       {status === "success" && result && (
         <Reveal className="flex max-w-[44rem] flex-col gap-3">

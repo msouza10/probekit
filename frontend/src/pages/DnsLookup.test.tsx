@@ -28,7 +28,8 @@ const result: DnsLookupResult = {
 // Em desenvolvimento (vitest roda com DEV = true) ele dispara a simulação local.
 const apiError = { error: "Domínio inválido", code: "invalid_domain" }
 
-const submitButton = () => screen.getByRole("button", { name: /consultar dns/i })
+const submitButton = () =>
+  screen.getByRole("button", { name: /consultar dns/i })
 
 async function submit(user: ReturnType<typeof userEvent.setup>, value: string) {
   await user.type(screen.getByRole("textbox"), value)
@@ -50,12 +51,14 @@ describe("DnsLookup (comportamento)", () => {
     expect(await screen.findByText("192.0.2.10")).toBeInTheDocument()
     expect(screen.getByText("2001:db8::10")).toBeInTheDocument()
     expect(screen.getByText("mail.example.com")).toBeInTheDocument()
-    expect(screen.getByText(/^(Pref: )?42$/)).toBeInTheDocument()
+    expect(screen.getByRole("cell", { name: "42" })).toBeInTheDocument()
     expect(
       screen.getByText("v=spf1 include:_spf.example.com ~all"),
     ).toBeInTheDocument()
     expect(screen.getByText("ns1.example.com")).toBeInTheDocument()
-    expect(screen.getByText(/^sip\.example\.com(:5060)?$/)).toBeInTheDocument()
+    expect(
+      screen.getByRole("cell", { name: "sip.example.com" }),
+    ).toBeInTheDocument()
   })
 
   it("com service e proto preenchidos, runDnsLookup recebe os três argumentos", async () => {
@@ -65,7 +68,10 @@ describe("DnsLookup (comportamento)", () => {
     await user.click(screen.getByRole("button", { name: /srv/i }))
     await user.type(screen.getByPlaceholderText("_sip"), "_sip")
     await user.type(screen.getByPlaceholderText("_tcp"), "_tcp")
-    await user.type(screen.getByPlaceholderText(/cloudflare\.com/i), "example.com")
+    await user.type(
+      screen.getByPlaceholderText(/cloudflare\.com/i),
+      "example.com",
+    )
     await user.click(submitButton())
 
     expect(mockedRun).toHaveBeenCalledWith("example.com", "_sip", "_tcp")
@@ -108,7 +114,9 @@ describe("DnsLookup (comportamento)", () => {
     await submit(user, "example.com")
     const writeText = vi.spyOn(navigator.clipboard, "writeText")
 
-    await user.click(await screen.findByRole("button", { name: /copiar json/i }))
+    await user.click(
+      await screen.findByRole("button", { name: /copiar json/i }),
+    )
     await waitFor(() =>
       expect(writeText).toHaveBeenCalledWith(JSON.stringify(result, null, 2)),
     )

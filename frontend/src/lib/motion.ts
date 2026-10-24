@@ -19,7 +19,12 @@ export function entrance(reduced: boolean, delay = 0): MotionSet {
   }
   return {
     initial: { opacity: 0, y: 14, filter: "blur(6px)" },
-    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+    animate: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transitionEnd: { filter: "none" },
+    },
     transition: { duration: 0.5, delay, ease: EASE },
   }
 }
@@ -37,7 +42,12 @@ export function routeTransition(reduced: boolean): MotionSet & {
   }
   return {
     initial: { opacity: 0, y: 12, filter: "blur(4px)" },
-    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+    animate: {
+      opacity: 1,
+      y: 0,
+      filter: "blur(0px)",
+      transitionEnd: { filter: "none" },
+    },
     exit: { opacity: 0, y: -8, filter: "blur(4px)" },
     transition: { duration: 0.35, ease: EASE },
   }

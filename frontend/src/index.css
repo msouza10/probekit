@@ -62,25 +62,6 @@
   --text-heading-lg--line-height: 1.1;
   --text-display: 4rem;
   --text-display--line-height: 1.05;
-
-  /*
-   * Nomes antigos (paleta azul-marinho), mantidos só como alias enquanto as
-   * páginas são migradas uma a uma. Código novo usa os tokens semânticos
-   * (background, foreground, muted-foreground, border, highlight, bench...).
-   * O design-guard.test.ts proíbe estes nomes nos arquivos já migrados.
-   */
-  --color-page-ink: var(--background);
-  --color-card-carbon: var(--card);
-  --color-deep-coal: var(--muted);
-  --color-onyx: var(--card);
-  --color-steel-border: var(--border);
-  --color-graphite: var(--input);
-  --color-fog: var(--muted-foreground);
-  --color-ash: var(--muted-foreground);
-  --color-snow: var(--foreground);
-  --color-blue-cornflower: var(--highlight);
-  --color-signal-red: var(--destructive);
-  --color-signal-red-surface: var(--destructive-surface);
 }
 
 /*
@@ -310,9 +291,7 @@
   }
 }
 
-/*
- * Classe herdada ainda em uso: .type-eyebrow (Header, Footer).
- */
+/* Rótulo curto em caixa-alta (títulos de grupo no Header e no Footer). */
 .type-eyebrow {
   font-size: 11px;
   font-weight: 500;
