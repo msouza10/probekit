@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import { Reveal } from "@/components/Reveal"
+import { ArchitectureDiagram } from "@/components/diagrams/ArchitectureDiagram"
 
 const repository = "https://github.com/msouza10/probekit"
 
@@ -33,7 +34,7 @@ const sections: {
       "Antes de qualquer pacote sair, a API confere o destino e recusa endereços privados, de loopback e de link-local. O ping usa ICMP de verdade, então a latência mostrada é a da máquina até o alvo. O limite é de 50 requisições a cada 5 minutos por endereço de origem, contado na memória de cada servidor.",
     ],
     // diagrama: arquitetura (Tasks 3-5 preenchem `diagram`)
-    diagram: undefined,
+    diagram: <ArchitectureDiagram />,
     sources: [
       { href: `${repository}/blob/main/OVERVIEW.md`, label: "Visão geral" },
       {

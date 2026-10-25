@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import Arquitetura from "./Arquitetura"
@@ -60,6 +60,19 @@ describe("Arquitetura", () => {
     while (walker.nextNode()) {
       expect(walker.currentNode.textContent?.trim()).not.toMatch(/^\/\//)
     }
+  })
+
+  it("mostra o diagrama de arquitetura na seção 01", () => {
+    renderPage()
+    const section = screen
+      .getByRole("heading", { level: 2, name: "Arquitetura" })
+      .closest("section")
+    expect(section).not.toBeNull()
+    expect(
+      within(section as HTMLElement).getByRole("img", {
+        name: /arquitetura/i,
+      }),
+    ).toBeInTheDocument()
   })
 
   it("não chama fetch ao montar", () => {
