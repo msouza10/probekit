@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { Reveal } from "@/components/Reveal"
 import { ArchitectureDiagram } from "@/components/diagrams/ArchitectureDiagram"
+import { PipelineDiagram } from "@/components/diagrams/PipelineDiagram"
 
 const repository = "https://github.com/msouza10/probekit"
 
@@ -33,7 +34,6 @@ const sections: {
       "O site é estático, servido por um Cloudflare Worker. Quando uma ferramenta roda, o navegador chama a API em api.probekit.cc: o pedido passa pelo proxy da Cloudflare, chega ao balanceador de carga da Oracle Cloud e cai em uma das duas máquinas, onde o binário em Go termina o TLS.",
       "Antes de qualquer pacote sair, a API confere o destino e recusa endereços privados, de loopback e de link-local. O ping usa ICMP de verdade, então a latência mostrada é a da máquina até o alvo. O limite é de 50 requisições a cada 5 minutos por endereço de origem, contado na memória de cada servidor.",
     ],
-    // diagrama: arquitetura (Tasks 3-5 preenchem `diagram`)
     diagram: <ArchitectureDiagram />,
     sources: [
       { href: `${repository}/blob/main/OVERVIEW.md`, label: "Visão geral" },
@@ -51,8 +51,7 @@ const sections: {
       "Em cada pull request roda o CI, com os jobs Go, NPM e Terraform. Quando uma mudança do backend chega à main, o pipeline da API calcula a versão e só publica uma release se as mensagens de commit pedirem (feat, fix ou perf). O site é construído quando uma mudança do frontend chega à main, e o deploy espera a aprovação do ambiente production.",
       "O deploy da API é manual, e os dois, API e site, têm um workflow de rollback.",
     ],
-    // diagrama: pipeline (Tasks 3-5 preenchem `diagram`)
-    diagram: undefined,
+    diagram: <PipelineDiagram />,
     sources: [
       {
         href: `${repository}/tree/main/.github/workflows`,
@@ -72,7 +71,7 @@ const sections: {
       "O Terraform cria a rede, as duas máquinas e o balanceador de carga na Oracle Cloud, e o registro DNS da API na Cloudflare. O estado fica num bucket da Oracle Cloud.",
       "O Worker do site não é criado pelo Terraform: quem o publica é o pipeline.",
     ],
-    // diagrama: infraestrutura (Tasks 3-5 preenchem `diagram`)
+    // diagrama: infraestrutura (a Task 5 preenche `diagram`)
     diagram: undefined,
     sources: [
       {

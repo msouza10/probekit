@@ -75,6 +75,22 @@ describe("Arquitetura", () => {
     ).toBeInTheDocument()
   })
 
+  it("mostra o diagrama do pipeline na seção 02", () => {
+    renderPage()
+    const section = screen
+      .getByRole("heading", { level: 2, name: "Pipeline" })
+      .closest("section")
+    expect(section).not.toBeNull()
+    expect(
+      within(section as HTMLElement).getByRole("img", { name: /pipeline/i }),
+    ).toBeInTheDocument()
+  })
+
+  it("não afirma que as VMs se atualizam sozinhas", () => {
+    const { container } = renderPage()
+    expect(container.textContent).not.toMatch(/atualizam sozinhas/i)
+  })
+
   it("não chama fetch ao montar", () => {
     const fetchMock = vi.fn()
     vi.stubGlobal("fetch", fetchMock)
