@@ -205,6 +205,22 @@ describe("AsciiOwl", () => {
     expect((pre.textContent ?? "").split("\n")).toHaveLength(lines.length)
   })
 
+  it.each([
+    ["com movimento", false],
+    ["estática", true],
+  ])("reserva a altura final do pre (%s)", (_name, isReduced) => {
+    reduced.value = isReduced
+    const { pre } = renderOwl()
+    // Sem isso o hero desloca enquanto a coruja é desenhada.
+    // O jsdom simplifica o calc: 100cqw / colunas / 0.6 * 1.02 * linhas.
+    const columns = Math.max(...lines.map((line) => line.length))
+    const expected = ((100 / columns / 0.6) * 1.02 * lines.length).toFixed(2)
+    const match = /([\d.]+)cqw/.exec(pre.style.minHeight)
+    expect(match).not.toBeNull()
+    expect(Number(match?.[1])).toBeCloseTo(Number(expected), 1)
+    expect(pre.style.lineHeight).toBe("1.02")
+  })
+
   it("fora da tela, nada muda desde o início", () => {
     const { pre } = renderOwl()
     act(() => fire?.([{ isIntersecting: false }]))
