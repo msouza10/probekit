@@ -1,5 +1,5 @@
-import type { CSSProperties } from "react"
 import { Diagram, type DiagramStep } from "./Diagram"
+import { Node, arrow, delay, type Box } from "./svgParts"
 
 /*
  * Mesma linguagem visual do ArchitectureDiagram (ver o comentário dele):
@@ -10,11 +10,6 @@ import { Diagram, type DiagramStep } from "./Diagram"
  * a bifurcação depois da `main` vira duas colunas (API à esquerda, site à
  * direita) que se juntam no portão de aprovação.
  */
-const NAME = 15
-const SUB = 13
-
-type Box = { x: number; y: number; w: number; h: number }
-
 // Linha 1: pull request -> CI -> main (centro y=40).
 const pullRequest: Box = { x: 4, y: 8, w: 112, h: 64 }
 const ci: Box = { x: 152, y: 8, w: 176, h: 64 }
@@ -56,80 +51,6 @@ const rollbackLines = ["M560 308 V348", "M496 380 H427 Q415 380 415 368 V308"]
 // O ponto sai do centro do Pull request e termina no centro do Deploy,
 // passando por dentro dos blocos (escondido por eles).
 const packetPath = "M60 40 H415 V276 H560"
-
-function delay(seconds: number): CSSProperties {
-  return { animationDelay: `${seconds}s` }
-}
-
-function arrowRight(x: number, y: number) {
-  return `M${x - 6} ${y - 5} L${x} ${y} L${x - 6} ${y + 5}`
-}
-function arrowDown(x: number, y: number) {
-  return `M${x - 5} ${y - 6} L${x} ${y} L${x + 5} ${y - 6}`
-}
-function arrowUp(x: number, y: number) {
-  return `M${x - 5} ${y + 6} L${x} ${y} L${x + 5} ${y + 6}`
-}
-
-type Line = { text: string; mono?: boolean }
-
-function Node({
-  box,
-  name,
-  monoName = false,
-  lines: detail = [],
-  gate: isGate = false,
-  enter,
-}: {
-  box: Box
-  name: string
-  monoName?: boolean
-  /** Linhas secundárias, de cima para baixo. */
-  lines?: Line[]
-  /** O portão pulsa e tem o fundo `muted`. */
-  gate?: boolean
-  /** Atraso da entrada do bloco. */
-  enter: number
-}) {
-  const cx = box.x + box.w / 2
-  return (
-    <g className="diagram-pop" style={delay(enter)}>
-      <rect
-        x={box.x}
-        y={box.y}
-        width={box.w}
-        height={box.h}
-        rx={6}
-        className={
-          isGate
-            ? "fill-muted stroke-border diagram-pulse"
-            : "fill-card stroke-border"
-        }
-      />
-      <text
-        x={cx}
-        y={detail.length === 0 ? box.y + box.h / 2 + 5 : box.y + 27}
-        textAnchor="middle"
-        fontSize={NAME}
-        className={`fill-foreground font-medium${monoName ? " font-mono" : ""}`}
-      >
-        {name}
-      </text>
-      {detail.map(({ text, mono }, index) => (
-        <text
-          key={text}
-          x={cx}
-          y={box.y + 46 + index * 18}
-          textAnchor="middle"
-          fontSize={SUB}
-          className={`fill-muted-foreground${mono ? " font-mono" : ""}`}
-        >
-          {text}
-        </text>
-      ))}
-    </g>
-  )
-}
 
 const steps: DiagramStep[] = [
   {
@@ -252,15 +173,15 @@ export function PipelineDiagram() {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d={arrowRight(152, 40)} className="stroke-highlight" />
-            <path d={arrowRight(373, 40)} className="stroke-highlight" />
-            <path d={arrowDown(415, 124)} className="stroke-highlight" />
-            <path d={arrowDown(130, 124)} className="stroke-input" />
-            <path d={arrowDown(130, 244)} className="stroke-input" />
-            <path d={arrowRight(330, 276)} className="stroke-input" />
-            <path d={arrowDown(415, 244)} className="stroke-highlight" />
-            <path d={arrowRight(524, 276)} className="stroke-highlight" />
-            <path d={arrowUp(415, 308)} className="stroke-input" />
+            <path d={arrow("right", 152, 40)} className="stroke-highlight" />
+            <path d={arrow("right", 373, 40)} className="stroke-highlight" />
+            <path d={arrow("down", 415, 124)} className="stroke-highlight" />
+            <path d={arrow("down", 130, 124)} className="stroke-input" />
+            <path d={arrow("down", 130, 244)} className="stroke-input" />
+            <path d={arrow("right", 330, 276)} className="stroke-input" />
+            <path d={arrow("down", 415, 244)} className="stroke-highlight" />
+            <path d={arrow("right", 524, 276)} className="stroke-highlight" />
+            <path d={arrow("up", 415, 308)} className="stroke-input" />
           </g>
 
           {/* Pull request e CI: ci.yml (on: pull_request; jobs go, npm, terraform) */}

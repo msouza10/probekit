@@ -1,5 +1,5 @@
-import type { CSSProperties } from "react"
 import { Diagram, type DiagramStep } from "./Diagram"
+import { Node, arrow, delay, SUB, type Box } from "./svgParts"
 
 /*
  * Linguagem visual dos diagramas largos (as Tasks de Pipeline e
@@ -18,12 +18,6 @@ import { Diagram, type DiagramStep } from "./Diagram"
  * - Pontos: círculos `diagram-packet` desenhados ANTES dos blocos, então
  *   somem por baixo de cada bloco que atravessam (o "processamento").
  */
-const NAME = 15
-const SUB = 13
-const BOX_H = 64
-
-type Box = { x: number; y: number; w: number }
-
 // Geometria: duas linhas (centros y=92 e y=204) e o meio (y=148).
 const navegador: Box = { x: 4, y: 116, w: 96 }
 const worker: Box = { x: 138, y: 60, w: 148 }
@@ -47,66 +41,6 @@ const packetPaths = {
   site: "M52 148 V104 Q52 92 64 92 H212",
   vm1: "M52 148 V192 Q52 204 64 204 H300 Q312 204 312 192 V160 Q312 148 324 148 H394 V104 Q394 92 406 92 H540",
   vm2: "M52 148 V192 Q52 204 64 204 H300 Q312 204 312 192 V160 Q312 148 324 148 H394 V192 Q394 204 406 204 H540",
-}
-
-// Seta aberta que termina em (x, y), apontando para a direita.
-function arrow(x: number, y: number) {
-  return `M${x - 6} ${y - 5} L${x} ${y} L${x - 6} ${y + 5}`
-}
-
-function delay(seconds: number): CSSProperties {
-  return { animationDelay: `${seconds}s` }
-}
-
-function Node({
-  box,
-  name,
-  detail,
-  mono = false,
-  pulse,
-  enter,
-}: {
-  box: Box
-  name: string
-  detail: string
-  mono?: boolean
-  /** Atraso da respiração da borda; sem ele o bloco não respira. */
-  pulse?: number
-  /** Atraso da entrada do bloco. */
-  enter: number
-}) {
-  const cx = box.x + box.w / 2
-  return (
-    <g className="diagram-pop" style={delay(enter)}>
-      <rect
-        x={box.x}
-        y={box.y}
-        width={box.w}
-        height={BOX_H}
-        rx={6}
-        className={`fill-card stroke-border${pulse === undefined ? "" : " diagram-pulse"}`}
-        style={pulse === undefined ? undefined : delay(pulse)}
-      />
-      <text
-        x={cx}
-        y={box.y + 27}
-        textAnchor="middle"
-        fontSize={NAME}
-        className="fill-foreground font-medium"
-      >
-        {name}
-      </text>
-      <text
-        x={cx}
-        y={box.y + 46}
-        textAnchor="middle"
-        fontSize={SUB}
-        className={`fill-muted-foreground${mono ? " font-mono" : ""}`}
-      >
-        {detail}
-      </text>
-    </g>
-  )
 }
 
 function Zone({
@@ -264,48 +198,52 @@ export function ArchitectureDiagram() {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d={arrow(138, 92)} className="stroke-input" />
-            <path d={arrow(138, 204)} className="stroke-highlight" />
-            <path d={arrow(338, 148)} className="stroke-highlight" />
-            <path d={arrow(496, 92)} className="stroke-highlight" />
-            <path d={arrow(496, 204)} className="stroke-highlight" />
+            <path d={arrow("right", 138, 92)} className="stroke-input" />
+            <path d={arrow("right", 138, 204)} className="stroke-highlight" />
+            <path d={arrow("right", 338, 148)} className="stroke-highlight" />
+            <path d={arrow("right", 496, 92)} className="stroke-highlight" />
+            <path d={arrow("right", 496, 204)} className="stroke-highlight" />
           </g>
 
           {/* Navegador: quem visita (você). */}
-          <Node box={navegador} name="Navegador" detail="você" enter={0} />
+          <Node
+            box={navegador}
+            name="Navegador"
+            lines={[{ text: "você" }]}
+            enter={0}
+          />
           {/* Worker e Proxy: OVERVIEW.md; frontend/wrangler.toml; ADR-0002 */}
           <Node
             box={worker}
             name="Worker"
-            detail="este site, estático"
+            lines={[{ text: "este site, estático" }]}
             enter={0.08}
           />
           <Node
             box={proxy}
             name="Proxy da API"
-            detail="api.probekit.cc"
-            mono
+            lines={[{ text: "api.probekit.cc", mono: true }]}
             enter={0.16}
           />
           {/* Balanceador: ADR-0001; oci/loadbalacers.tf (listener TCP 443) */}
           <Node
             box={balanceador}
             name="Balanceador"
-            detail="TCP 443"
+            lines={[{ text: "TCP 443" }]}
             enter={0.24}
           />
           {/* VMs: oci/instance.tf (count = 2); backend/api-service-golang */}
           <Node
             box={vm1}
             name="VM 1"
-            detail="API em Go"
+            lines={[{ text: "API em Go" }]}
             pulse={0}
             enter={0.32}
           />
           <Node
             box={vm2}
             name="VM 2"
-            detail="API em Go"
+            lines={[{ text: "API em Go" }]}
             pulse={2}
             enter={0.4}
           />

@@ -1,10 +1,7 @@
-/// <reference types="node" />
-import { readFileSync } from "node:fs"
-import { dirname, resolve } from "node:path"
-import { fileURLToPath } from "node:url"
 import { render, screen, within } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { ArchitectureDiagram } from "./ArchitectureDiagram"
+import { injectDiagramCss } from "./testUtils"
 
 // Os únicos textos que o svg pode mostrar (a fonte de cada um está em
 // comentário no componente). Qualquer rótulo novo precisa entrar aqui.
@@ -23,22 +20,6 @@ const allowedLabels = [
   "VM 2",
   "API em Go",
 ]
-
-// O jsdom não carrega o index.css. Para conferir que os pontos ficam
-// escondidos com o movimento desligado, o teste injeta as regras reais dos
-// diagramas (o bloco `.diagram-*` do index.css, sem os @keyframes).
-function injectDiagramCss() {
-  const css = readFileSync(
-    resolve(dirname(fileURLToPath(import.meta.url)), "../../index.css"),
-    "utf8",
-  )
-  const start = css.indexOf(".diagram-flow {")
-  const end = css.indexOf("@keyframes diagram-flow")
-  const style = document.createElement("style")
-  style.textContent = css.slice(start, end)
-  document.head.append(style)
-  return () => style.remove()
-}
 
 describe("ArchitectureDiagram", () => {
   afterEach(() => vi.unstubAllGlobals())
