@@ -1,47 +1,46 @@
+import type { ReactNode } from "react"
 import { Link } from "react-router-dom"
-import { Bench } from "@/components/Bench"
 import { Reveal } from "@/components/Reveal"
 import { tools } from "@/lib/tools"
 
 const repository = "https://github.com/msouza10/probekit"
 const available = tools.filter((tool) => tool.status !== "Planejado")
 
-const prose = "max-w-[38rem] text-body text-foreground/90"
+const adrs = `${repository}/tree/main/docs/adr`
+const specs = `${repository}/tree/main/docs/superpowers/specs`
+const license = `${repository}/blob/main/LICENSE`
+
 const inlineLink =
-  "text-foreground underline decoration-highlight/50 underline-offset-[0.2em] transition-colors hover:decoration-highlight"
+  "text-foreground underline decoration-highlight/50 underline-offset-[0.2em] transition-colors hover:decoration-highlight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 
-/*
- * Saída de exemplo, rotulada como tal no Bench. Endereço da faixa reservada
- * para documentação (RFC 5737, 192.0.2.0/24): nada aqui é medição real.
- */
-const exampleReplies = [
-  { seq: 1, time: "12.4" },
-  { seq: 2, time: "11.9" },
-  { seq: 3, time: "12.1" },
-]
-
-function ExamplePing() {
+function ExternalLink({ href, children }: { href: string; children: string }) {
   return (
-    <pre className="text-[0.8125rem] leading-7 sm:text-sm">
-      <span className="text-bench-muted">$ </span>
-      ping -c 3 example.com
-      {"\n"}
-      <span className="text-bench-muted">PING example.com (192.0.2.10)</span>
-      {exampleReplies.map(({ seq, time }) => (
-        <span key={seq}>
-          {"\n"}
-          <span className="text-bench-muted">seq={seq} ttl=52 </span>
-          time={time} ms
-        </span>
-      ))}
-      {"\n\n"}3 enviados, 3 recebidos,{" "}
-      <span className="text-bench-ok">0% de perda</span>
-      {"\n"}
-      <span className="text-bench-muted">mín/média/máx </span>
-      11.9/12.1/12.4 ms
-    </pre>
+    <a href={href} target="_blank" rel="noreferrer" className={inlineLink}>
+      {children}
+    </a>
   )
 }
+
+const profile: { term: string; detail: ReactNode }[] = [
+  { term: "Foco", detail: "Go · DevOps · redes" },
+  { term: "API", detail: "Go, em duas VMs · Oracle Cloud, São Paulo" },
+  { term: "Site", detail: "Cloudflare Worker com arquivos estáticos" },
+  { term: "Infraestrutura", detail: "Terraform · OCI e Cloudflare" },
+  {
+    term: "Entrega",
+    detail: "GitHub Actions · CI, release, deploy com aprovação e rollback",
+  },
+  {
+    term: "Decisões",
+    detail: (
+      <>
+        <ExternalLink href={adrs}>ADRs</ExternalLink> e{" "}
+        <ExternalLink href={specs}>specs</ExternalLink> no repositório
+      </>
+    ),
+  },
+  { term: "Licença", detail: <ExternalLink href={license}>MIT</ExternalLink> },
+]
 
 export function Home() {
   return (
@@ -64,37 +63,36 @@ export function Home() {
             </p>
             <p className="max-w-[36rem] text-body-lg text-muted-foreground">
               Pode usar à vontade, ou só olhar como foi feito: o código está
-              todo{" "}
-              <a
-                href={repository}
-                target="_blank"
-                rel="noreferrer"
-                className={inlineLink}
-              >
-                no GitHub
-              </a>
-              .
+              todo <ExternalLink href={repository}>no GitHub</ExternalLink>.
             </p>
           </Reveal>
         </div>
+      </section>
 
-        <Reveal
-          delay={0.16}
-          className="grid items-end gap-5 lg:grid-cols-[minmax(0,44rem)_minmax(0,1fr)] lg:gap-10"
+      <section
+        aria-labelledby="perfil-title"
+        className="grid gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-x-14"
+      >
+        <h2
+          id="perfil-title"
+          className="max-w-[16ch] text-heading-sm text-foreground lg:pt-1"
         >
-          <Bench label="ping" meta="valores ilustrativos" example>
-            <ExamplePing />
-          </Bench>
-          <p className="max-w-[30ch] font-sans text-body-sm text-muted-foreground">
-            Este é o formato da resposta, não uma medição. A de verdade sai de
-            uma VM na Oracle Cloud, em São Paulo.{" "}
-            <Link
-              to="/ping"
-              className="inline-flex min-h-11 items-center font-medium text-foreground underline decoration-highlight underline-offset-4 transition-colors hover:text-highlight"
-            >
-              Rodar de verdade
-            </Link>
-          </p>
+          Perfil do laboratório
+        </h2>
+        <Reveal>
+          <dl className="max-w-[40rem] border-b border-border">
+            {profile.map(({ term, detail }) => (
+              <div
+                key={term}
+                className="grid gap-x-8 gap-y-1 border-t border-border py-4 sm:grid-cols-[9rem_minmax(0,1fr)]"
+              >
+                <dt className="font-sans text-body-sm font-medium text-foreground">
+                  {term}
+                </dt>
+                <dd className="text-body text-foreground/90">{detail}</dd>
+              </div>
+            ))}
+          </dl>
         </Reveal>
       </section>
 
@@ -146,37 +144,15 @@ export function Home() {
           estiverem rodando.
         </p>
       </section>
-
-      <section
-        aria-labelledby="execucao-title"
-        className="grid gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-x-14"
-      >
-        <h2
-          id="execucao-title"
-          className="max-w-[16ch] text-heading-sm text-foreground lg:pt-1"
+      <p className="font-sans text-body-sm text-muted-foreground">
+        Como tudo isso é montado:{" "}
+        <Link
+          to="/arquitetura"
+          className={`${inlineLink} inline-flex min-h-11 items-center font-medium`}
         >
-          Como os diagnósticos são executados
-        </h2>
-        <Reveal className="flex flex-col gap-5">
-          <p className={prose}>
-            O diagnóstico não acontece no seu navegador. Quando você pede um
-            ping ou uma consulta DNS, a página manda o pedido para uma API em Go
-            que roda na Oracle Cloud, em São Paulo. É de lá que os pacotes saem.
-          </p>
-          <p className={prose}>
-            Antes de testar, a API resolve o nome e recusa endereços privados e
-            internos (loopback, link-local), para que o laboratório não sirva de
-            ponte para a rede de ninguém. O ping usa ICMP de verdade, então a
-            latência que aparece é a distância entre a VM em São Paulo e o alvo,
-            não entre você e o alvo.
-          </p>
-          <p className={prose}>
-            Para não esgotar a máquina, há um limite de 50 pedidos a cada cinco
-            minutos por endereço de origem. Por isso esta página não testa nada
-            sozinha ao abrir; o exemplo lá em cima é só texto.
-          </p>
-        </Reveal>
-      </section>
+          Arquitetura
+        </Link>
+      </p>
     </main>
   )
 }

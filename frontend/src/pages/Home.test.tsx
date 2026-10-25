@@ -4,22 +4,14 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 import { tools } from "@/lib/tools"
 import Home from "./Home"
 
+const repo = "https://github.com/msouza10/probekit"
+
 function renderHome() {
   return render(
     <MemoryRouter>
       <Home />
     </MemoryRouter>,
   )
-}
-
-// A bancada da Home é um Bench (section com aria-label → role "region")
-// marcado como exemplo.
-function exampleBench() {
-  const bench = screen
-    .getAllByRole("region")
-    .find((region) => region.getAttribute("data-slot") === "bench")
-  expect(bench).toBeDefined()
-  return bench as HTMLElement
 }
 
 describe("Home", () => {
@@ -50,23 +42,55 @@ describe("Home", () => {
     }
   })
 
-  it("tem um link 'Rodar de verdade' que leva ao ping", () => {
-    renderHome()
-    expect(
-      screen.getByRole("link", { name: /rodar de verdade/i }),
-    ).toHaveAttribute("href", "/ping")
+  it("não mostra bancada nem texto de exemplo", () => {
+    const { container } = renderHome()
+    const bench = screen
+      .queryAllByRole("region")
+      .find((region) => region.getAttribute("data-slot") === "bench")
+    expect(bench).toBeUndefined()
+    expect(container.textContent).not.toMatch(/exemplo/i)
   })
 
-  it("mostra uma bancada rotulada como exemplo, só com endereços de documentação", () => {
+  it("tem um link para a página Arquitetura", () => {
     renderHome()
-    const bench = exampleBench()
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href"))
+    expect(hrefs).toContain("/arquitetura")
+  })
 
-    expect(within(bench).getByText(/exemplo/i)).toBeInTheDocument()
+  it("mostra o perfil do laboratório com sete pares, na ordem", () => {
+    const { container } = renderHome()
+    const dl = container.querySelector("dl")
+    expect(dl).not.toBeNull()
+    const labels = Array.from((dl as HTMLElement).querySelectorAll("dt")).map(
+      (dt) => dt.textContent,
+    )
+    expect(labels).toEqual([
+      "Foco",
+      "API",
+      "Site",
+      "Infraestrutura",
+      "Entrega",
+      "Decisões",
+      "Licença",
+    ])
+    expect(
+      within(dl as HTMLElement).getByRole("link", { name: "ADRs" }),
+    ).toHaveAttribute("href", `${repo}/tree/main/docs/adr`)
+    expect(
+      within(dl as HTMLElement).getByRole("link", { name: "MIT" }),
+    ).toHaveAttribute("href", `${repo}/blob/main/LICENSE`)
+  })
 
-    const ipv4s = bench.textContent?.match(/\b\d{1,3}(?:\.\d{1,3}){3}\b/g) ?? []
-    expect(ipv4s.length).toBeGreaterThan(0)
-    for (const ip of ipv4s) {
-      expect(ip).toMatch(/^192\.0\.2\./)
+  it("todo link externo aponta para o repositório do projeto", () => {
+    const { container } = renderHome()
+    const external = Array.from(container.querySelectorAll('a[href^="http"]'))
+    expect(external.length).toBeGreaterThan(0)
+    for (const link of external) {
+      expect(link.getAttribute("href")).toMatch(
+        /^https:\/\/github\.com\/msouza10\/probekit/,
+      )
     }
   })
 
