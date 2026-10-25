@@ -39,9 +39,16 @@ export function Header() {
       <div className="contents sm:flex sm:items-center sm:gap-8">
         <Link
           to="/"
-          className="font-serif text-subheading font-medium tracking-tight text-foreground"
+          className="inline-flex items-center gap-2 font-serif text-subheading font-medium tracking-tight text-foreground"
           aria-label="Probekit início"
         >
+          <img
+            src="/brand/favicon.png"
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 shrink-0 object-contain"
+          />
           Probekit
         </Link>
         <nav
