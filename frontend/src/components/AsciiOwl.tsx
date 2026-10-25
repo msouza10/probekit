@@ -19,27 +19,33 @@ const reservedHeight = `calc(${fontSize} * ${LEADING} * ${lines.length})`
 // coordenadas da própria arte (linha e coluna a partir de 0, extremos
 // incluídos), a mesma origem de `lines` e `grid`.
 const protectedRects = [
-  { rows: [10, 14], cols: [79, 94] },
-  { rows: [10, 14], cols: [104, 119] },
-  { rows: [13, 18], cols: [97, 101] },
+  { rows: [8, 15], cols: [82, 92] },
+  { rows: [8, 16], cols: [101, 119] },
+  { rows: [15, 19], cols: [99, 105] },
 ]
 const protectedCells = new Set<number>()
 for (const { rows, cols } of protectedRects)
   for (let y = rows[0]; y <= rows[1]; y++)
     for (let x = cols[0]; x <= cols[1]; x++) protectedCells.add(y * width + x)
 
-const ramp = ".:-=+*#%@&MXAHSGB35"
-const ROW_MS = 38
+// Varia apenas um nível de sombra para preservar o volume das penas.
+const shimmerTones: Record<string, string> = {
+  "░": "▒",
+  "▒": "░▓",
+  "▓": "▒█",
+  "█": "▓",
+}
+const ROW_MS = 16
 const SHIMMER_MS = 110
-const SWAPS_PER_TICK = 90
+const SWAPS_PER_TICK = 45
 const RETURN_CHANCE = 0.22
 
 const pick = (n: number) => Math.floor(Math.random() * n)
 
 /**
  * Desenha a arte linha a linha uma única vez e depois cintila: alguns
- * caracteres trocam por outro da rampa e voltam ao original. O texto do
- * `<pre>` é escrito direto no DOM; o React não renderiza os ~11 mil
+ * caracteres variam um nível de sombra e voltam ao original. O texto do
+ * `<pre>` é escrito direto no DOM; o React não renderiza os milhares de
  * caracteres a cada tick.
  */
 export function AsciiOwl({ className }: { className?: string }) {
@@ -85,8 +91,9 @@ export function AsciiOwl({ className }: { className?: string }) {
       for (let i = 0; i < SWAPS_PER_TICK; i++) {
         const y = pick(grid.length)
         const x = pick(width)
-        if (grid[y][x] === " " || protectedCells.has(y * width + x)) continue
-        current[y][x] = ramp[pick(ramp.length)]
+        const tones = shimmerTones[grid[y][x]]
+        if (!tones || protectedCells.has(y * width + x)) continue
+        current[y][x] = tones[pick(tones.length)]
         swapped.set(y * width + x, current[y][x])
       }
       pre.textContent = current.map((row) => row.join("").trimEnd()).join("\n")

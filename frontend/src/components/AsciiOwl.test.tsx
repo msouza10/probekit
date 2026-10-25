@@ -31,7 +31,7 @@ function installObserver() {
 }
 
 const lines = art.replace(/\n$/, "").split("\n")
-const ROW_MS = 38
+const ROW_MS = 16
 const TICK_MS = 110
 
 function renderOwl() {
@@ -124,6 +124,13 @@ describe("AsciiOwl", () => {
       const now = (pre.textContent ?? "").split("")
       original.split("").forEach((ch, i) => {
         if (ch === " " || ch === "\n") expect(now[i]).toBe(ch)
+        else {
+          const tones = "░▒▓█"
+          expect(tones).toContain(now[i])
+          expect(
+            Math.abs(tones.indexOf(ch) - tones.indexOf(now[i])),
+          ).toBeLessThanOrEqual(1)
+        }
       })
       random.mockReturnValue(0)
       act(() => void vi.advanceTimersByTime(TICK_MS * 3))
@@ -224,9 +231,9 @@ describe("AsciiOwl", () => {
   describe("olhos e bico protegidos", () => {
     // Mantenha em sincronia com AsciiOwl.tsx.
     const rects = [
-      { rows: [10, 14], cols: [79, 94] },
-      { rows: [10, 14], cols: [104, 119] },
-      { rows: [13, 18], cols: [97, 101] },
+      { rows: [8, 15], cols: [82, 92] },
+      { rows: [8, 16], cols: [101, 119] },
+      { rows: [15, 19], cols: [99, 105] },
     ]
     const cells = rects.flatMap(({ rows, cols }) =>
       Array.from(
@@ -275,11 +282,16 @@ describe("AsciiOwl", () => {
 
   describe("sorteio forçado sobre uma célula", () => {
     const wide = Math.max(...lines.map((line) => line.length))
-    const rampFirst = "." // primeiro caractere da rampa; fração 0 o escolhe
+    const firstTone: Record<string, string> = {
+      "░": "▒",
+      "▒": "░",
+      "▓": "▒",
+      "█": "▓",
+    }
     const rects = [
-      { rows: [10, 14], cols: [79, 94] },
-      { rows: [10, 14], cols: [104, 119] },
-      { rows: [13, 18], cols: [97, 101] },
+      { rows: [8, 15], cols: [82, 92] },
+      { rows: [8, 16], cols: [101, 119] },
+      { rows: [15, 19], cols: [99, 105] },
     ]
     const inside = (y: number, x: number) =>
       rects.some(
@@ -287,12 +299,11 @@ describe("AsciiOwl", () => {
           y >= rows[0] && y <= rows[1] && x >= cols[0] && x <= cols[1],
       )
 
-    // Primeira célula visível (e diferente de rampFirst) dentro ou fora.
+    // Primeira célula visível dentro ou fora da região protegida.
     function firstCell(test: (y: number, x: number) => boolean) {
       for (let y = 0; y < lines.length; y++)
         for (let x = 0; x < lines[y].length; x++)
-          if (lines[y][x] !== " " && lines[y][x] !== rampFirst && test(y, x))
-            return [y, x] as const
+          if (lines[y][x] !== " " && test(y, x)) return [y, x] as const
       throw new Error("sem célula")
     }
 
@@ -344,7 +355,7 @@ describe("AsciiOwl", () => {
       const [y, x] = firstCell((cy, cx) => !inside(cy, cx))
       const { hits, seen } = runAimed(y, x, 2)
       expect(hits.picks).toBeGreaterThan(0)
-      expect(seen[0]).toBe(rampFirst)
+      expect(seen[0]).toBe(firstTone[lines[y][x]])
       expect(seen[0]).not.toBe(lines[y][x])
     })
   })
