@@ -20,6 +20,10 @@ describe("Footer", () => {
       "href",
       "/dns-lookup",
     )
+    expect(screen.getByRole("link", { name: /arquitetura/i })).toHaveAttribute(
+      "href",
+      "/arquitetura",
+    )
     expect(
       screen.getByRole("link", { name: /sobre o projeto/i }),
     ).toHaveAttribute("href", "/sobre")

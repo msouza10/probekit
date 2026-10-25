@@ -103,6 +103,14 @@ export function Header() {
             </Popover.Portal>
           </Popover.Root>
           <NavLink
+            to="/arquitetura"
+            className={({ isActive }) =>
+              `${navLink} ${isActive ? "bg-muted text-foreground" : ""}`
+            }
+          >
+            Arquitetura
+          </NavLink>
+          <NavLink
             to="/sobre"
             className={({ isActive }) =>
               `${navLink} ${isActive ? "bg-muted text-foreground" : ""}`

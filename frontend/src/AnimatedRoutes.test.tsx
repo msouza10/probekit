@@ -43,6 +43,17 @@ describe("AnimatedRoutes", () => {
     ).toBeInTheDocument()
   })
 
+  it("renders the Arquitetura page at /arquitetura", () => {
+    render(
+      <MemoryRouter initialEntries={["/arquitetura"]}>
+        <AnimatedRoutes />
+      </MemoryRouter>,
+    )
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Arquitetura" }),
+    ).toBeInTheDocument()
+  })
+
   it("renders the NotFound page for an unknown route", () => {
     render(
       <MemoryRouter initialEntries={["/this-route-does-not-exist"]}>

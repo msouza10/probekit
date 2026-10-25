@@ -57,6 +57,11 @@ export function Footer() {
           <h2 className="type-eyebrow mb-3 text-muted-foreground">Projeto</h2>
           <ul className="flex flex-col">
             <li>
+              <Link className={footerLink} to="/arquitetura">
+                Arquitetura
+              </Link>
+            </li>
+            <li>
               <Link className={footerLink} to="/sobre">
                 Sobre o projeto
               </Link>

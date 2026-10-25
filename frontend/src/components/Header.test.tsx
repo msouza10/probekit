@@ -25,6 +25,16 @@ describe("Header", () => {
     expect(link).toHaveAttribute("href", "/sobre")
   })
 
+  it("renders a link to the Arquitetura page", () => {
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+    const link = screen.getByRole("link", { name: /arquitetura/i })
+    expect(link).toHaveAttribute("href", "/arquitetura")
+  })
+
   it("opens the Ferramentas dropdown and links to each tool", async () => {
     const user = userEvent.setup()
     render(
@@ -46,7 +56,7 @@ describe("Header", () => {
 })
 
 describe("Header navegação", () => {
-  it("não oferece Artigos, Linha do tempo nem Arquitetura", async () => {
+  it("não oferece Artigos nem Linha do tempo", async () => {
     const user = userEvent.setup()
     const { container } = render(
       <MemoryRouter>
@@ -54,22 +64,18 @@ describe("Header navegação", () => {
       </MemoryRouter>,
     )
     await user.click(screen.getByRole("button", { name: /^ferramentas$/i }))
-    expect(container.textContent).not.toMatch(
-      /artigos|linha do tempo|arquitetura/i,
-    )
-    expect(document.body.textContent).not.toMatch(
-      /artigos|linha do tempo|arquitetura/i,
-    )
+    expect(container.textContent).not.toMatch(/artigos|linha do tempo/i)
+    expect(document.body.textContent).not.toMatch(/artigos|linha do tempo/i)
   })
 
-  it("a navegação principal tem só Ferramentas e Sobre", () => {
+  it("a navegação principal tem Ferramentas, Arquitetura e Sobre", () => {
     render(
       <MemoryRouter>
         <Header />
       </MemoryRouter>,
     )
     const nav = screen.getByRole("navigation", { name: "Navegação principal" })
-    expect(within(nav).getAllByRole("link")).toHaveLength(1)
+    expect(within(nav).getAllByRole("link")).toHaveLength(2)
     expect(within(nav).getAllByRole("button")).toHaveLength(1)
   })
 })

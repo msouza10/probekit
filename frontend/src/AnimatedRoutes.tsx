@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { Route, Routes, useLocation } from "react-router-dom"
 import { routeTransition } from "./lib/motion"
+import Arquitetura from "./pages/Arquitetura"
 import DnsLookup from "./pages/DnsLookup"
 import Home from "./pages/Home"
 import NotFound from "./pages/NotFound"
@@ -24,6 +25,7 @@ export function AnimatedRoutes() {
           <Route path="/" element={<Home />} />
           <Route path="/ping" element={<Ping />} />
           <Route path="/dns-lookup" element={<DnsLookup />} />
+          <Route path="/arquitetura" element={<Arquitetura />} />
           <Route path="/sobre" element={<Sobre />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
