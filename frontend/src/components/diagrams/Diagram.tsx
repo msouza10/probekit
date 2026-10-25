@@ -37,7 +37,7 @@ export function Diagram({ id, title, summary, steps, children }: DiagramProps) {
         {summary}
       </p>
       <div className="mt-4 hidden sm:block">{children(diagramIds(id))}</div>
-      <ol className="mt-4 flex flex-col font-sans sm:sr-only">
+      <ol role="list" className="mt-4 flex flex-col font-sans sm:sr-only">
         {steps.map((step, index) => (
           <li key={index} className="flex flex-col items-stretch">
             <div className="rounded-md border border-border bg-card px-4 py-3">

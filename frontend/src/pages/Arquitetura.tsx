@@ -33,7 +33,7 @@ const sections: {
     title: "Arquitetura",
     paragraphs: [
       "O site é estático, servido por um Cloudflare Worker. Quando uma ferramenta roda, o navegador chama a API em api.probekit.cc: o pedido passa pelo proxy da Cloudflare, chega ao balanceador de carga da Oracle Cloud e cai em uma das duas máquinas, onde o binário em Go termina o TLS.",
-      "Antes de qualquer pacote sair, a API confere o destino e recusa endereços privados, de loopback e de link-local. O ping usa ICMP de verdade, então a latência mostrada é a da máquina até o alvo. O limite é de 50 requisições a cada 5 minutos por endereço de origem, contado na memória de cada servidor.",
+      "Antes de qualquer pacote sair, a API confere o destino e recusa endereços privados, de loopback e de link-local. O ping usa ICMP de verdade, então a latência mostrada é a da máquina até o alvo. O limite é de 50 requisições a cada 5 minutos por endereço de origem que a API enxerga (hoje, o da borda da Cloudflare, então quem passa pelo mesmo ponto de presença divide o limite), contado na memória de cada servidor.",
     ],
     diagram: <ArchitectureDiagram />,
     sources: [

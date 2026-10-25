@@ -97,7 +97,7 @@ const steps: DiagramStep[] = [
     // deploy); runbook-deploy.md (seções 3 e 5)
     title: "Deploy, depois da aprovação",
     detail:
-      "O site é publicado com o Wrangler e verificado. O deploy da API aplica o plano que você leu e roda o script de deploy nas duas VMs.",
+      "O site é publicado com o Wrangler e verificado. O deploy da API aplica o plano salvo na etapa de plan e roda o script de deploy nas duas VMs.",
   },
   {
     // rollback-frontend.yml, rollback-api-golang.yml; ADR-0008; runbook-deploy.md

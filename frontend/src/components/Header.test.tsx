@@ -15,6 +15,20 @@ describe("Header", () => {
     expect(link).toHaveAttribute("href", "/")
   })
 
+  it("mostra o rótulo da busca só a partir de md (640px não quebra)", () => {
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+    const button = screen.getByRole("button", { name: "Buscar ferramentas" })
+    expect(button).toHaveAttribute("aria-label", "Buscar ferramentas")
+    const label = within(button).getByText("Buscar ferramenta…")
+    expect(label.tagName).toBe("SPAN")
+    expect(label).toHaveClass("hidden", "md:inline")
+    expect(label).not.toHaveClass("sm:inline")
+  })
+
   it("renders a link to the Sobre page", () => {
     render(
       <MemoryRouter>

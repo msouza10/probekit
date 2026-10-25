@@ -67,7 +67,7 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 **Frontend (`probekit.cc`):**
 - ✅ SPA em React 19 + Vite + TypeScript, Tailwind v4, shadcn/ui e Motion; páginas Home, Ping, DNS Lookup, Arquitetura, Sobre e NotFound.
 - ✅ As páginas de Ping e DNS Lookup chamam a API de verdade (`VITE_API_BASE_URL`, `https://api.probekit.cc` em produção); a simulação de resultados só existe em desenvolvimento, para nunca mostrar dados inventados em produção.
-- ✅ Testes com Vitest (37, incluindo o cliente da API).
+- ✅ Testes com Vitest (incluindo o cliente da API e as páginas).
 - ✅ **Site no ar** como Cloudflare Worker com assets estáticos (`frontend/wrangler.toml`), nos domínios `probekit.cc` e `www.probekit.cc`, com deploy pelo workflow `deploy-frontend.yml` (ver abaixo); o passo a passo manual com o Wrangler continua no [`runbook`](./docs/runbook-deploy.md).
 - ⏳ O badge de região só aparece quando a API devolver `origin_region` (ainda não devolve).
 - ⏳ Rotas inexistentes respondem HTTP 200 com a página NotFound do React (fallback de SPA do Worker), não 404.

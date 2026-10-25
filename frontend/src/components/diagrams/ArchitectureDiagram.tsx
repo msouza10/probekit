@@ -108,7 +108,7 @@ const steps: DiagramStep[] = [
     // padrão do sistema)
     title: "O teste roda de verdade",
     detail:
-      "O ping envia ICMP de verdade, e o DNS usa o resolvedor do sistema da VM, não os servidores autoritativos do domínio.",
+      "O ping envia ICMP de verdade, e o DNS usa o resolvedor configurado na VM, não os servidores autoritativos do domínio.",
   },
   {
     // utils/response.go (SetJSON, Content-Type application/json)
