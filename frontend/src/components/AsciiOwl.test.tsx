@@ -222,6 +222,7 @@ describe("AsciiOwl", () => {
   })
 
   describe("olhos e bico protegidos", () => {
+    // Mantenha em sincronia com AsciiOwl.tsx.
     const rects = [
       { rows: [10, 14], cols: [79, 94] },
       { rows: [10, 14], cols: [104, 119] },
@@ -269,6 +270,82 @@ describe("AsciiOwl", () => {
         for (const [y, x] of cells)
           expect(now[y][x] ?? " ").toBe(lines[y][x] ?? " ")
       }
+    })
+  })
+
+  describe("sorteio forçado sobre uma célula", () => {
+    const wide = Math.max(...lines.map((line) => line.length))
+    const rampFirst = "." // primeiro caractere da rampa; fração 0 o escolhe
+    const rects = [
+      { rows: [10, 14], cols: [79, 94] },
+      { rows: [10, 14], cols: [104, 119] },
+      { rows: [13, 18], cols: [97, 101] },
+    ]
+    const inside = (y: number, x: number) =>
+      rects.some(
+        ({ rows, cols }) =>
+          y >= rows[0] && y <= rows[1] && x >= cols[0] && x <= cols[1],
+      )
+
+    // Primeira célula visível (e diferente de rampFirst) dentro ou fora.
+    function firstCell(test: (y: number, x: number) => boolean) {
+      for (let y = 0; y < lines.length; y++)
+        for (let x = 0; x < lines[y].length; x++)
+          if (lines[y][x] !== " " && lines[y][x] !== rampFirst && test(y, x))
+            return [y, x] as const
+      throw new Error("sem célula")
+    }
+
+    // Cada sorteio consome (linha, coluna, rampa); sem trocas pendentes não
+    // há sorteios de retorno no meio, então a ordem se mantém alinhada.
+    function aim(y: number, x: number) {
+      const values = [(y + 0.5) / lines.length, (x + 0.5) / wide, 0]
+      const hits = { picks: 0 }
+      let n = 0
+      vi.spyOn(Math, "random").mockImplementation(() => {
+        const value = values[n % 3]
+        if (n % 3 === 0) hits.picks++
+        n++
+        return value
+      })
+      return hits
+    }
+
+    function runAimed(y: number, x: number, ticks: number) {
+      const hits = aim(y, x)
+      const { pre } = renderOwl()
+      act(() => fire?.([{ isIntersecting: true }]))
+      act(() => void vi.advanceTimersByTime(ROW_MS * (lines.length + 1)))
+      const seen: string[] = []
+      for (let i = 0; i < ticks; i++) {
+        act(() => void vi.advanceTimersByTime(TICK_MS))
+        seen.push((pre.textContent ?? "").split("\n")[y][x])
+      }
+      return { hits, seen }
+    }
+
+    it.each(rects.map((rect, i) => [i, rect] as const))(
+      "o sorteio mirado no retângulo %i não altera a célula",
+      (_i, rect) => {
+        const [y, x] = firstCell(
+          (cy, cx) =>
+            cy >= rect.rows[0] &&
+            cy <= rect.rows[1] &&
+            cx >= rect.cols[0] &&
+            cx <= rect.cols[1],
+        )
+        const { hits, seen } = runAimed(y, x, 10)
+        expect(hits.picks).toBeGreaterThan(0)
+        for (const ch of seen) expect(ch).toBe(lines[y][x])
+      },
+    )
+
+    it("controle: o mesmo sorteio numa célula fora dos retângulos troca o caractere", () => {
+      const [y, x] = firstCell((cy, cx) => !inside(cy, cx))
+      const { hits, seen } = runAimed(y, x, 2)
+      expect(hits.picks).toBeGreaterThan(0)
+      expect(seen[0]).toBe(rampFirst)
+      expect(seen[0]).not.toBe(lines[y][x])
     })
   })
 
