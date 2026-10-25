@@ -1,4 +1,5 @@
 import { act, render } from "@testing-library/react"
+import { StrictMode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import art from "@/assets/coruja-ascii.txt?raw"
 import { AsciiOwl } from "./AsciiOwl"
@@ -156,7 +157,52 @@ describe("AsciiOwl", () => {
       act(() => void document.dispatchEvent(new Event("visibilitychange")))
       act(() => void vi.advanceTimersByTime(TICK_MS * 2))
       expect((pre.textContent ?? "").split("\n").length).toBe(lines.length)
+      expect(vi.getTimerCount()).toBe(1)
     })
+  })
+
+  it("pausa no meio do desenho e retoma sem encolher", () => {
+    const { pre } = renderOwl()
+    act(() => fire?.([{ isIntersecting: true }]))
+    act(() => void vi.advanceTimersByTime(ROW_MS * 10))
+    const rowsAt = () => (pre.textContent ?? "").split("\n").length
+    const paused = rowsAt()
+    expect(paused).toBeGreaterThanOrEqual(10)
+    expect(paused).toBeLessThan(lines.length)
+    act(() => fire?.([{ isIntersecting: false }]))
+    act(() => void vi.advanceTimersByTime(ROW_MS * 10))
+    expect(rowsAt()).toBe(paused)
+    act(() => fire?.([{ isIntersecting: true }]))
+    act(() => void vi.advanceTimersByTime(ROW_MS))
+    expect(rowsAt()).toBeGreaterThanOrEqual(paused)
+    act(() => void vi.advanceTimersByTime(ROW_MS * lines.length))
+    expect(rowsAt()).toBe(lines.length)
+  })
+
+  it("visível duas vezes seguidas deixa um único timer", () => {
+    renderOwl()
+    act(() => fire?.([{ isIntersecting: true }]))
+    act(() => fire?.([{ isIntersecting: true }]))
+    expect(vi.getTimerCount()).toBe(1)
+  })
+
+  it("usa a última entrada quando o observador entrega várias de uma vez", () => {
+    renderOwl()
+    act(() => fire?.([{ isIntersecting: true }, { isIntersecting: false }]))
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
+  it("no StrictMode (monta, limpa, monta) fica com um timer e desenha", () => {
+    const { container } = render(
+      <StrictMode>
+        <AsciiOwl />
+      </StrictMode>,
+    )
+    const pre = container.querySelector("pre") as HTMLPreElement
+    act(() => fire?.([{ isIntersecting: true }]))
+    expect(vi.getTimerCount()).toBe(1)
+    act(() => void vi.advanceTimersByTime(ROW_MS * (lines.length + 1)))
+    expect((pre.textContent ?? "").split("\n")).toHaveLength(lines.length)
   })
 
   it("fora da tela, nada muda desde o início", () => {

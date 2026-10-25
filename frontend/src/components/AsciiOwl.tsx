@@ -8,8 +8,12 @@ const fullText = lines.join("\n")
 const width = Math.max(...lines.map((line) => line.length))
 const grid = lines.map((line) => line.padEnd(width, " ").split(""))
 
-// Colunas da arte: o corpo da fonte sai daqui (ver `fit` abaixo).
-const columns = width
+// JetBrains Mono avança 0,6em por caractere; a entrelinha é fixa. O corpo da
+// fonte e a altura reservada saem destas mesmas constantes.
+const ADVANCE = 0.6
+const LEADING = 1.02
+const fontSize = `calc(100cqw / ${width} / ${ADVANCE})`
+const reservedHeight = `calc(${fontSize} * ${LEADING} * ${lines.length})`
 
 const ramp = ".:-=+*#%@&MXAHSGB35"
 const ROW_MS = 38
@@ -85,8 +89,8 @@ export function AsciiOwl({ className }: { className?: string }) {
           : setInterval(shimmerTick, SHIMMER_MS)
     }
 
-    const observer = new IntersectionObserver(([entry]) => {
-      visible = entry.isIntersecting
+    const observer = new IntersectionObserver((entries) => {
+      visible = entries[entries.length - 1].isIntersecting
       sync()
     })
     observer.observe(pre)
@@ -102,13 +106,16 @@ export function AsciiOwl({ className }: { className?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={cn("hidden [container-type:inline-size] lg:block", className)}
+      className={cn(
+        "hidden overflow-hidden [container-type:inline-size] lg:block",
+        className,
+      )}
     >
       <pre
         ref={preRef}
         aria-hidden="true"
-        className="pointer-events-none font-mono leading-[1.02] whitespace-pre text-muted-foreground select-none"
-        style={{ fontSize: `calc(100cqw / ${columns} / 0.6)` }}
+        className="pointer-events-none font-mono whitespace-pre text-muted-foreground select-none"
+        style={{ fontSize, lineHeight: LEADING, minHeight: reservedHeight }}
       >
         {isStatic ? fullText : null}
       </pre>
