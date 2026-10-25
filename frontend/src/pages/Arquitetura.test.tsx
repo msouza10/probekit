@@ -24,14 +24,23 @@ describe("Arquitetura", () => {
 
   it("tem três seções numeradas mais Princípios", () => {
     renderPage()
-    const h2 = screen.getAllByRole("heading", { level: 2 })
-    expect(h2).toHaveLength(4)
-    expect(h2.map((h) => h.textContent)).toEqual([
-      expect.stringMatching(/Arquitetura/),
-      expect.stringMatching(/Pipeline/),
-      expect.stringMatching(/Infraestrutura/),
+    expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(4)
+    for (const name of [
+      "Arquitetura",
+      "Pipeline",
+      "Infraestrutura",
       "Princípios",
-    ])
+    ]) {
+      expect(
+        screen.getByRole("heading", { level: 2, name }),
+      ).toBeInTheDocument()
+    }
+  })
+
+  it("não repete nenhum id", () => {
+    const { container } = renderPage()
+    const ids = [...container.querySelectorAll("[id]")].map((e) => e.id)
+    expect(new Set(ids).size).toBe(ids.length)
   })
 
   it("só aponta para fora com links do repositório", () => {

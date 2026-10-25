@@ -21,6 +21,7 @@ const sections: {
   number: string
   title: string
   paragraphs: string[]
+  diagram?: ReactNode
   sources: Source[]
 }[] = [
   {
@@ -31,6 +32,8 @@ const sections: {
       "O site é estático, servido por um Cloudflare Worker. Quando uma ferramenta roda, o navegador chama a API em api.probekit.cc: o pedido passa pelo proxy da Cloudflare, chega ao balanceador de carga da Oracle Cloud e cai em uma das duas máquinas, onde o binário em Go termina o TLS.",
       "Antes de qualquer pacote sair, a API confere o destino e recusa endereços privados, de loopback e de link-local. O ping usa ICMP de verdade, então a latência mostrada é a da máquina até o alvo. O limite é de 50 requisições a cada 5 minutos por endereço de origem, contado na memória de cada servidor.",
     ],
+    // diagrama: arquitetura (Tasks 3-5 preenchem `diagram`)
+    diagram: undefined,
     sources: [
       { href: `${repository}/blob/main/OVERVIEW.md`, label: "Visão geral" },
       {
@@ -44,9 +47,11 @@ const sections: {
     number: "02",
     title: "Pipeline",
     paragraphs: [
-      "Em cada pull request roda o CI, com os jobs Go, NPM e Terraform. A API ganha uma release quando uma mudança do backend chega à main. O site é construído quando uma mudança do frontend chega à main, e o deploy espera a aprovação do ambiente production.",
+      "Em cada pull request roda o CI, com os jobs Go, NPM e Terraform. Quando uma mudança do backend chega à main, o pipeline da API calcula a versão e só publica uma release se as mensagens de commit pedirem (feat, fix ou perf). O site é construído quando uma mudança do frontend chega à main, e o deploy espera a aprovação do ambiente production.",
       "O deploy da API é manual, e os dois, API e site, têm um workflow de rollback.",
     ],
+    // diagrama: pipeline (Tasks 3-5 preenchem `diagram`)
+    diagram: undefined,
     sources: [
       {
         href: `${repository}/tree/main/.github/workflows`,
@@ -66,6 +71,8 @@ const sections: {
       "O Terraform cria a rede, as duas máquinas e o balanceador de carga na Oracle Cloud, e o registro DNS da API na Cloudflare. O estado fica num bucket da Oracle Cloud.",
       "O Worker do site não é criado pelo Terraform: quem o publica é o pipeline.",
     ],
+    // diagrama: infraestrutura (Tasks 3-5 preenchem `diagram`)
+    diagram: undefined,
     sources: [
       {
         href: `${repository}/tree/main/infra/terraform`,
@@ -86,7 +93,7 @@ const principles = [
   },
   {
     term: "Fica registrado",
-    detail: "Cada escolha entre alternativas vira um ADR.",
+    detail: "As escolhas difíceis ficam registradas em ADRs.",
   },
   {
     term: "Código aberto",
@@ -106,8 +113,8 @@ function Section({
   children: ReactNode
 }) {
   return (
-    <section aria-labelledby={`${id}-title`} className={sectionGrid}>
-      <h2 id={`${id}-title`} className={sectionTitle}>
+    <section aria-labelledby={`secao-${id}-title`} className={sectionGrid}>
+      <h2 id={`secao-${id}-title`} className={sectionTitle}>
         <span aria-hidden="true" className={sectionNumber}>
           {number}
         </span>
@@ -140,13 +147,10 @@ function SourceLinks({ sources }: { sources: Source[] }) {
 export function Arquitetura() {
   return (
     <main className="flex flex-col gap-16 pt-12 pb-8 sm:gap-24 sm:pt-20">
-      <section
-        aria-labelledby="arquitetura-title"
-        className="flex flex-col gap-6"
-      >
+      <section aria-labelledby="pagina-title" className="flex flex-col gap-6">
         <Reveal>
           <h1
-            id="arquitetura-title"
+            id="pagina-title"
             className="max-w-[20ch] text-[2.125rem] leading-[1.12] font-medium tracking-[-0.02em] text-foreground sm:text-heading-lg"
           >
             Arquitetura
@@ -161,16 +165,14 @@ export function Arquitetura() {
         </Reveal>
       </section>
 
-      {sections.map(({ id, number, title, paragraphs, sources }) => (
+      {sections.map(({ id, number, title, paragraphs, diagram, sources }) => (
         <Section key={id} id={id} number={number} title={title}>
           {paragraphs.map((text) => (
             <p key={text} className={prose}>
               {text}
             </p>
           ))}
-          {id === "arquitetura" && <>{/* diagrama: arquitetura */}</>}
-          {id === "pipeline" && <>{/* diagrama: pipeline */}</>}
-          {id === "infraestrutura" && <>{/* diagrama: infraestrutura */}</>}
+          {diagram}
           <SourceLinks sources={sources} />
         </Section>
       ))}
