@@ -68,10 +68,10 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 - ✅ SPA em React 19 + Vite + TypeScript, Tailwind v4, shadcn/ui e Motion; páginas Home, Ping, DNS Lookup, Sobre e NotFound.
 - ✅ As páginas de Ping e DNS Lookup chamam a API de verdade (`VITE_API_BASE_URL`, `https://api.probekit.cc` em produção); a simulação de resultados só existe em desenvolvimento, para nunca mostrar dados inventados em produção.
 - ✅ Testes com Vitest (37, incluindo o cliente da API).
-- ✅ **Site no ar** como Cloudflare Worker com assets estáticos (`frontend/wrangler.toml`), nos domínios `probekit.cc` e `www.probekit.cc`, com deploy **manual** via Wrangler (passo a passo no [`runbook`](./docs/runbook-deploy.md)).
+- ✅ **Site no ar** como Cloudflare Worker com assets estáticos (`frontend/wrangler.toml`), nos domínios `probekit.cc` e `www.probekit.cc`, com deploy pelo workflow `deploy-frontend.yml` (ver abaixo); o passo a passo manual com o Wrangler continua no [`runbook`](./docs/runbook-deploy.md).
 - ⏳ O badge de região só aparece quando a API devolver `origin_region` (ainda não devolve).
 - ⏳ Rotas inexistentes respondem HTTP 200 com a página NotFound do React (fallback de SPA do Worker), não 404.
-- ⏳ Sem workflow de deploy automático nem CI em pull request.
+- ✅ CI em pull request (`ci.yml`, com os jobs Go, NPM e Terraform) e deploy do site pelo workflow `deploy-frontend.yml` quando algo em `frontend/**` entra na `main`, com aprovação do ambiente `production` ([ADR-0008](./docs/adr/0008-deploy-do-site-pelo-github-actions.md); verificado em 2026-10-21 e 2026-10-22).
 
 **Infraestrutura e deploy da API:**
 - ✅ Terraform (state remoto em bucket OCI) provisiona a rede, 2 VMs e o Network Load Balancer (L4, TCP/443) na OCI, e o registro DNS `api` (proxied) na Cloudflare.
@@ -107,7 +107,6 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 O primeiro marco (ping e DNS lookup no ar, com infraestrutura reproduzível) está concluído. O acompanhamento tarefa a tarefa fica em [`docs/superpowers/plans/2026-10-09-probekit-first-deploy.md`](./docs/superpowers/plans/2026-10-09-probekit-first-deploy.md). O que vem a seguir, em ordem:
 
 1. **Backend (Task 3, restante):** usar o IP real do cliente no limite de requisições (`CF-Connecting-IP` só quando a conexão vem de faixa da Cloudflare) e devolver `origin_region` nas respostas de ping e DNS lookup.
-2. **Automatizar o site:** workflow `deploy-frontend.yml` com `cloudflare/wrangler-action` (secrets `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID`; `VITE_API_BASE_URL` no build) e CI em pull request (`go vet`/`go test`, `npm ci`/lint/testes/build, `terraform fmt`/`validate`).
-3. **Operação:** teste de derrubar uma VM, `concurrency` nos workflows e aprovação obrigatória no ambiente `production`.
-4. **Endurecimento (Task 13):** restringir a 443 às faixas de IP da Cloudflare, restringir o SSH, distribuir as VMs em fault domains distintos e avaliar *Authenticated Origin Pulls*.
-5. **Próximas ferramentas** do catálogo, definidas conforme as necessidades.
+2. **Operação:** teste de derrubar uma VM, `concurrency` nos workflows e aprovação obrigatória no ambiente `production`.
+3. **Endurecimento (Task 13):** restringir a 443 às faixas de IP da Cloudflare, restringir o SSH, distribuir as VMs em fault domains distintos e avaliar *Authenticated Origin Pulls*.
+4. **Próximas ferramentas** do catálogo, definidas conforme as necessidades.

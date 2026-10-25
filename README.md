@@ -23,10 +23,10 @@ As tecnologias entram conforme surgem necessidades e oportunidades de aprendizad
 O projeto está **no ar**, com as duas primeiras ferramentas (ping ICMP e consulta de registros DNS):
 
 - **API em Go**, em duas VMs na Oracle Cloud (OCI) atrás de um Network Load Balancer, com TLS terminado no próprio binário (certificado Origin CA da Cloudflare), CORS por lista de origens, validação de destinos, erros padronizados, limite de requisições por IP e testes automatizados. Cada merge com mudança no backend gera uma release, e as VMs se atualizam sozinhas.
-- **Frontend** em React + Vite + TypeScript, publicado como Cloudflare Worker com assets estáticos. Hoje o deploy do site é **manual**, com o Wrangler (ver [Publicação](#publicação)).
+- **Frontend** em React + Vite + TypeScript, publicado como Cloudflare Worker com assets estáticos. O deploy do site roda pelo workflow `deploy-frontend.yml`, com aprovação do ambiente `production`; o passo a passo manual com o Wrangler continua em [Publicação](#publicação).
 - **Infraestrutura** como código com Terraform (OCI e Cloudflare) e deploy da API por GitHub Actions disparado manualmente.
 
-O que ainda falta (detalhes no [`OVERVIEW.md`](./OVERVIEW.md)): deploy automático do frontend, CI em pull request, IP real do cliente no limite de requisições (hoje ele enxerga o IP da borda da Cloudflare), região de origem na resposta da API e o endurecimento de acessos.
+O que ainda falta (detalhes no [`OVERVIEW.md`](./OVERVIEW.md)): IP real do cliente no limite de requisições (hoje ele enxerga o IP da borda da Cloudflare), região de origem na resposta da API e o endurecimento de acessos.
 
 A arquitetura completa, com diagrama e fluxo de uma requisição, está em [`docs/architecture/arch.md`](./docs/architecture/arch.md).
 
