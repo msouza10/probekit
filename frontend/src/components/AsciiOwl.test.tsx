@@ -221,6 +221,57 @@ describe("AsciiOwl", () => {
     expect(pre.style.lineHeight).toBe("1.02")
   })
 
+  describe("olhos e bico protegidos", () => {
+    const rects = [
+      { rows: [10, 14], cols: [79, 94] },
+      { rows: [10, 14], cols: [104, 119] },
+      { rows: [13, 18], cols: [97, 101] },
+    ]
+    const cells = rects.flatMap(({ rows, cols }) =>
+      Array.from(
+        { length: rows[1] - rows[0] + 1 },
+        (_, i) => rows[0] + i,
+      ).flatMap((y) =>
+        Array.from({ length: cols[1] - cols[0] + 1 }, (_, j) => [
+          y,
+          cols[0] + j,
+        ]),
+      ),
+    )
+
+    it("cada retângulo está dentro da arte e tem caracteres visíveis", () => {
+      const columns = Math.max(...lines.map((line) => line.length))
+      for (const { rows, cols } of rects) {
+        expect(rows[0]).toBeGreaterThanOrEqual(0)
+        expect(rows[1]).toBeLessThan(lines.length)
+        expect(cols[1]).toBeLessThan(columns)
+        let visible = 0
+        for (let y = rows[0]; y <= rows[1]; y++)
+          for (let x = cols[0]; x <= cols[1]; x++)
+            if ((lines[y][x] ?? " ") !== " ") visible++
+        expect(visible).toBeGreaterThan(0)
+      }
+    })
+
+    it.each([
+      ["sempre 0", () => 0],
+      ["sempre 0.999", () => 0.999],
+      ["sequência fixa", lcg(11)],
+    ])("a cintilação nunca altera essas células (%s)", (_n, rnd) => {
+      vi.spyOn(Math, "random").mockImplementation(rnd)
+      const { pre } = renderOwl()
+      act(() => fire?.([{ isIntersecting: true }]))
+      act(() => void vi.advanceTimersByTime(ROW_MS * (lines.length + 1)))
+      expect(pre.textContent).toBe(art.replace(/\n$/, ""))
+      for (let tick = 0; tick < 60; tick++) {
+        act(() => void vi.advanceTimersByTime(TICK_MS))
+        const now = (pre.textContent ?? "").split("\n")
+        for (const [y, x] of cells)
+          expect(now[y][x] ?? " ").toBe(lines[y][x] ?? " ")
+      }
+    })
+  })
+
   it("fora da tela, nada muda desde o início", () => {
     const { pre } = renderOwl()
     act(() => fire?.([{ isIntersecting: false }]))

@@ -15,6 +15,19 @@ const LEADING = 1.02
 const fontSize = `calc(100cqw / ${width} / ${ADVANCE})`
 const reservedHeight = `calc(${fontSize} * ${LEADING} * ${lines.length})`
 
+// Olhos (com os brilhos) e bico: a cintilação nunca os toca. Retângulos em
+// coordenadas da própria arte (linha e coluna a partir de 0, extremos
+// incluídos), a mesma origem de `lines` e `grid`.
+const protectedRects = [
+  { rows: [10, 14], cols: [79, 94] },
+  { rows: [10, 14], cols: [104, 119] },
+  { rows: [13, 18], cols: [97, 101] },
+]
+const protectedCells = new Set<number>()
+for (const { rows, cols } of protectedRects)
+  for (let y = rows[0]; y <= rows[1]; y++)
+    for (let x = cols[0]; x <= cols[1]; x++) protectedCells.add(y * width + x)
+
 const ramp = ".:-=+*#%@&MXAHSGB35"
 const ROW_MS = 38
 const SHIMMER_MS = 110
@@ -72,7 +85,7 @@ export function AsciiOwl({ className }: { className?: string }) {
       for (let i = 0; i < SWAPS_PER_TICK; i++) {
         const y = pick(grid.length)
         const x = pick(width)
-        if (grid[y][x] === " ") continue
+        if (grid[y][x] === " " || protectedCells.has(y * width + x)) continue
         current[y][x] = ramp[pick(ramp.length)]
         swapped.set(y * width + x, current[y][x])
       }
