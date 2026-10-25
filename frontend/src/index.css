@@ -304,9 +304,13 @@ code {
 /*
  * Diagramas (components/diagrams). O movimento é só CSS e só dentro de
  * [data-motion="on"], que o hook liga quando o diagrama está visível e a
- * pessoa não pediu movimento reduzido. Com "off" tudo aparece parado, no
+ * pessoa não pediu movimento reduzido. Fora disso tudo aparece parado, no
  * estado final, e os pontos que viajam ficam escondidos. Só animam transform,
  * opacity, stroke-dashoffset, offset-distance e a cor do traço.
+ * Contrato: UMA classe de animação por elemento (elas se sobrepõem se
+ * juntas). Para linha desenhada que depois flui, use duas linhas: a base com
+ * .diagram-draw e outra por cima com .diagram-flow. Todo .diagram-draw exige
+ * pathLength="1" no path (o comprimento vira 1, qualquer que seja o real).
  * Atrasos escalonados vão inline (animation-delay); a duração da viagem de um
  * ponto pode ser trocada com --diagram-travel.
  */
@@ -325,7 +329,7 @@ code {
   animation: diagram-pulse 4s ease-in-out infinite;
 }
 [data-motion="on"] .diagram-draw {
-  stroke-dasharray: 1000;
+  stroke-dasharray: 1;
   animation: diagram-draw 1.2s ease-out both;
 }
 [data-motion="on"] .diagram-pop {
@@ -335,6 +339,17 @@ code {
   display: block;
   offset-distance: 0%;
   animation: diagram-travel var(--diagram-travel, 3.2s) linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .diagram-flow,
+  .diagram-pulse,
+  .diagram-draw,
+  .diagram-pop {
+    animation: none !important;
+  }
+  .diagram-packet {
+    display: none !important;
+  }
 }
 @keyframes diagram-flow {
   to {
@@ -352,7 +367,7 @@ code {
 }
 @keyframes diagram-draw {
   from {
-    stroke-dashoffset: 1000;
+    stroke-dashoffset: 1;
   }
   to {
     stroke-dashoffset: 0;

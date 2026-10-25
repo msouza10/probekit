@@ -18,9 +18,12 @@ export function useDiagramMotion(): {
   useEffect(() => {
     const element = ref.current
     if (!element || typeof IntersectionObserver === "undefined") return
-    const observer = new IntersectionObserver(([entry]) => {
-      setVisible(entry.isIntersecting)
-    })
+    // Threshold 0.2: só começa quando uma parte razoável está à vista. Até o
+    // primeiro callback `visible` é false, ou seja, tudo parado e completo.
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(entry.isIntersecting),
+      { threshold: 0.2 },
+    )
     observer.observe(element)
     return () => observer.disconnect()
   }, [])

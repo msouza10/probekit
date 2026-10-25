@@ -12,13 +12,15 @@ type Callback = (
 ) => void
 
 let fire: Callback | undefined
+let threshold: number | number[] | undefined
 
 function installObserver() {
   vi.stubGlobal(
     "IntersectionObserver",
     class {
-      constructor(callback: Callback) {
+      constructor(callback: Callback, options?: IntersectionObserverInit) {
         fire = callback
+        threshold = options?.threshold
       }
       observe() {}
       unobserve() {}
@@ -30,9 +32,9 @@ function installObserver() {
 function Probe() {
   const { ref, on } = useDiagramMotion()
   return (
-    <div ref={ref as React.RefObject<HTMLDivElement>} data-testid="probe">
+    <section ref={ref} data-testid="probe">
       {String(on)}
-    </div>
+    </section>
   )
 }
 
@@ -59,6 +61,12 @@ describe("useDiagramMotion", () => {
     expect(screen.getByTestId("probe")).toHaveTextContent("true")
     act(() => fire?.([{ isIntersecting: false }]))
     expect(screen.getByTestId("probe")).toHaveTextContent("false")
+  })
+
+  it("observa com threshold 0.2", () => {
+    installObserver()
+    render(<Probe />)
+    expect(threshold).toBe(0.2)
   })
 
   it("fica desligado com movimento reduzido, mesmo visível", () => {

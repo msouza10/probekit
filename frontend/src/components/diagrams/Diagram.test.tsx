@@ -1,6 +1,7 @@
 import { render, screen, within } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { Diagram, diagramIds } from "./Diagram"
+import { Diagram } from "./Diagram"
+import { diagramIds } from "./diagramIds"
 
 const steps = [
   { title: "Navegador", detail: "envia o pedido" },
@@ -8,7 +9,6 @@ const steps = [
 ]
 
 function renderDiagram() {
-  const ids = diagramIds("fluxo")
   return render(
     <Diagram
       id="fluxo"
@@ -16,10 +16,12 @@ function renderDiagram() {
       summary="Do navegador à API."
       steps={steps}
     >
-      <svg role="img" aria-labelledby={`${ids.title} ${ids.summary}`}>
-        <title id={ids.title}>Fluxo do pedido</title>
-        <desc id={ids.summary}>Do navegador à API.</desc>
-      </svg>
+      {(ids) => (
+        <svg role="img" aria-labelledby={`${ids.title} ${ids.summary}`}>
+          <title id={ids.title}>Fluxo do pedido</title>
+          <desc id={ids.summary}>Do navegador à API.</desc>
+        </svg>
+      )}
     </Diagram>,
   )
 }
@@ -61,6 +63,12 @@ describe("Diagram", () => {
       "data-motion",
       "off",
     )
+  })
+
+  it("numera os passos no celular", () => {
+    renderDiagram()
+    expect(screen.getByText("01")).toBeInTheDocument()
+    expect(screen.getByText("02")).toBeInTheDocument()
   })
 
   it("mostra a tag do passo", () => {
