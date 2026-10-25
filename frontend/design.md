@@ -166,6 +166,17 @@ Só tokens existentes, sem alias novo: bloco `fill-card` com `stroke-border` (o 
 
 [`src/pages/Arquitetura.tsx`](./src/pages/Arquitetura.tsx): título e introdução, três seções numeradas (01 Arquitetura, 02 Pipeline, 03 Infraestrutura), cada uma com parágrafos, o diagrama e links para as fontes no GitHub, e por fim os Princípios. Cada rótulo e cada parágrafo vêm de um arquivo do repositório (o comentário perto do texto diz de qual); o que não tem fonte não entra.
 
+### Coruja em ASCII
+
+[`src/components/AsciiOwl.tsx`](./src/components/AsciiOwl.tsx), ao lado do título da Home. É um elemento de identidade escolhido pelo criador e uma exceção deliberada à regra de "sem elementos decorativos". A arte vem de `src/assets/coruja-ascii.txt` (importada com `?raw`).
+
+- Decorativa: wrapper e `<pre>` com `aria-hidden="true"`, `select-none` e `pointer-events-none`. Cor `text-muted-foreground`, fonte `font-mono`.
+- Só aparece a partir de `lg` (1024px): abaixo disso o wrapper é `hidden`, e o herói da Home volta a uma coluna.
+- Encaixe: o wrapper é um `container-type: inline-size` e o corpo da fonte é `calc(100cqw / colunas / 0.6)`, com 0,6em de avanço da JetBrains Mono. A arte ocupa a coluna inteira em qualquer largura, sem rolagem horizontal.
+- Animação em duas fases, escrita direto no texto do `<pre>` (sem re-render do React): ao ficar visível pela primeira vez, a coruja se desenha de cima para baixo, uma linha a cada 38ms; depois cintila, a cada 110ms, trocando alguns caracteres por outros da rampa `.:-=+*#%@&MXAHSGB35`, que voltam ao original aos poucos. Espaços da arte nunca mudam.
+- Os timers pausam quando a coruja sai da tela (`IntersectionObserver`) ou a aba fica escondida, e retomam sem redesenhar. Ao desmontar, tudo é limpo.
+- Com `prefers-reduced-motion: reduce`, ou sem `IntersectionObserver`, a arte aparece completa e estática.
+
 ## Foco e acessibilidade
 
 - `:focus-visible` global: contorno de 2px em `--ring` (= `--highlight`) com 4px de recuo. Componentes podem trocar por anel próprio, mas sempre com foco visível.

@@ -97,6 +97,25 @@ describe("Home", () => {
     }
   })
 
+  it("mostra a coruja decorativa no herói, sem tirar título, textos e links", () => {
+    const { container } = renderHome()
+    const hero = container.querySelector(
+      'section[aria-labelledby="home-title"]',
+    )
+    expect(hero).not.toBeNull()
+    const owl = (hero as HTMLElement).querySelector(
+      "div[aria-hidden='true'] pre",
+    )
+    expect(owl).not.toBeNull()
+    expect(
+      within(hero as HTMLElement).getByRole("heading", { level: 1 }),
+    ).toHaveTextContent(/laboratório feito para mim/)
+    expect((hero as HTMLElement).querySelectorAll("p")).toHaveLength(2)
+    expect(
+      within(hero as HTMLElement).getByRole("link", { name: "no GitHub" }),
+    ).toHaveAttribute("href", repo)
+  })
+
   it("não chama a API ao montar", () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch")
     renderHome()

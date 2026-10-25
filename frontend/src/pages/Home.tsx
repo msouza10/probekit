@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import { Link } from "react-router-dom"
+import { AsciiOwl } from "@/components/AsciiOwl"
 import { Reveal } from "@/components/Reveal"
 import { tools } from "@/lib/tools"
 
@@ -45,7 +46,10 @@ const profile: { term: string; detail: ReactNode }[] = [
 export function Home() {
   return (
     <main className="flex flex-col gap-20 pt-12 pb-8 sm:gap-28 sm:pt-20 lg:pt-24">
-      <section aria-labelledby="home-title" className="flex flex-col gap-10">
+      <section
+        aria-labelledby="home-title"
+        className="flex flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] lg:items-center lg:gap-x-12"
+      >
         <div className="flex flex-col gap-6">
           <Reveal>
             <h1
@@ -67,6 +71,7 @@ export function Home() {
             </p>
           </Reveal>
         </div>
+        <AsciiOwl />
       </section>
 
       <section
