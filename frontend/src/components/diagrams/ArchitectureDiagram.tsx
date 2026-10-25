@@ -153,12 +153,14 @@ export function ArchitectureDiagram() {
             ))}
           </g>
           {/* Caminho do pedido: tracejado que flui por cima da base. */}
-          <g className="diagram-pop" style={delay(1.1)}>
-            <g className="fill-none stroke-highlight" strokeWidth={1.5}>
-              {[lines.api, lines.origem, lines.vm1, lines.vm2].map((d) => (
-                <path key={d} d={d} className="diagram-flow" />
-              ))}
-            </g>
+          <g
+            className="diagram-pop fill-none stroke-highlight"
+            strokeWidth={1.5}
+            style={delay(1.1)}
+          >
+            {[lines.api, lines.origem, lines.vm1, lines.vm2].map((d) => (
+              <path key={d} d={d} className="diagram-flow" />
+            ))}
           </g>
 
           {/* Pontos: antes dos blocos, para passarem por baixo deles. */}

@@ -82,7 +82,7 @@ const steps: DiagramStep[] = [
     title: "Plan e apply",
     tag: "plan → apply",
     detail:
-      "O plan e o apply rodam no workflow Deploy da API, que é disparado à mão. O plan fica salvo, e o apply só segue depois da aprovação do ambiente production e aplica exatamente esse plano.",
+      "O plan e o apply rodam no workflow Deploy API, que é disparado à mão. O plan fica salvo, e o apply só segue depois da aprovação do ambiente production e aplica exatamente esse plano.",
   },
   {
     // infra/terraform/oci/network.tf (VCN, sub-rede, gateway, rota, security
@@ -141,12 +141,14 @@ export function InfrastructureDiagram() {
             ))}
           </g>
           {/* O que o apply cria: tracejado discreto que flui por cima. */}
-          <g className="diagram-pop" style={delay(1.4)}>
-            <g className="fill-none stroke-highlight" strokeWidth={1.5}>
-              {created.map((d) => (
-                <path key={d} d={d} className="diagram-flow" />
-              ))}
-            </g>
+          <g
+            className="diagram-pop fill-none stroke-highlight"
+            strokeWidth={1.5}
+            style={delay(1.4)}
+          >
+            {created.map((d) => (
+              <path key={d} d={d} className="diagram-flow" />
+            ))}
           </g>
           {/* Apply -> estado remoto: parado (o estado não é um fluxo). */}
           <path

@@ -143,16 +143,16 @@ export function Home() {
           Outras ideias estão anotadas no repositório. Entram aqui quando
           estiverem rodando.
         </p>
+        <p className="font-sans text-body-sm text-muted-foreground">
+          Como tudo isso é montado:{" "}
+          <Link
+            to="/arquitetura"
+            className={`${inlineLink} inline-flex min-h-11 items-center font-medium`}
+          >
+            Arquitetura
+          </Link>
+        </p>
       </section>
-      <p className="font-sans text-body-sm text-muted-foreground">
-        Como tudo isso é montado:{" "}
-        <Link
-          to="/arquitetura"
-          className={`${inlineLink} inline-flex min-h-11 items-center font-medium`}
-        >
-          Arquitetura
-        </Link>
-      </p>
     </main>
   )
 }

@@ -137,12 +137,14 @@ export function PipelineDiagram() {
             ))}
           </g>
           {/* Caminho do ponto: tracejado que flui por cima da base. */}
-          <g className="diagram-pop" style={delay(1.3)}>
-            <g className="fill-none stroke-highlight" strokeWidth={1.5}>
-              {highlighted.map((d) => (
-                <path key={d} d={d} className="diagram-flow" />
-              ))}
-            </g>
+          <g
+            className="diagram-pop fill-none stroke-highlight"
+            strokeWidth={1.5}
+            style={delay(1.3)}
+          >
+            {highlighted.map((d) => (
+              <path key={d} d={d} className="diagram-flow" />
+            ))}
           </g>
           {/* Rollback: tracejado parado, sem fluxo e sem animação. */}
           <g

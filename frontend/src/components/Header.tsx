@@ -133,7 +133,7 @@ export function Header() {
             className="flex h-10 items-center gap-2 rounded-md border border-border px-3 text-xs text-muted-foreground hover:border-input hover:text-foreground"
           >
             <Search className="h-4 w-4" />
-            <span className="hidden sm:inline">Buscar ferramenta…</span>
+            <span className="hidden md:inline">Buscar ferramenta…</span>
           </Dialog.Trigger>
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 z-70 bg-bench/60" />

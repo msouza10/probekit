@@ -104,7 +104,7 @@ Todos planos: sem sombra, sem gradiente, a hierarquia vem de tom (`card` sobre `
 - **Card** (`ui/card.tsx`): `rounded-lg`, borda `border`, fundo `card`. Sem elevação, sem hover.
 - **Badge** (`ui/badge.tsx`): `rounded-md` (não é pílula), 12px; `default`, `secondary`, `outline` e `destructive` (superfície + borda `destructive`).
 - **Separator**: linha de 1px em `--border`.
-- **Bench** (`components/Bench.tsx`): painel escuro nos dois temas, `rounded-md`, borda `bench-border`. Tem um cabeçalho em mono com o `label` (caixa-alta) à esquerda e à direita `exemplo` (quando `example`) e `meta` (por exemplo a região de origem). O corpo é um `role="group"` com `tabIndex={0}` e `aria-label` "`label`, conteúdo": a área rola na horizontal e por isso é focável pelo teclado, com contorno `bench-highlight` por dentro. Usada na Home (exemplo de `ping`, **sempre rotulado como exemplo**) e como área de resultado em Ping e DNS Lookup. Só a saída do comando vai para a bancada; os formulários ficam na página.
+- **Bench** (`components/Bench.tsx`): painel escuro nos dois temas, `rounded-md`, borda `bench-border`. Tem um cabeçalho em mono com o `label` (caixa-alta) à esquerda e à direita `exemplo` (quando `example`) e `meta` (por exemplo a região de origem). O corpo é um `role="group"` com `tabIndex={0}` e `aria-label` "`label`, conteúdo": a área rola na horizontal e por isso é focável pelo teclado, com contorno `bench-highlight` por dentro. Usada como área de resultado em Ping e DNS Lookup (a Home não a usa). Só a saída do comando vai para a bancada; os formulários ficam na página.
 - **Estados de erro**: bloco com borda `destructive`, fundo `destructive-surface`, `role="alert"`. Carregamento: um `<p role="status">` dentro de um contêiner `aria-live="polite"` sempre montado.
 
 ## Movimento
@@ -117,6 +117,54 @@ Biblioteca: Motion (`motion/react`). As regras ficam em [`src/lib/motion.ts`](./
 - **`prefers-reduced-motion: reduce`**: `useReducedMotion` seleciona o ramo `reduced`, que só anima `opacity` em 0,12s: sem deslocamento e sem blur. O CSS global também zera `scroll-behavior` suave e reduz animações e transições a 0,01ms.
 - O popover de ferramentas do Header usa `@keyframes rise-in` (160ms), só sob `motion-safe`.
 - Só `transform`, `opacity` e `filter`; nada que cause reflow.
+
+## Diagramas
+
+A página `/arquitetura` tem três diagramas (Arquitetura, Pipeline e Infraestrutura) em [`src/components/diagrams/`](./src/components/diagrams/). Cada um explica um fluxo; o movimento só reforça a leitura e nenhum diagrama depende dele.
+
+### Componente `Diagram`
+
+`Diagram` (`Diagram.tsx`) recebe `id`, `title`, `summary`, `steps` e um **render prop** em `children`. Ele chama `children({ title, summary })` com os ids derivados de `id` (`diagramIds.ts`), e o `<svg>` devolvido deve ter `role="img"`, `aria-labelledby` apontando para esses dois ids, e dentro um `<title id>` e um `<desc id>`. O `Diagram` desenha a `<figure>` (legenda, resumo, svg largo e a lista ordenada dos passos). As peças comuns do SVG (`Node`, `arrow`, `delay`, `NAME`, `SUB`) estão em `svgParts.tsx`.
+
+### Versão vertical (abaixo de 640px)
+
+Abaixo de `sm` (640px) o svg largo fica escondido e a **lista ordenada de passos é o diagrama**: cartões `border-border bg-card` empilhados, ligados por uma seta (linha `bg-border` e ponta em `border-highlight`). De `sm` para cima a lista continua no DOM, só para leitores de tela (`sm:sr-only`), e o resumo também. Assim o texto é o mesmo nas duas versões e o svg nunca é a única fonte da informação.
+
+Tamanhos mínimos de texto (a spec exige nome do bloco com pelo menos 14px efetivos e secundário com pelo menos 12px):
+
+- Versão larga: o `viewBox` tem 600 unidades de largura e o svg é limitado a `max-w-[600px]`. A coluna mais estreita em que ele aparece tem 576px (viewport de 640px menos o `sm:px-8`), escala 0,96. Por isso o nome do bloco usa 15 unidades (14,4px efetivos) e o secundário e o rótulo de zona, 13 (12,5px efetivos).
+- Versão vertical: texto em HTML (`text-body-sm` no título do passo, 15px, e `text-caption` no detalhe, 13px), sem escala.
+
+### Movimento
+
+`useDiagramMotion` (`useDiagramMotion.ts`) devolve `{ ref, on }`. `on` é verdadeiro só quando um `IntersectionObserver` (limiar 0,2) diz que a figura está na tela **e** `useReducedMotion` é falso. O `Diagram` põe `data-motion="on"` ou `data-motion="off"` na `<figure>`. Sem `IntersectionObserver` (jsdom) o valor fica `off`. Em `off` tudo aparece parado, no estado final, e os pontos que viajam não são exibidos.
+
+O movimento é só CSS (`@keyframes` em `src/index.css`), ligado por `[data-motion="on"]`. Classes:
+
+| Classe            | O que faz                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------- |
+| `.diagram-draw`   | A linha se desenha uma vez (`stroke-dashoffset`); exige `pathLength="1"` no `path`  |
+| `.diagram-flow`   | Tracejado que corre sobre uma linha já desenhada (fluxo contínuo)                   |
+| `.diagram-pop`    | Entrada do bloco: `opacity` e `translateY(6px)`, com atraso escalonado              |
+| `.diagram-pulse`  | A borda do bloco (portão e VMs) alterna entre `--border` e `--highlight`            |
+| `.diagram-packet` | Ponto que viaja por uma linha (`offset-path`), escondido fora de `data-motion="on"` |
+
+Regras:
+
+- `pathLength="1"` em todo `path` com `.diagram-draw`.
+- **Uma classe de animação por elemento**: duas animações no mesmo elemento se sobrepõem. Linha que se desenha e depois flui são dois `path`, a base com `.diagram-draw` e outra por cima com `.diagram-flow`.
+- **Sem SMIL** (`animateMotion`): não se pausa por CSS nem se testa no jsdom.
+- Os pontos andam por `offsetPath: path("...")` (estilo inline), com a duração trocável por `--diagram-travel`. São desenhados antes dos blocos, então somem por baixo de cada bloco que atravessam.
+- Atrasos escalonados vão inline (`animation-delay`).
+- Com `prefers-reduced-motion: reduce` o CSS também zera `.diagram-*` e esconde `.diagram-packet`, além de o atributo ficar `off`.
+
+### Cores
+
+Só tokens existentes, sem alias novo: bloco `fill-card` com `stroke-border` (o portão usa `fill-muted`); zonas tracejadas e ligações em `stroke-input` (3:1 sobre o fundo); fluxo, setas do caminho principal e pulso em `stroke-highlight`; nomes em `fill-foreground` e texto secundário em `fill-muted-foreground`. O ponto de uma das linhas usa `var(--muted-foreground)` e os demais, `--highlight`.
+
+### Página Arquitetura
+
+[`src/pages/Arquitetura.tsx`](./src/pages/Arquitetura.tsx): título e introdução, três seções numeradas (01 Arquitetura, 02 Pipeline, 03 Infraestrutura), cada uma com parágrafos, o diagrama e links para as fontes no GitHub, e por fim os Princípios. Cada rótulo e cada parágrafo vêm de um arquivo do repositório (o comentário perto do texto diz de qual); o que não tem fonte não entra.
 
 ## Foco e acessibilidade
 

@@ -81,6 +81,9 @@ describe("Home", () => {
     expect(
       within(dl as HTMLElement).getByRole("link", { name: "MIT" }),
     ).toHaveAttribute("href", `${repo}/blob/main/LICENSE`)
+    expect(
+      within(dl as HTMLElement).getByRole("link", { name: "specs" }),
+    ).toHaveAttribute("href", `${repo}/tree/main/docs/superpowers/specs`)
   })
 
   it("todo link externo aponta para o repositório do projeto", () => {

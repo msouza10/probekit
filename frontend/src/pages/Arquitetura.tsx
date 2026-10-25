@@ -24,7 +24,7 @@ const sections: {
   number: string
   title: string
   paragraphs: string[]
-  diagram?: ReactNode
+  diagram: ReactNode
   sources: Source[]
 }[] = [
   {
@@ -49,7 +49,7 @@ const sections: {
     number: "02",
     title: "Pipeline",
     paragraphs: [
-      "Em cada pull request roda o CI, com os jobs Go, NPM e Terraform. Quando uma mudança do backend chega à main, o pipeline da API calcula a versão e só publica uma release se as mensagens de commit pedirem (feat, fix ou perf). O site é construído quando uma mudança do frontend chega à main, e o deploy espera a aprovação do ambiente production.",
+      "Em cada pull request roda o CI, com os jobs Go, NPM e Terraform. Quando uma mudança do backend chega à main, o pipeline da API calcula a versão e só publica uma release se as mensagens de commit pedirem: feat, fix ou perf, ou uma quebra de compatibilidade (BREAKING CHANGE: ou !:), que sobe a versão maior. O site é construído quando uma mudança do frontend chega à main, e o deploy espera a aprovação do ambiente production.",
       "O deploy da API é manual, e os dois, API e site, têm um workflow de rollback.",
     ],
     diagram: <PipelineDiagram />,

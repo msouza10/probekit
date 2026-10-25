@@ -54,6 +54,17 @@ describe("design guard", () => {
     }
   })
 
+  it("a lista computada cobre as páginas e os diagramas novos", () => {
+    expect(redesigned).toEqual(
+      expect.arrayContaining([
+        "src/pages/Arquitetura.tsx",
+        "src/components/diagrams/Diagram.tsx",
+        "src/components/diagrams/svgParts.tsx",
+        "src/pages/Ping.tsx",
+      ]),
+    )
+  })
+
   it.each(redesigned.length > 0 ? redesigned : ["(nenhum ainda)"])(
     "%s segue a linguagem visual do redesign",
     (relativePath) => {
