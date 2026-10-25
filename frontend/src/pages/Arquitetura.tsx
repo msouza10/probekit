@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { Reveal } from "@/components/Reveal"
 import { ArchitectureDiagram } from "@/components/diagrams/ArchitectureDiagram"
+import { InfrastructureDiagram } from "@/components/diagrams/InfrastructureDiagram"
 import { PipelineDiagram } from "@/components/diagrams/PipelineDiagram"
 
 const repository = "https://github.com/msouza10/probekit"
@@ -71,8 +72,7 @@ const sections: {
       "O Terraform cria a rede, as duas máquinas e o balanceador de carga na Oracle Cloud, e o registro DNS da API na Cloudflare. O estado fica num bucket da Oracle Cloud.",
       "O Worker do site não é criado pelo Terraform: quem o publica é o pipeline.",
     ],
-    // diagrama: infraestrutura (a Task 5 preenche `diagram`)
-    diagram: undefined,
+    diagram: <InfrastructureDiagram />,
     sources: [
       {
         href: `${repository}/tree/main/infra/terraform`,

@@ -2,8 +2,8 @@ import { Diagram, type DiagramStep } from "./Diagram"
 import { Node, arrow, delay, SUB, type Box } from "./svgParts"
 
 /*
- * Linguagem visual dos diagramas largos (as Tasks de Pipeline e
- * Infraestrutura reaproveitam):
+ * Linguagem visual dos diagramas largos (o Pipeline e a Infraestrutura a
+ * reaproveitam; as peças comuns estão em svgParts.tsx):
  * - viewBox de 600 de largura e svg limitado a 600px (`max-w-[600px]`): de
  *   1280 até ~600px de coluna, 1 unidade = 1px. A coluna mais estreita em que o
  *   svg aparece é 576px (viewport de 640 menos o `sm:px-8`), escala 0,96.

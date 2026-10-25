@@ -86,6 +86,24 @@ describe("Arquitetura", () => {
     ).toBeInTheDocument()
   })
 
+  it("mostra o diagrama da infraestrutura na seção 03", () => {
+    renderPage()
+    const section = screen
+      .getByRole("heading", { level: 2, name: "Infraestrutura" })
+      .closest("section")
+    expect(section).not.toBeNull()
+    expect(
+      within(section as HTMLElement).getByRole("img", {
+        name: /infraestrutura/i,
+      }),
+    ).toBeInTheDocument()
+  })
+
+  it("não menciona AWS nem Azure em lugar nenhum", () => {
+    const { container } = renderPage()
+    expect(container.textContent).not.toMatch(/\b(AWS|Azure)\b/i)
+  })
+
   it("não afirma que as VMs se atualizam sozinhas", () => {
     const { container } = renderPage()
     expect(container.textContent).not.toMatch(/atualizam sozinhas/i)
