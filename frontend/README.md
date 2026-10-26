@@ -26,14 +26,23 @@ Edite [`src/lib/tools.ts`](./src/lib/tools.ts) — tanto a lista da home page qu
 
 ## Páginas
 
-Rotas em [`src/AnimatedRoutes.tsx`](./src/AnimatedRoutes.tsx): `/` (Home), `/ping`, `/dns-lookup`, `/arquitetura`, `/sobre` e `*` (NotFound). A Arquitetura reúne três diagramas em SVG (regras em [`design.md`](./design.md#diagramas)).
+Rotas em [`src/AnimatedRoutes.tsx`](./src/AnimatedRoutes.tsx): `/` (Home), `/ping`, `/dns-lookup`, `/arquitetura`, `/sobre` e `*` (NotFound). Só a Home entra no pacote principal; as outras são carregadas quando a rota abre (`React.lazy`), com uma área reservada enquanto carregam para o rodapé não pular. Título e descrição de cada rota ficam em [`src/lib/pageMeta.ts`](./src/lib/pageMeta.ts). A Arquitetura reúne três diagramas em SVG (regras em [`DESIGN.md`](../DESIGN.md), seção Diagramas).
 
 ## Páginas `/ping` e `/dns-lookup`
 
 As duas páginas chamam a API de verdade por [`src/lib/api.ts`](./src/lib/api.ts) (`runPing` e `runDnsLookup`) e tratam os estados de carregando, sucesso e erro. O contrato da API e o comportamento esperado estão na spec [`docs/superpowers/specs/2026-10-01-probekit-ping-dns-feature-design.md`](../docs/superpowers/specs/2026-10-01-probekit-ping-dns-feature-design.md).
 
-- A região de origem exibida vem do campo `origin_region` da resposta. Enquanto a API não o devolver, o badge simplesmente não aparece.
+- A origem do teste ("Sonda: OCI · São Paulo") vem de constantes em `src/lib/api.ts` (`PROBE_PROVIDER`, `PROBE_PROVIDER_SHORT`, `PROBE_LOCATION`), porque a API roda sempre na mesma região. Se um dia houver mais de uma sonda, a origem passa a vir da resposta da API.
 - Se a API não responder, **em produção** a página mostra o erro. A simulação de resultados (valores aleatórios, marcada como "Simulação local") só existe em desenvolvimento (`import.meta.env.DEV`), para um resultado inventado nunca passar por verdadeiro.
+
+## Componentes das páginas
+
+- `src/components/tool/`: esqueleto e peças das páginas de ferramenta (`ToolPage`, selo de origem, status, estatísticas, JSON sob demanda).
+- `src/components/page/`: esqueleto das páginas informativas (`InfoPage`, sumário "Nesta página", `StackMap`, `AuthorCard`, `CreditsGrid`).
+- `src/components/diagrams/`: os diagramas em SVG da Arquitetura.
+- `src/components/icons/techLogos.tsx`: logos das tecnologias (Home e Sobre).
+
+O padrão visual de cada um está no [`DESIGN.md`](../DESIGN.md). As imagens de `public/brand/` são servidas como estão: mantenha-as pequenas (o retrato da Sobre tem poucos KB).
 
 ## Variáveis de ambiente
 

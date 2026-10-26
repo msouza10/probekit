@@ -23,7 +23,7 @@ O primeiro marco está **no ar**: `https://probekit.cc` (site, deploy manual com
 | 0 · Decisões e ADRs | ✅ ADRs 0003, 0004 e 0005 |
 | 1 · Rede e NLB na 443 | ✅ (falta só revisar o `plan` no log do workflow) |
 | 2 · Egress ICMP/UDP | ✅ verificado em produção |
-| 3 · Go: TLS, IP do cliente, CORS, `origin_region` | ⚠️ TLS ✅ e CORS ✅; **IP real do cliente e `origin_region` pendentes** |
+| 3 · Go: TLS, IP do cliente, CORS, `origin_region` | ⚠️ TLS ✅, CORS ✅ e IP real do cliente ✅ (PR #10); **`origin_region` pendente** |
 | 4 · `deploy-api-go.sh` | ✅ |
 | 5 · Primeira release | ✅ 1.0.0, 1.1.0 e 1.2.0 |
 | 6 · Certificado | ✅ entregue pelo workflow |
@@ -36,7 +36,7 @@ O primeiro marco está **no ar**: `https://probekit.cc` (site, deploy manual com
 | 13 · Endurecimento de acessos | ⏳ |
 | 14 · Documentação | ✅ nesta rodada |
 
-**Próximos passos:** (1) Task 3 restante no backend (IP real do cliente e `origin_region`); (2) Tasks 11 e 12 (CI e deploy automático do site); (3) Task 13 (a 443 só para as faixas da Cloudflare, SSH restrito); (4) teste de derrubar uma VM.
+**Próximos passos:** (1) Task 3 restante no backend (`origin_region`; o IP real do cliente foi entregue no PR #10); (2) Tasks 11 e 12 (CI e deploy automático do site); (3) Task 13 (a 443 só para as faixas da Cloudflare, SSH restrito); (4) teste de derrubar uma VM.
 
 ## Global Constraints
 
@@ -78,8 +78,8 @@ O primeiro marco está **no ar**: `https://probekit.cc` (site, deploy manual com
 |---|---|
 | TLS no Go | ✅ Resolvida (PR #5, [ADR-0003](../../adr/0003-porta-origem-e-entrega-do-certificado.md)) |
 | Egress só TCP | ✅ Resolvida (egress `all`; ping e DNS lookup funcionam nas VMs) |
-| `origin_region` ausente; frontend com região fixa | ⏳ O frontend não fixa mais a região (PR #8) e lê o campo; o backend ainda não o devolve |
-| Rate limit por `RemoteAddr` | ⏳ Pendente: o NLB preserva a origem, então o Go vê o IP da borda da Cloudflare |
+| `origin_region` ausente; frontend com região fixa | ⏳ O backend ainda não devolve o campo. Em 2026-10-26 o site passou a mostrar a origem ("Sonda: OCI · São Paulo") com valores fixos em `frontend/src/lib/api.ts`, porque as VMs ficam sempre na mesma região; o campo deixou de ser necessário para o badge |
+| Rate limit por `RemoteAddr` | ✅ Resolvida (PR #10, release 1.2.1; a API em produção respondia na 1.3.0 em 2026-10-26). O NLB preserva a origem, então o Go vê o IP da borda da Cloudflare; por isso `RealIP` confia em `CF-Connecting-IP` só quando a conexão vem de faixa da Cloudflare |
 | Frontend relativo e sem CORS | ✅ Resolvida (CORS no PR #7, `VITE_API_BASE_URL` no PR #8, [ADR-0004](../../adr/0004-chamada-frontend-api-com-cors.md)) |
 | `user_data` ausente | ✅ Superada pela D6: o workflow entrega o script por SSH |
 
@@ -152,10 +152,10 @@ Conceitos a estudar (sessão guiada, um passo por vez): `http.ListenAndServeTLS`
 
 Critérios de pronto:
 - [x] Servidor sobe em TLS com caminhos de cert/key vindos de variáveis de ambiente — PR #5; `tests/tls_test.go` (leitura das variáveis, HTTPS real, saída com erro sem os arquivos)
-- [ ] `RateLimiter` usa o IP real do cliente — **pendente.** O NLB preserva o IP de origem (verificado com `ss` nas VMs), então o Go enxerga o IP da borda da Cloudflare. Plano: `ClientIP` confia em `CF-Connecting-IP` só quando a conexão vem de faixa da Cloudflare (`TRUSTED_PROXY_CIDRS`)
+- [x] `RateLimiter` usa o IP real do cliente — PR #10; `tests/clientip_test.go`. O NLB preserva o IP de origem (verificado com `ss` nas VMs), então o Go enxerga o IP da borda da Cloudflare: `RealIP` confia em `CF-Connecting-IP` só quando a conexão vem de faixa da Cloudflare. As faixas vêm da API pública da Cloudflare na inicialização (não da variável `TRUSTED_PROXY_CIDRS` prevista aqui); se não carregarem, o limite usa o IP da conexão. Falta testar de fora o comportamento por usuário
 - [x] `Access-Control-Allow-Origin` só para a allowlist; `OPTIONS` responde 204 — PR #7; `tests/cors_test.go`; o preflight responde 204 (origem permitida) ou 403 (não permitida)
-- [ ] Respostas de `/api/ping` e `/api/dns-lookup` trazem `origin_region` (cumpre o spec do ping) — **pendente**; o frontend já lê o campo
-- [ ] **Assistente:** escrever os testes (`tests/clientip_test.go`, `tests/cors_test.go`, `tests/origin_region_test.go`) assim que o criador definir as assinaturas; rodar `go test ./...` — `tls_test.go` e `cors_test.go` escritos; faltam `clientip_test.go` e `origin_region_test.go`
+- [ ] Respostas de `/api/ping` e `/api/dns-lookup` trazem `origin_region` (cumpre o spec do ping) — **pendente**; desde 2026-10-26 o site não lê mais o campo (origem com valores fixos)
+- [ ] **Assistente:** escrever os testes (`tests/clientip_test.go`, `tests/cors_test.go`, `tests/origin_region_test.go`) assim que o criador definir as assinaturas; rodar `go test ./...` — `tls_test.go`, `cors_test.go` e `clientip_test.go` escritos; falta `origin_region_test.go`
 
 ### Task 4: Estender `deploy-api-go.sh` **[Criador]**
 **Depende de:** D1, D3, D4. **Files:** `infra/shellscript/deploy-api-go.sh` (editar). O timer reutiliza o próprio script, copiado da tag da release para `/usr/local/sbin/autodeploy-api-go.sh`, então `probekit-update.sh` não é mais necessário.
@@ -212,7 +212,7 @@ Critérios de pronto:
 **Depende de:** D2, Task 3. **Files:** Modify `frontend/src/lib/api.ts`; Create `frontend/.env.example`, `frontend/src/lib/api.test.ts`
 
 - [x] Teste: `runPing` usa `import.meta.env.VITE_API_BASE_URL` como prefixo e, sem a variável, usa caminho relativo (dev com proxy do Vite) — PR #8; `frontend/src/lib/api.test.ts`
-- [x] Remover `ORIGIN_REGION` fixo; usar `origin_region` da resposta — o badge só aparece se a API devolver o campo
+- [x] Remover `ORIGIN_REGION` fixo; usar `origin_region` da resposta — feito no PR #8; em 2026-10-26 o site voltou a valores fixos para a origem (`PROBE_*` em `api.ts`), sem depender do campo
 - [x] Mensagem de erro de rede sem citar `localhost:8080`
 - [x] `npx vitest run` e `npm run build` — 37 testes passando e build ok
 

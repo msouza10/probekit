@@ -69,7 +69,7 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 - ✅ As páginas de Ping e DNS Lookup chamam a API de verdade (`VITE_API_BASE_URL`, `https://api.probekit.cc` em produção); a simulação de resultados só existe em desenvolvimento, para nunca mostrar dados inventados em produção.
 - ✅ Testes com Vitest (incluindo o cliente da API e as páginas).
 - ✅ **Site no ar** como Cloudflare Worker com assets estáticos (`frontend/wrangler.toml`), nos domínios `probekit.cc` e `www.probekit.cc`, com deploy pelo workflow `deploy-frontend.yml` (ver abaixo); o passo a passo manual com o Wrangler continua no [`runbook`](./docs/runbook-deploy.md).
-- ⏳ O badge de região só aparece quando a API devolver `origin_region` (ainda não devolve).
+- ✅ As páginas de ferramenta mostram a origem do teste ("Sonda: OCI · São Paulo"), com valores fixos em `frontend/src/lib/api.ts` (`PROBE_*`), porque as VMs ficam sempre na mesma região. O campo `origin_region` da API não é mais necessário para isso.
 - ⏳ Rotas inexistentes respondem HTTP 200 com a página NotFound do React (fallback de SPA do Worker), não 404.
 - ✅ CI em pull request (`ci.yml`, com os jobs Go, NPM e Terraform) e deploy do site pelo workflow `deploy-frontend.yml` quando algo em `frontend/**` entra na `main`, com aprovação do ambiente `production` ([ADR-0008](./docs/adr/0008-deploy-do-site-pelo-github-actions.md); verificado em 2026-10-21 e 2026-10-22).
 
@@ -78,13 +78,13 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 - ✅ TLS terminado no binário Go com certificado Origin CA da Cloudflare ([ADR-0002](./docs/adr/0002-terminacao-tls-cloudflare-full-strict.md)); certificado e chave chegam às VMs pelo workflow de deploy, a partir de secrets do GitHub ([ADR-0003](./docs/adr/0003-porta-origem-e-entrega-do-certificado.md)).
 - ✅ CORS por lista de origens (`CORS_ALLOWED_ORIGINS`) com preflight ([ADR-0004](./docs/adr/0004-chamada-frontend-api-com-cors.md)).
 - ✅ ICMP sem privilégio liberado só para o grupo do usuário do serviço (`net.ipv4.ping_group_range`); sem isso o `/api/ping` respondia 500 nas VMs.
-- ✅ Release automática do binário (`probekit-linux-amd64-api-go-X.Y.Z`, hoje na 1.2.0) e atualização das VMs por timer de 5 minutos ([ADR-0005](./docs/adr/0005-atualizacao-das-vms-e-deploy-inicial.md)).
+- ✅ Release automática do binário (`probekit-linux-amd64-api-go-X.Y.Z`, na 1.3.0 em 2026-10-26) e atualização das VMs por timer de 5 minutos ([ADR-0005](./docs/adr/0005-atualizacao-das-vms-e-deploy-inicial.md)).
 - ✅ Workflow *Deploy* (manual): `terraform apply`, espera do cloud-init, entrega do certificado e execução do `deploy-api-go.sh` por SSH nas duas VMs. Rodou com sucesso mais de uma vez.
 - ✅ Smoke test em produção (2026-10-17): `/`, `/api/ping` e `/api/dns-lookup` respondem 200, ping para IP privado responde 400, e o preflight de CORS responde 204 só para as origens permitidas.
 - ⏳ Teste de derrubar uma VM e confirmar que o NLB continua respondendo.
 
 **Limitações conhecidas:**
-- O limite de requisições usa `r.RemoteAddr`. O NLB preserva o IP de origem (verificado nas VMs em 2026-10-17 com `ss`), então o Go enxerga o IP da **borda da Cloudflare**, não o do usuário: todos os usuários de um mesmo ponto de presença dividem o mesmo limite. A correção planejada é usar `CF-Connecting-IP` apenas quando a conexão vier de uma faixa de IP da Cloudflare.
+- O limite de requisições usa o IP real do cliente (`CF-Connecting-IP`, só quando a conexão vem de faixa da Cloudflare; release 1.2.1, API em produção na 1.3.0 em 2026-10-26). Se a lista de faixas da Cloudflare não carregar na inicialização, o limite volta a usar o IP da conexão, que é o da borda. Falta testar de fora o comportamento por usuário.
 - A porta 443 do NLB e das VMs está aberta para `0.0.0.0/0` (não só para a Cloudflare) e o SSH (22) também.
 
 ## Diretrizes propostas
@@ -106,7 +106,7 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 
 O primeiro marco (ping e DNS lookup no ar, com infraestrutura reproduzível) está concluído. O acompanhamento tarefa a tarefa fica em [`docs/superpowers/plans/2026-10-09-probekit-first-deploy.md`](./docs/superpowers/plans/2026-10-09-probekit-first-deploy.md). O que vem a seguir, em ordem:
 
-1. **Backend (Task 3, restante):** usar o IP real do cliente no limite de requisições (`CF-Connecting-IP` só quando a conexão vem de faixa da Cloudflare) e devolver `origin_region` nas respostas de ping e DNS lookup.
+1. **Backend (Task 3, restante):** devolver `origin_region` nas respostas de ping e DNS lookup, se ainda fizer sentido (o site já mostra a origem com valores fixos).
 2. **Operação:** teste de derrubar uma VM, `concurrency` nos workflows e aprovação obrigatória no ambiente `production`.
 3. **Endurecimento (Task 13):** restringir a 443 às faixas de IP da Cloudflare, restringir o SSH, distribuir as VMs em fault domains distintos e avaliar *Authenticated Origin Pulls*.
 4. **Próximas ferramentas** do catálogo, definidas conforme as necessidades.
