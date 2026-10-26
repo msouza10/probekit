@@ -24,6 +24,14 @@ colors:
   night-error-ink: "#ffffff"
   night-error-surface: "#2e2e2e"
   night-success-gray: "#d0d0d0"
+  stat-commit: "#0969da"
+  stat-pr: "#8250df"
+  stat-issue: "#1a7f37"
+  stat-deploy: "#1a7f37"
+  night-stat-commit: "#58a6ff"
+  night-stat-pr: "#bc8cff"
+  night-stat-issue: "#3fb950"
+  night-stat-deploy: "#3fb950"
   bench: "#0a0a0a"
   bench-ink: "#ededed"
   bench-muted: "#9a9a9a"
@@ -143,12 +151,18 @@ Papel branco e tinta preta, em cinzas puros (R = G = B em todo valor). Os nomes 
 - **Tinta de Erro** (`error-ink` #000000 / `night-error-ink` #ffffff) sobre **Superfície de Erro** (`error-surface` #e6e6e6 / `night-error-surface` #2e2e2e): bloco de erro com borda e texto `destructive`. O extremo do cinza (preto no claro, branco no escuro) marca o erro; a mensagem escrita é quem diz o que houve.
 - **Cinza de Sucesso** (`success-gray` #3d3d3d / `night-success-gray` #d0d0d0): sucesso.
 
+### Exceção: ícones de atividade do repositório
+Única cor fora da escala de cinza. Os ícones (nunca o texto) dos indicadores do repositório usam as cores do GitHub, para commit, PR, issue e deploy concluído se reconhecerem de relance. Aparecem na linha do herói (`RepoPulse`) e nos números do rodapé (`RepoStats`).
+- **Commit** (`stat-commit` #0969da / `night-stat-commit` #58a6ff), **PR** (`stat-pr` #8250df / `night-stat-pr` #bc8cff), **Issue** (`stat-issue` #1a7f37 / `night-stat-issue` #3fb950) e **Deploy** (`stat-deploy`, o mesmo verde da issue).
+- Contraste sobre o papel: de 4,83 a 4,97 no claro e de 7,37 a 7,43 no escuro (mínimo de 3:1 para ícone).
+- Os ícones são decorativos (`aria-hidden`); o sentido continua escrito no texto ao lado.
+
 ### Bancada
 Escura nos dois temas; os valores não mudam com `data-theme`.
 - **Fundo da Bancada** (`bench` #0a0a0a), **Tinta da Bancada** (`bench-ink` #ededed), **Apagado** (`bench-muted` #9a9a9a), **Linha** (`bench-line` #2e2e2e), **Ok** (`bench-ok` #b8b8b8) e **Brilho** (`bench-bright` #ffffff, o realce dentro da bancada).
 
 ### Named Rules
-**A Regra do Cinza Puro.** Nenhum valor de cor tem matiz: R, G e B são iguais. Nada de marrom, bege ou cinza "quente" ou "frio". Destaque, erro e sucesso se distinguem por degrau de cinza e por texto, nunca só por cor.
+**A Regra do Cinza Puro.** Nenhum valor de cor tem matiz: R, G e B são iguais. A única exceção são os ícones de atividade do repositório (`stat-*`), descritos acima. Nada de marrom, bege ou cinza "quente" ou "frio". Destaque, erro e sucesso se distinguem por degrau de cinza e por texto, nunca só por cor. Cor nova só entra como ícone decorativo, nunca em texto, fundo ou borda.
 
 **A Regra do Escuro Desenhado.** O tema escuro não é o claro invertido: preto suave (#121212, não #000) e cinzas reclareados para manter o contraste. Todo par de texto precisa de 4,5:1 (AA) nos dois temas.
 

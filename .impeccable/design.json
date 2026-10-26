@@ -1,142 +1,160 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-26T14:36:11+00:00",
+  "generatedAt": "2026-10-26T15:58:18Z",
   "title": "Design System: Probekit",
   "extensions": {
     "colorMeta": {
       "ink": {
         "role": "primary",
         "displayName": "Tinta",
-        "canonical": "#1d1b17",
+        "canonical": "oklch(20% 0 0)",
         "tonalRamp": [
-          "#2b2822",
-          "#474238",
-          "#645d4f",
-          "#807766",
-          "#a59d8d",
-          "#c7c2b8",
-          "#e2dfda",
-          "#f4f3f1"
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#d4d4d4",
+          "#eeeeee"
         ]
       },
-      "marker-amber": {
+      "marker-gray": {
         "role": "secondary",
-        "displayName": "Âmbar de Marca-texto",
-        "canonical": "#8a5410",
+        "displayName": "Cinza de Destaque",
+        "canonical": "oklch(37% 0 0)",
         "tonalRamp": [
-          "#452a08",
-          "#72460d",
-          "#a06113",
-          "#ce7d18",
-          "#eaa248",
-          "#f2c58d",
-          "#f8e1c4",
-          "#fcf3e8"
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#d4d4d4",
+          "#eeeeee"
         ]
       },
       "paper": {
         "role": "neutral",
         "displayName": "Papel",
-        "canonical": "#faf8f4",
+        "canonical": "oklch(99% 0 0)",
         "tonalRamp": [
-          "#352b18",
-          "#584828",
-          "#7b6438",
-          "#9e8148",
-          "#bfa673",
-          "#d7c7a7",
-          "#eae2d1",
-          "#f7f4ed"
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#d4d4d4",
+          "#eeeeee"
         ]
       },
       "card-paper": {
         "role": "neutral",
         "displayName": "Papel de Cartão",
-        "canonical": "#f4f0e8",
+        "canonical": "oklch(96% 0 0)",
         "tonalRamp": [
-          "#342b19",
-          "#564729",
-          "#79643a",
-          "#9b804a",
-          "#bda575",
-          "#d6c7a9",
-          "#eae2d2",
-          "#f7f4ee"
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#d4d4d4",
+          "#eeeeee"
         ]
       },
       "muted-ink": {
         "role": "neutral",
         "displayName": "Tinta Apagada",
-        "canonical": "#5e584d",
+        "canonical": "oklch(46% 0 0)",
         "tonalRamp": [
-          "#2a2722",
-          "#464239",
-          "#625c50",
-          "#7e7667",
-          "#a39c8f",
-          "#c6c1b9",
-          "#e1dfdb",
-          "#f4f3f1"
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#d4d4d4",
+          "#eeeeee"
         ]
       },
       "rule-line": {
         "role": "neutral",
         "displayName": "Linha de Caderno",
-        "canonical": "#e2dccf",
+        "canonical": "oklch(89% 0 0)",
         "tonalRamp": [
-          "#302a1d",
-          "#4f4630",
-          "#6f6143",
-          "#8f7d56",
-          "#b2a280",
-          "#cfc5b0",
-          "#e6e1d6",
-          "#f5f3ef"
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#d4d4d4",
+          "#eeeeee"
         ]
       },
-      "error-red": {
+      "error-ink": {
         "role": "functional",
-        "displayName": "Vermelho de Erro",
-        "canonical": "#a8321f",
+        "displayName": "Tinta de Erro",
+        "canonical": "oklch(0% 0 0)",
         "tonalRamp": [
-          "#41130c",
-          "#6c2014",
-          "#972d1c",
-          "#c23a24",
-          "#df6653",
-          "#eba093",
-          "#f5cdc7",
-          "#fbece9"
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#d4d4d4",
+          "#eeeeee"
         ]
       },
-      "success-green": {
+      "success-gray": {
         "role": "functional",
-        "displayName": "Verde de Sucesso",
-        "canonical": "#2f6a3c",
+        "displayName": "Cinza de Sucesso",
+        "canonical": "oklch(36% 0 0)",
         "tonalRamp": [
-          "#18351e",
-          "#275832",
-          "#377c46",
-          "#469f5a",
-          "#72c083",
-          "#a7d8b2",
-          "#d1ebd7",
-          "#edf7ef"
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#d4d4d4",
+          "#eeeeee"
         ]
+      },
+      "stat-commit": {
+        "role": "accent",
+        "displayName": "Azul do Commit",
+        "canonical": "oklch(54% 0.191 257)",
+        "tonalRamp": []
+      },
+      "stat-pr": {
+        "role": "accent",
+        "displayName": "Roxo do PR",
+        "canonical": "oklch(56% 0.207 295)",
+        "tonalRamp": []
+      },
+      "stat-issue": {
+        "role": "accent",
+        "displayName": "Verde da Issue e do Deploy",
+        "canonical": "oklch(52% 0.140 148)",
+        "tonalRamp": []
       },
       "bench": {
         "role": "bench",
         "displayName": "Fundo da Bancada",
-        "canonical": "#100e0b",
+        "canonical": "oklch(14% 0 0)",
         "tonalRamp": [
-          "#2d281f",
-          "#4c4234",
-          "#6a5d49",
-          "#88775e",
-          "#ac9d86",
-          "#cbc2b3",
-          "#e4dfd8",
-          "#f5f3f0"
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#d4d4d4",
+          "#eeeeee"
         ]
       }
     },
@@ -208,7 +226,7 @@
       "refersTo": "button-primary",
       "description": "Ação principal; hover só troca cor.",
       "html": "<button class=\"ds-btn-primary\">Testar</button>",
-      "css": ".ds-btn-primary{background:#1d1b17;color:#faf8f4;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;height:36px;padding:0 16px;border:0;border-radius:6px;transition:background-color 180ms ease}.ds-btn-primary:hover{background:#3a362e}.ds-btn-primary:focus-visible{outline:2px solid #8a5410;outline-offset:2px}"
+      "css": ".ds-btn-primary{background:#171717;color:#fafafa;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;height:36px;padding:0 16px;border:0;border-radius:6px;transition:background-color 180ms ease}.ds-btn-primary:hover{background:#3a3a3a}.ds-btn-primary:focus-visible{outline:2px solid #404040;outline-offset:2px}"
     },
     {
       "name": "Outline Button",
@@ -216,7 +234,7 @@
       "refersTo": "button-outline",
       "description": "Ação secundária com borda fina.",
       "html": "<button class=\"ds-btn-outline\">Limpar</button>",
-      "css": ".ds-btn-outline{background:transparent;color:#1d1b17;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;height:36px;padding:0 16px;border:1px solid #e2dccf;border-radius:6px;transition:background-color 180ms ease}.ds-btn-outline:hover{background:#efeae0}.ds-btn-outline:focus-visible{outline:2px solid #8a5410;outline-offset:2px}"
+      "css": ".ds-btn-outline{background:transparent;color:#171717;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;height:36px;padding:0 16px;border:1px solid #dcdcdc;border-radius:6px;transition:background-color 180ms ease}.ds-btn-outline:hover{background:#ebebeb}.ds-btn-outline:focus-visible{outline:2px solid #404040;outline-offset:2px}"
     },
     {
       "name": "Text Field",
@@ -224,7 +242,7 @@
       "refersTo": "input",
       "description": "Campo com borda visível (3:1).",
       "html": "<input class=\"ds-input\" placeholder=\"example.com\" />",
-      "css": ".ds-input{font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;min-height:44px;padding:0 12px;color:#1d1b17;background:#faf8f4;border:1px solid #958c7c;border-radius:6px}.ds-input:focus-visible{outline:2px solid #8a5410;outline-offset:2px}"
+      "css": ".ds-input{font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;min-height:44px;padding:0 12px;color:#171717;background:#fafafa;border:1px solid #8a8a8a;border-radius:6px}.ds-input:focus-visible{outline:2px solid #404040;outline-offset:2px}"
     },
     {
       "name": "Card",
@@ -232,7 +250,7 @@
       "refersTo": "card",
       "description": "Superfície plana: tom e borda, sem sombra.",
       "html": "<div class=\"ds-card\"><strong>Ping</strong><p>Teste se um host responde.</p></div>",
-      "css": ".ds-card{background:#f4f0e8;color:#1d1b17;border:1px solid #e2dccf;border-radius:8px;padding:16px;font-family:'Newsreader Variable',Georgia,serif}.ds-card p{margin:4px 0 0;color:#5e584d}"
+      "css": ".ds-card{background:#f3f3f3;color:#171717;border:1px solid #dcdcdc;border-radius:8px;padding:16px;font-family:'Newsreader Variable',Georgia,serif}.ds-card p{margin:4px 0 0;color:#595959}"
     },
     {
       "name": "Badge",
@@ -240,7 +258,7 @@
       "refersTo": "badge",
       "description": "Rótulo retangular de cantos discretos, não pílula.",
       "html": "<span class=\"ds-badge\">exemplo</span>",
-      "css": ".ds-badge{display:inline-block;background:#efeae0;color:#1d1b17;border:1px solid #e2dccf;border-radius:6px;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:12px;padding:2px 8px}"
+      "css": ".ds-badge{display:inline-block;background:#ebebeb;color:#171717;border:1px solid #dcdcdc;border-radius:6px;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:12px;padding:2px 8px}"
     },
     {
       "name": "Bancada",
@@ -248,28 +266,28 @@
       "refersTo": "bench",
       "description": "Painel escuro com a saída da ferramenta.",
       "html": "<div class=\"ds-bench\"><div class=\"ds-bench-head\"><span>RESULTADO</span><span>exemplo</span></div><pre>64 bytes from 192.0.2.1: time=12.4 ms</pre></div>",
-      "css": ".ds-bench{background:#100e0b;color:#ece8e1;border:1px solid #3a342b;border-radius:6px;font-family:'JetBrains Mono Variable',ui-monospace,monospace;font-size:13px}.ds-bench-head{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #3a342b;color:#9b9486}.ds-bench pre{margin:0;padding:12px;color:#8fb98a;overflow-x:auto}"
+      "css": ".ds-bench{background:#0a0a0a;color:#ededed;border:1px solid #2e2e2e;border-radius:6px;font-family:'JetBrains Mono Variable',ui-monospace,monospace;font-size:13px}.ds-bench-head{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #2e2e2e;color:#9a9a9a}.ds-bench pre{margin:0;padding:12px;color:#b8b8b8;overflow-x:auto}"
     }
   ],
   "narrative": {
     "northStar": "O Caderno de Laboratório",
-    "overview": "A página é um caderno: papel quente, tinta escura, texto corrido em serifa. As ferramentas escrevem nele; o resultado aparece numa bancada escura encaixada na página. Plano e quieto, com uma única cor de destaque, o âmbar de marca-texto. O tema escuro é o mesmo caderno à noite, desenhado à parte.",
+    "overview": "A página é um caderno: papel branco, tinta preta, texto corrido em serifa. As ferramentas escrevem nele; o resultado aparece numa bancada escura encaixada na página. Plano e quieto, e monocromático: só preto, cinzas e branco, sem matiz. O destaque é um degrau de cinza. O tema escuro é o mesmo caderno à noite (preto suave), desenhado à parte.",
     "keyCharacteristics": [
       "Papel e tinta; serifa para ler, sans para operar, mono só para dados.",
-      "Uma voz de destaque (âmbar), mais erro e sucesso funcionais.",
+      "Monocromático: preto, cinzas e branco; destaque, erro e sucesso são degraus de cinza, e o sentido vem do texto. Exceção: os ícones de atividade do repositório (commit, PR, issue, deploy) usam as cores do GitHub.",
       "Plano: sem sombra, sem gradiente, sem hover que levanta.",
       "A bancada escura isola a saída das ferramentas nos dois temas.",
       "Movimento curto, só transform, opacity e filter, e sempre com versão prefers-reduced-motion."
     ],
     "rules": [
       {
-        "name": "A Regra da Voz Única",
-        "body": "Há uma só cor de destaque, o âmbar. Vermelho e verde existem apenas para erro e sucesso.",
+        "name": "A Regra do Cinza Puro",
+        "body": "Nenhum valor de cor tem matiz: R, G e B são iguais. Nada de marrom, bege ou cinza quente ou frio. Destaque, erro e sucesso se distinguem por degrau de cinza e por texto, nunca só por cor. Única exceção: ícones decorativos de atividade do repositório (stat-*); cor nova nunca entra em texto, fundo ou borda.",
         "section": "colors"
       },
       {
         "name": "A Regra do Escuro Desenhado",
-        "body": "O tema escuro não é o claro invertido. Todo par de texto precisa de 4,5:1 (AA) nos dois temas.",
+        "body": "O tema escuro não é o claro invertido: preto suave (#121212, não #000) e cinzas reclareados. Todo par de texto precisa de 4,5:1 (AA) nos dois temas.",
         "section": "colors"
       },
       {
@@ -289,7 +307,8 @@
       }
     ],
     "dos": [
-      "Do usar marker-amber como única cor de destaque, para foco, seleção e o que importa agora.",
+      "Do usar marker-gray como único destaque (um tom de cinza), para foco, seleção e o que importa agora.",
+      "Do restringir a cor aos ícones decorativos de atividade do repositório (stat-commit, stat-pr, stat-issue, stat-deploy), com o sentido sempre escrito no texto ao lado.",
       "Do manter a saída das ferramentas na bancada escura e o resto no papel.",
       "Do desenhar o tema escuro à parte e medir o contraste (4,5:1 para texto, 3:1 para borda de campo e foco).",
       "Do animar só transform, opacity e filter, com um ramo reduced que só anima opacity em 0,12s.",
@@ -298,13 +317,13 @@
     ],
     "donts": [
       "Don't usar gradiente, sombra, brilho, glassmorphism nem hover que levanta.",
-      "Don't usar ícone decorativo; ícone só quando diz algo que o texto não diz.",
+      "Don't usar ícone decorativo; ícone só quando diz algo que o texto não diz (os ícones coloridos de commit, PR, issue e deploy são a exceção documentada).",
       "Don't montar grade de cards iguais nem seção de três colunas numeradas (desenho de template).",
       "Don't adotar tom de vitrine: promessas, selos de confiança, chamadas de venda.",
       "Don't escrever eyebrow no formato // TÍTULO.",
       "Don't usar fonte monoespaçada em texto corrido.",
       "Don't apresentar dado inventado como real.",
-      "Don't criar uma segunda cor de destaque; vermelho e verde são só erro e sucesso.",
+      "Don't usar cor fora da escala de cinza em texto, fundo ou borda; nada de marrom, bege ou âmbar.",
       "Don't usar animação que chame atenção para si ou que ignore prefers-reduced-motion."
     ]
   }
