@@ -251,6 +251,15 @@ Toda ferramenta (Ping, DNS Lookup e as futuras) segue o mesmo esqueleto, montado
 
 Regras do padrão: o veredicto vem primeiro e diz o que aconteceu com o destino; vermelho vale para qualquer "o destino não existe ou não responde", inclusive um erro da API que descreva isso (`domain_not_found` no DNS, `invalid_target` no Ping), mostrado com texto próprio em português e o código ao lado; número sem valor (por exemplo, latência de quem não respondeu) aparece como "—", nunca como "0"; o JSON bruto começa fechado, abre com a entrada padrão do site (opacidade, 14px de deslocamento e desfoque de 6px que some; só opacidade com movimento reduzido), fecha sem animação, e "Copiar JSON" funciona com ele fechado; nenhuma ferramenta inventa um quadro próprio para o resultado.
 
+### Página informativa (padrão)
+Sobre, Arquitetura e as páginas de texto futuras seguem um esqueleto, montado com os componentes de `components/page/`:
+1. **`InfoPage`**: o `<main>`, o `h1` (máx. 20ch) e a abertura em `text-body-lg` apagado, com no máximo dois parágrafos. Ritmo vertical `gap-12`, `sm:gap-16` e `pt-10`, `sm:pt-14`, sem margem própria da página.
+2. **`InfoSection`**: título `h2` na coluna da esquerda (15rem) e conteúdo na da direita; em tela estreita, empilha. O número ("01") é opcional e decorativo.
+3. **`FactList`**: termo e detalhe com linha fina entre os itens, para stack e princípios.
+4. **`SourceLinks`**: links do repositório no fim da seção, em sans, abrindo em outra aba; apontam para o arquivo exato (por exemplo, o ADR certo), não para a pasta inteira.
+
+Regras: cada parágrafo só afirma o que está no repositório (código, workflows, ADRs ou Terraform) e é conferido contra ele quando o código muda; links internos usam `Link` do roteador e links externos só vão para o repositório do projeto; texto em primeira pessoa, sem prometer o que não existe.
+
 ### Estados
 - **Erro de ferramenta** (falha nossa ou do pedido): `ResultStatus` em tom cinza (`role="alert"`), com a mensagem, o código em `code` e um botão de nova tentativa. Sem bloco com borda vermelha; `error-ink` e `error-surface` ficam para erros de formulário simples (por exemplo, o campo vazio do ping rápido).
 - **Destino que não respondeu:** não é erro; é resultado, com `ResultStatus` em tom vermelho (`role="status"`).

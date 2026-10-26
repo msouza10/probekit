@@ -1,19 +1,17 @@
 import type { ReactNode } from "react"
-import { Reveal } from "@/components/Reveal"
 import { ArchitectureDiagram } from "@/components/diagrams/ArchitectureDiagram"
 import { InfrastructureDiagram } from "@/components/diagrams/InfrastructureDiagram"
 import { PipelineDiagram } from "@/components/diagrams/PipelineDiagram"
+import {
+  FactList,
+  InfoPage,
+  InfoSection,
+  SourceLinks,
+} from "@/components/page/InfoPage"
+import { introText, prose } from "@/components/page/classes"
 
 const repository = "https://github.com/msouza10/probekit"
-
-const prose = "max-w-[38rem] text-body text-foreground/90"
-const inlineLink =
-  "text-foreground underline decoration-highlight/50 underline-offset-[0.2em] transition-colors hover:decoration-highlight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-const sectionGrid =
-  "grid gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-x-14"
-const sectionTitle =
-  "flex max-w-[16ch] flex-col gap-1 text-heading-sm text-foreground lg:pt-1"
-const sectionNumber = "font-sans text-body-sm font-normal text-muted-foreground"
+const adr = (file: string) => `${repository}/blob/main/docs/adr/${file}`
 
 type Source = { href: string; label: string }
 
@@ -30,17 +28,21 @@ const sections: {
   {
     id: "arquitetura",
     number: "01",
-    title: "Arquitetura",
+    title: "Do navegador à API",
     paragraphs: [
       "O site é estático, servido por um Cloudflare Worker. Quando uma ferramenta roda, o navegador chama a API em api.probekit.cc: o pedido passa pelo proxy da Cloudflare, chega ao balanceador de carga da Oracle Cloud e cai em uma das duas máquinas, onde o binário em Go termina o TLS.",
-      "Antes de qualquer pacote sair, a API confere o destino e recusa endereços privados, de loopback e de link-local. O ping usa ICMP de verdade, então a latência mostrada é a da máquina até o alvo. O limite é de 50 requisições a cada 5 minutos por endereço de origem que a API enxerga (hoje, o da borda da Cloudflare, então quem passa pelo mesmo ponto de presença divide o limite), contado na memória de cada servidor.",
+      "Antes de qualquer pacote sair, a API confere o destino e recusa endereços privados, de loopback e de link-local. O ping usa ICMP de verdade, então a latência mostrada é a da máquina até o alvo. O limite é de 50 requisições a cada 5 minutos por visitante. Como o pedido chega pela Cloudflare, a API lê o endereço do visitante no cabeçalho CF-Connecting-IP, mas só quando a conexão vem de uma faixa de endereços da Cloudflare; quem acessar o balanceador direto não consegue forjá-lo. A contagem fica na memória de cada servidor.",
     ],
     diagram: <ArchitectureDiagram />,
     sources: [
       { href: `${repository}/blob/main/OVERVIEW.md`, label: "Visão geral" },
       {
-        href: `${repository}/tree/main/docs/adr`,
-        label: "Decisões (ADRs)",
+        href: adr("0001-oci-network-load-balancer.md"),
+        label: "ADR 0001: balanceador de carga",
+      },
+      {
+        href: adr("0002-terminacao-tls-cloudflare-full-strict.md"),
+        label: "ADR 0002: TLS na Cloudflare",
       },
     ],
   },
@@ -62,6 +64,10 @@ const sections: {
         href: `${repository}/blob/main/docs/runbook-deploy.md`,
         label: "Runbook de deploy",
       },
+      {
+        href: adr("0008-deploy-do-site-pelo-github-actions.md"),
+        label: "ADR 0008: deploy do site",
+      },
     ],
   },
   {
@@ -79,8 +85,8 @@ const sections: {
         label: "Terraform",
       },
       {
-        href: `${repository}/tree/main/docs/adr`,
-        label: "Decisões (ADRs)",
+        href: adr("0005-atualizacao-das-vms-e-deploy-inicial.md"),
+        label: "ADR 0005: atualização das VMs",
       },
     ],
   },
@@ -89,84 +95,35 @@ const sections: {
 const principles = [
   {
     term: "Roda de verdade",
-    detail: "Em produção o resultado vem da API, nunca de uma simulação.",
+    detail:
+      "Em produção o resultado vem da API, nunca de uma simulação, e a página diz de onde o teste saiu.",
   },
   {
     term: "Fica registrado",
-    detail: "As escolhas difíceis ficam registradas em ADRs.",
+    detail:
+      "As escolhas difíceis viram ADRs: notas curtas sobre o que foi decidido e por quê.",
   },
   {
     term: "Código aberto",
-    detail: "Tudo está no repositório.",
+    detail:
+      "O código é MIT e está inteiro no repositório, com o Terraform e os workflows.",
   },
 ]
 
-function Section({
-  id,
-  number,
-  title,
-  children,
-}: {
-  id: string
-  number: string
-  title: string
-  children: ReactNode
-}) {
-  return (
-    <section aria-labelledby={`secao-${id}-title`} className={sectionGrid}>
-      <h2 id={`secao-${id}-title`} className={sectionTitle}>
-        <span aria-hidden="true" className={sectionNumber}>
-          {number}
-        </span>
-        {title}
-      </h2>
-      <Reveal className="flex flex-col gap-5">{children}</Reveal>
-    </section>
-  )
-}
-
-function SourceLinks({ sources }: { sources: Source[] }) {
-  return (
-    <ul className="flex flex-wrap gap-x-6 font-sans text-body-sm">
-      {sources.map(({ href, label }) => (
-        <li key={href}>
-          <a
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            className={`${inlineLink} inline-flex min-h-11 items-center`}
-          >
-            {label}
-          </a>
-        </li>
-      ))}
-    </ul>
-  )
-}
-
 export function Arquitetura() {
   return (
-    <main className="flex flex-col gap-16 pt-12 pb-8 sm:gap-24 sm:pt-20">
-      <section aria-labelledby="pagina-title" className="flex flex-col gap-6">
-        <Reveal>
-          <h1
-            id="pagina-title"
-            className="max-w-[20ch] text-[2.125rem] leading-[1.12] font-medium tracking-[-0.02em] text-foreground sm:text-heading-lg"
-          >
-            Arquitetura
-          </h1>
-        </Reveal>
-        <Reveal delay={0.08} className="flex flex-col gap-4">
-          <p className="max-w-[36rem] text-body-lg text-muted-foreground">
-            Aqui eu mostro como o laboratório é montado. O site é estático, na
-            Cloudflare, e a API, em Go, roda em duas máquinas da Oracle Cloud em
-            São Paulo, atrás de um balanceador de carga.
-          </p>
-        </Reveal>
-      </section>
-
+    <InfoPage
+      title="Arquitetura"
+      intro={
+        <p className={introText}>
+          Como o laboratório é montado. O site é estático, na Cloudflare, e a
+          API, em Go, roda em duas máquinas da Oracle Cloud em São Paulo, atrás
+          de um balanceador de carga.
+        </p>
+      }
+    >
       {sections.map(({ id, number, title, paragraphs, diagram, sources }) => (
-        <Section key={id} id={id} number={number} title={title}>
+        <InfoSection key={id} id={`secao-${id}`} number={number} title={title}>
           {paragraphs.map((text) => (
             <p key={text} className={prose}>
               {text}
@@ -174,30 +131,13 @@ export function Arquitetura() {
           ))}
           {diagram}
           <SourceLinks sources={sources} />
-        </Section>
+        </InfoSection>
       ))}
 
-      <section aria-labelledby="principios-title" className={sectionGrid}>
-        <h2 id="principios-title" className={sectionTitle}>
-          Princípios
-        </h2>
-        <Reveal>
-          <dl className="max-w-[40rem] border-b border-border">
-            {principles.map(({ term, detail }) => (
-              <div
-                key={term}
-                className="grid gap-x-8 gap-y-1 border-t border-border py-4 sm:grid-cols-[10rem_minmax(0,1fr)]"
-              >
-                <dt className="font-sans text-body-sm font-medium text-foreground">
-                  {term}
-                </dt>
-                <dd className="text-body text-foreground/90">{detail}</dd>
-              </div>
-            ))}
-          </dl>
-        </Reveal>
-      </section>
-    </main>
+      <InfoSection id="principios" title="Princípios">
+        <FactList items={principles} termWidth="10rem" />
+      </InfoSection>
+    </InfoPage>
   )
 }
 

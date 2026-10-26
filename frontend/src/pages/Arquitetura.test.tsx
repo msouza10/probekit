@@ -26,7 +26,7 @@ describe("Arquitetura", () => {
     renderPage()
     expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(4)
     for (const name of [
-      "Arquitetura",
+      "Do navegador à API",
       "Pipeline",
       "Infraestrutura",
       "Princípios",
@@ -65,7 +65,7 @@ describe("Arquitetura", () => {
   it("mostra o diagrama de arquitetura na seção 01", () => {
     renderPage()
     const section = screen
-      .getByRole("heading", { level: 2, name: "Arquitetura" })
+      .getByRole("heading", { level: 2, name: "Do navegador à API" })
       .closest("section")
     expect(section).not.toBeNull()
     expect(
@@ -97,6 +97,26 @@ describe("Arquitetura", () => {
         name: /infraestrutura/i,
       }),
     ).toBeInTheDocument()
+  })
+
+  it("liga cada seção às fontes certas, com ADRs específicos", () => {
+    const { container } = renderPage()
+    const hrefs = [...container.querySelectorAll("a")].map((a) =>
+      a.getAttribute("href"),
+    )
+    const adrs = hrefs.filter((h) => h?.includes("/docs/adr/0"))
+    expect(adrs).toEqual([
+      expect.stringContaining("0001-oci-network-load-balancer.md"),
+      expect.stringContaining("0002-terminacao-tls-cloudflare-full-strict.md"),
+      expect.stringContaining("0008-deploy-do-site-pelo-github-actions.md"),
+      expect.stringContaining("0005-atualizacao-das-vms-e-deploy-inicial.md"),
+    ])
+  })
+
+  it("descreve o limite por visitante, sem dizer que todos dividem o IP da borda", () => {
+    const { container } = renderPage()
+    expect(container.textContent).toMatch(/CF-Connecting-IP/)
+    expect(container.textContent).not.toMatch(/dividem? o limite/)
   })
 
   it("não menciona AWS nem Azure em lugar nenhum", () => {
