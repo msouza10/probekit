@@ -2,34 +2,34 @@
 name: Probekit
 description: Caderno de laboratório na web, com a saída das ferramentas numa bancada escura.
 colors:
-  paper: "#faf8f4"
-  ink: "#1d1b17"
-  card-paper: "#f4f0e8"
-  muted-paper: "#efeae0"
-  muted-ink: "#5e584d"
-  rule-line: "#e2dccf"
-  field-line: "#958c7c"
-  marker-amber: "#8a5410"
-  error-red: "#a8321f"
-  error-surface: "#f8e9e4"
-  success-green: "#2f6a3c"
-  night-paper: "#1c1915"
-  night-ink: "#ece6da"
-  night-card: "#24201a"
-  night-muted: "#28231d"
-  night-muted-ink: "#a8a092"
-  night-rule-line: "#38322a"
-  night-field-line: "#6f675a"
-  night-marker-amber: "#e2a85e"
-  night-error-red: "#ef8a78"
-  night-error-surface: "#3a1d17"
-  night-success-green: "#9cc596"
-  bench: "#100e0b"
-  bench-ink: "#ece8e1"
-  bench-muted: "#9b9486"
-  bench-line: "#3a342b"
-  bench-ok: "#8fb98a"
-  bench-amber: "#e2a85e"
+  paper: "#fafafa"
+  ink: "#171717"
+  card-paper: "#f3f3f3"
+  muted-paper: "#ebebeb"
+  muted-ink: "#595959"
+  rule-line: "#dcdcdc"
+  field-line: "#8a8a8a"
+  marker-gray: "#404040"
+  error-ink: "#000000"
+  error-surface: "#e6e6e6"
+  success-gray: "#3d3d3d"
+  night-paper: "#121212"
+  night-ink: "#ededed"
+  night-card: "#1b1b1b"
+  night-muted: "#242424"
+  night-muted-ink: "#a3a3a3"
+  night-rule-line: "#333333"
+  night-field-line: "#6e6e6e"
+  night-marker-gray: "#d4d4d4"
+  night-error-ink: "#ffffff"
+  night-error-surface: "#2e2e2e"
+  night-success-gray: "#d0d0d0"
+  bench: "#0a0a0a"
+  bench-ink: "#ededed"
+  bench-muted: "#9a9a9a"
+  bench-line: "#2e2e2e"
+  bench-ok: "#b8b8b8"
+  bench-bright: "#ffffff"
 typography:
   display:
     fontFamily: "Newsreader Variable, Newsreader Fallback, Georgia, serif"
@@ -108,49 +108,49 @@ components:
 
 **Creative North Star: "O Caderno de Laboratório"**
 
-A página é um caderno: papel quente, tinta escura, texto corrido em serifa, a voz do criador em primeira pessoa. As ferramentas não saem do caderno; elas escrevem nele. O resultado de um ping ou de uma consulta DNS aparece numa **bancada**, um painel escuro de terminal encaixado na página, e só ele. Formulários, títulos e explicações ficam no papel.
+A página é um caderno: papel branco, tinta preta, texto corrido em serifa, a voz do criador em primeira pessoa. As ferramentas não saem do caderno; elas escrevem nele. O resultado de um ping ou de uma consulta DNS aparece numa **bancada**, um painel escuro de terminal encaixado na página, e só ele. Formulários, títulos e explicações ficam no papel.
 
-O sistema é plano e quieto. A hierarquia vem de tom (cartão sobre papel) e de linha fina, nunca de sombra, gradiente ou movimento que chame atenção. Existe uma única cor de destaque, o âmbar de marca-texto, usado para foco, seleção e o que importa no momento. O tema escuro é o mesmo caderno à noite: marrom-escuro quente, desenhado à parte, não o claro invertido.
+O sistema é plano e quieto. A hierarquia vem de tom (cartão sobre papel) e de linha fina, nunca de sombra, gradiente ou movimento que chame atenção. O site é monocromático: só preto, cinzas e branco, sem matiz. O destaque (foco, seleção, o que importa no momento) é um degrau de cinza, não uma cor. O tema escuro é o mesmo caderno à noite: preto suave, desenhado à parte, não o claro invertido.
 
 O projeto é de um criador aprendendo e construindo, sem tom de vitrine. O texto diz o que a coisa faz e de onde parte o teste, sem prometer.
 
 **Key Characteristics:**
 - Papel e tinta; serifa para ler, sans para operar, mono só para dados.
-- Uma voz de destaque (âmbar), mais erro e sucesso funcionais.
+- Monocromático: preto, cinzas e branco; destaque, erro e sucesso são degraus de cinza, e o sentido vem do texto.
 - Plano: sem sombra, sem gradiente, sem hover que levanta.
 - A bancada escura isola a saída das ferramentas nos dois temas.
 - Movimento curto, só `transform`, `opacity` e `filter`, e sempre com versão `prefers-reduced-motion`.
 
 ## Colors
 
-Papel quente e tinta marrom-escura, com um único âmbar. Os nomes `night-*` valem para `:root[data-theme="dark"]`; os demais, para o tema claro. Os valores vêm de `frontend/src/index.css`.
+Papel branco e tinta preta, em cinzas puros (R = G = B em todo valor). Os nomes `night-*` valem para `:root[data-theme="dark"]`; os demais, para o tema claro. Os valores vêm de `frontend/src/index.css`.
 
 ### Primary
-- **Tinta** (`ink` #1d1b17 / `night-ink` #ece6da): texto principal e fundo do botão principal (o texto do botão é o papel).
+- **Tinta** (`ink` #171717 / `night-ink` #ededed): texto principal e fundo do botão principal (o texto do botão é o papel).
 
 ### Secondary
-- **Âmbar de Marca-texto** (`marker-amber` #8a5410 / `night-marker-amber` #e2a85e): a única cor de destaque. Anel de foco (`--ring`), seleção de texto (24% de mistura), setas e pulso dos diagramas. Contraste sobre o papel: 5,90 no claro, 8,34 no escuro.
+- **Cinza de Destaque** (`marker-gray` #404040 / `night-marker-gray` #d4d4d4): o destaque, que agora é um tom e não uma cor. Anel de foco (`--ring`), seleção de texto (24% de mistura), sublinhados, setas e pulso dos diagramas. Contraste sobre o papel: 9,93 no claro, 12,64 no escuro.
 
 ### Neutral
-- **Papel** (`paper` #faf8f4 / `night-paper` #1c1915): fundo da página e do popover.
-- **Papel de Cartão** (`card-paper` #f4f0e8 / `night-card` #24201a): superfície de `Card` e do botão secundário.
-- **Papel Apagado** (`muted-paper` #efeae0 / `night-muted` #28231d): fundo discreto e hover de itens.
-- **Tinta Apagada** (`muted-ink` #5e584d / `night-muted-ink` #a8a092): texto secundário, 6,65 no claro e 6,76 no escuro sobre o papel.
-- **Linha de Caderno** (`rule-line` #e2dccf / `night-rule-line` #38322a): separadores e bordas decorativas, de propósito só uma linha (1,29 de contraste); nunca a única indicação de um controle.
-- **Linha de Campo** (`field-line` #958c7c / `night-field-line` #6f675a): borda de campos, 3:1 sobre o fundo.
+- **Papel** (`paper` #fafafa / `night-paper` #121212): fundo da página e do popover.
+- **Papel de Cartão** (`card-paper` #f3f3f3 / `night-card` #1b1b1b): superfície de `Card` e do botão secundário.
+- **Papel Apagado** (`muted-paper` #ebebeb / `night-muted` #242424): fundo discreto e hover de itens.
+- **Tinta Apagada** (`muted-ink` #595959 / `night-muted-ink` #a3a3a3): texto secundário, 6,71 no claro e 7,43 no escuro sobre o papel.
+- **Linha de Caderno** (`rule-line` #dcdcdc / `night-rule-line` #333333): separadores e bordas decorativas, de propósito só uma linha (baixo contraste); nunca a única indicação de um controle.
+- **Linha de Campo** (`field-line` #8a8a8a / `night-field-line` #6e6e6e): borda de campos, 3:1 sobre o fundo.
 
 ### Funcional
-- **Vermelho de Erro** (`error-red` #a8321f / `night-error-red` #ef8a78) sobre **Superfície de Erro** (`error-surface` #f8e9e4 / `night-error-surface` #3a1d17): bloco de erro com borda e texto `destructive`.
-- **Verde de Sucesso** (`success-green` #2f6a3c / `night-success-green` #9cc596): sucesso.
+- **Tinta de Erro** (`error-ink` #000000 / `night-error-ink` #ffffff) sobre **Superfície de Erro** (`error-surface` #e6e6e6 / `night-error-surface` #2e2e2e): bloco de erro com borda e texto `destructive`. O extremo do cinza (preto no claro, branco no escuro) marca o erro; a mensagem escrita é quem diz o que houve.
+- **Cinza de Sucesso** (`success-gray` #3d3d3d / `night-success-gray` #d0d0d0): sucesso.
 
 ### Bancada
 Escura nos dois temas; os valores não mudam com `data-theme`.
-- **Fundo da Bancada** (`bench` #100e0b), **Tinta da Bancada** (`bench-ink` #ece8e1), **Apagado** (`bench-muted` #9b9486), **Linha** (`bench-line` #3a342b), **Ok** (`bench-ok` #8fb98a) e **Âmbar** (`bench-amber` #e2a85e).
+- **Fundo da Bancada** (`bench` #0a0a0a), **Tinta da Bancada** (`bench-ink` #ededed), **Apagado** (`bench-muted` #9a9a9a), **Linha** (`bench-line` #2e2e2e), **Ok** (`bench-ok` #b8b8b8) e **Brilho** (`bench-bright` #ffffff, o realce dentro da bancada).
 
 ### Named Rules
-**A Regra da Voz Única.** Há uma só cor de destaque, o âmbar. Vermelho e verde existem apenas para erro e sucesso, nunca como segunda cor de marca.
+**A Regra do Cinza Puro.** Nenhum valor de cor tem matiz: R, G e B são iguais. Nada de marrom, bege ou cinza "quente" ou "frio". Destaque, erro e sucesso se distinguem por degrau de cinza e por texto, nunca só por cor.
 
-**A Regra do Escuro Desenhado.** O tema escuro não é o claro invertido: marrom quente, âmbar mais claro para manter o contraste, vermelho e verde reclareados. Todo par de texto precisa de 4,5:1 (AA) nos dois temas.
+**A Regra do Escuro Desenhado.** O tema escuro não é o claro invertido: preto suave (#121212, não #000) e cinzas reclareados para manter o contraste. Todo par de texto precisa de 4,5:1 (AA) nos dois temas.
 
 ## Typography
 
@@ -199,7 +199,7 @@ Todos planos; a hierarquia vem de tom e de borda fina.
 - **Shape:** cantos `md` (6px).
 - **Primary:** fundo `ink`, texto `paper`; 36px de altura por padrão, formulários usam `min-h-11`.
 - **Outline / Ghost / Link:** borda `rule-line`, só texto, ou sublinhado.
-- **Hover / Focus / Tap:** hover só troca cor (180ms, sob `motion-safe`); toque com `whileTap` em escala 0,98; foco com anel de 2px em `marker-amber` e 2px de recuo.
+- **Hover / Focus / Tap:** hover só troca cor (180ms, sob `motion-safe`); toque com `whileTap` em escala 0,98; foco com anel de 2px em `marker-gray` e 2px de recuo.
 
 ### Cards / Containers
 - **Corner Style:** `lg` (8px).
@@ -210,16 +210,16 @@ Todos planos; a hierarquia vem de tom e de borda fina.
 - `md` (não é pílula), 12px; variantes `default`, `secondary`, `outline` e `destructive` (superfície e borda de erro).
 
 ### Bancada (Bench)
-O componente de assinatura. Painel escuro nos dois temas, `md`, borda `bench-line`. O cabeçalho em mono traz o rótulo em caixa-alta à esquerda e, à direita, "exemplo" (quando a saída é exemplo) e a meta (por exemplo, a região de origem). O corpo é um `role="group"` focável (`tabIndex=0`, `aria-label` "rótulo, conteúdo") que rola na horizontal, com contorno `bench-amber` por dentro. Usada nos resultados de Ping e DNS Lookup. Só a saída do comando vai para a bancada; formulários ficam no papel.
+O componente de assinatura. Painel escuro nos dois temas, `md`, borda `bench-line`. O cabeçalho em mono traz o rótulo em caixa-alta à esquerda e, à direita, "exemplo" (quando a saída é exemplo) e a meta (por exemplo, a região de origem). O corpo é um `role="group"` focável (`tabIndex=0`, `aria-label` "rótulo, conteúdo") que rola na horizontal, com contorno `bench-bright` por dentro. Usada nos resultados de Ping e DNS Lookup. Só a saída do comando vai para a bancada; formulários ficam no papel.
 
 ### Estados
-- **Erro:** bloco com borda e texto `error-red` sobre `error-surface`, `role="alert"`.
+- **Erro:** bloco com borda e texto `error-ink` sobre `error-surface`, `role="alert"`.
 - **Carregamento:** `<p role="status">` dentro de um contêiner `aria-live="polite"` sempre montado.
-- **Foco global:** `:focus-visible` com contorno de 2px em `marker-amber` e 4px de recuo.
+- **Foco global:** `:focus-visible` com contorno de 2px em `marker-gray` e 4px de recuo.
 - **Troca de tema:** View Transition API; o retrato do tema antigo some e o do novo aparece, com desfoque de 6px (`opacity` e `filter`, 400ms, `ease`). Com `prefers-reduced-motion`, só `opacity` em 0,12s. Sem suporte do navegador, a troca é direta. Nenhuma máscara nem `clip-path`, para ficar dentro da regra de movimento.
 
 ### Diagrama
-Figura com legenda, resumo, svg largo e lista ordenada de passos. Abaixo de 640px a lista de passos é o diagrama (cartões empilhados ligados por seta); acima, a lista fica só para leitores de tela. O movimento é CSS, ligado por `[data-motion="on"]`, e desligado com `prefers-reduced-motion`. Usa só tokens existentes: bloco `card` com borda `rule-line`, zonas tracejadas e ligações em `field-line`, fluxo e setas em `marker-amber`.
+Figura com legenda, resumo, svg largo e lista ordenada de passos. Abaixo de 640px a lista de passos é o diagrama (cartões empilhados ligados por seta); acima, a lista fica só para leitores de tela. O movimento é CSS, ligado por `[data-motion="on"]`, e desligado com `prefers-reduced-motion`. Usa só tokens existentes: bloco `card` com borda `rule-line`, zonas tracejadas e ligações em `field-line`, fluxo e setas em `marker-gray`.
 
 ### Coruja ASCII
 Elemento de identidade escolhido pelo criador e exceção deliberada à regra de "sem elementos decorativos". Arte em `src/assets/coruja-ascii.txt`, em `muted-ink` e mono, decorativa (`aria-hidden`), só de `lg` para cima. Desenha-se de cima para baixo e depois cintila; olhos e bico nunca são tocados pela cintilação. Com `prefers-reduced-motion` aparece completa e parada.
@@ -227,7 +227,7 @@ Elemento de identidade escolhido pelo criador e exceção deliberada à regra de
 ## Do's and Don'ts
 
 ### Do:
-- **Do** usar `marker-amber` como única cor de destaque, para foco, seleção e o que importa agora.
+- **Do** usar `marker-gray` como único destaque (um tom de cinza), para foco, seleção e o que importa agora.
 - **Do** manter a saída das ferramentas na bancada escura e o resto no papel.
 - **Do** desenhar o tema escuro à parte e medir o contraste (4,5:1 para texto, 3:1 para borda de campo e foco).
 - **Do** animar só `transform`, `opacity` e `filter`, com um ramo `reduced` que só anima `opacity` em 0,12s.

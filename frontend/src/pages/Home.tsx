@@ -102,10 +102,10 @@ export function Home() {
 
       <section aria-labelledby="fechamento-title">
         <h2 id="fechamento-title" className="sr-only">
-          Arquitetura e artigos
+          Arquitetura
         </h2>
-        <Reveal className="grid border-b border-border sm:grid-cols-2">
-          <div className="group relative flex flex-col gap-3 border-t border-border py-8 sm:border-r sm:py-10 sm:pr-10">
+        <Reveal className="border-b border-border">
+          <div className="group relative flex flex-col gap-3 border-t border-border py-8 sm:py-10">
             <p className="type-eyebrow font-sans text-muted-foreground">
               Como foi feito
             </p>
@@ -121,17 +121,6 @@ export function Home() {
             </Link>
             <p className="max-w-[30ch] text-body text-muted-foreground">
               Diagramas da API, da infraestrutura e do deploy.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 border-t border-border py-8 sm:py-10 sm:pl-10">
-            <p className="type-eyebrow font-sans text-muted-foreground">
-              Escritos
-            </p>
-            <p className="text-heading-sm font-medium text-muted-foreground sm:text-heading">
-              Artigos
-            </p>
-            <p className="max-w-[30ch] text-body text-muted-foreground">
-              Em breve. Vou escrever sobre o que testo e aprendo.
             </p>
           </div>
         </Reveal>

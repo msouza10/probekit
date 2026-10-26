@@ -92,9 +92,10 @@ describe("RepoPulse", () => {
     const items = within(list).getAllByRole("listitem")
     expect(items).toHaveLength(3)
     // Commit: ícone neutro. Os dois deploys: ícone de ok na cor de sucesso.
-    expect(items[0].querySelector("svg.text-success")).toBeNull()
-    expect(items[1].querySelector("svg.text-success")).not.toBeNull()
-    expect(items[2].querySelector("svg.text-success")).not.toBeNull()
+    expect(items[0].querySelector("svg.text-stat-commit")).not.toBeNull()
+    expect(items[0].querySelector("svg.text-stat-deploy")).toBeNull()
+    expect(items[1].querySelector("svg.text-stat-deploy")).not.toBeNull()
+    expect(items[2].querySelector("svg.text-stat-deploy")).not.toBeNull()
     // O ícone é decorativo: o texto falado já diz "deploy do site".
     for (const item of items) {
       expect(item.querySelector("svg")).toHaveAttribute("aria-hidden", "true")
@@ -102,6 +103,14 @@ describe("RepoPulse", () => {
     expect(list.className).toContain("flex-nowrap")
     expect(list.className).not.toContain("flex-wrap")
     expect(list.className).toContain("whitespace-nowrap")
+  })
+
+  it("em tela de toque cada link de tempo ganha altura de 44px", async () => {
+    mockGithub({ "/commits": commit })
+    render(<RepoPulse />)
+    for (const link of await screen.findAllByRole("link")) {
+      expect(link).toHaveClass("pointer-coarse:min-h-11")
+    }
   })
 
   it("não mostra estrela nem licença", async () => {

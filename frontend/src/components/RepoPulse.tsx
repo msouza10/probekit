@@ -9,7 +9,7 @@ import {
 } from "@/lib/github"
 
 const link =
-  "text-foreground underline decoration-highlight/50 underline-offset-[0.2em] transition-colors hover:decoration-highlight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+  "inline-flex items-center pointer-coarse:min-h-11 text-foreground underline decoration-highlight/50 underline-offset-[0.2em] transition-colors hover:decoration-highlight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 
 function Entry({
   icon,
@@ -77,7 +77,10 @@ export function RepoPulse() {
           {data.commit ? (
             <Entry
               icon={
-                <GitCommitHorizontal aria-hidden="true" className={iconClass} />
+                <GitCommitHorizontal
+                  aria-hidden="true"
+                  className={`${iconClass} text-stat-commit`}
+                />
               }
               spoken=""
               name={`commit ${data.commit.label}`}
@@ -90,7 +93,7 @@ export function RepoPulse() {
               icon={
                 <BadgeCheck
                   aria-hidden="true"
-                  className={`${iconClass} text-success`}
+                  className={`${iconClass} text-stat-deploy`}
                 />
               }
               spoken="deploy do "
@@ -104,7 +107,7 @@ export function RepoPulse() {
               icon={
                 <BadgeCheck
                   aria-hidden="true"
-                  className={`${iconClass} text-success`}
+                  className={`${iconClass} text-stat-deploy`}
                 />
               }
               spoken="deploy da "

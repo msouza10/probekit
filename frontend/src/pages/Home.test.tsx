@@ -1,4 +1,5 @@
 import { render, screen, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { tools } from "@/lib/tools"
@@ -59,10 +60,10 @@ describe("Home", () => {
     expect(container.textContent).not.toMatch(/exemplo/i)
   })
 
-  it("fecha com duas portas: Arquitetura é um link do site e Artigos ainda é só texto", () => {
+  it("fecha com Arquitetura, um link do site, e sem prometer artigos que não existem", () => {
     renderHome()
     const section = screen.getByRole("region", {
-      name: "Arquitetura e artigos",
+      name: "Arquitetura",
     })
 
     const arquitetura = within(section).getByRole("link", {
@@ -72,9 +73,9 @@ describe("Home", () => {
     expect(arquitetura).toHaveAttribute("href", "/arquitetura")
     expect(arquitetura).not.toHaveAttribute("target")
 
-    // Enquanto a parte de artigos não existe, não há link nem promessa de data.
-    expect(within(section).getByText("Artigos")).toBeInTheDocument()
-    expect(within(section).getByText(/em breve/i)).toBeInTheDocument()
+    // Sem artigos publicados, a Home não anuncia a seção nem promete data.
+    expect(within(section).queryByText("Artigos")).not.toBeInTheDocument()
+    expect(within(section).queryByText(/em breve/i)).not.toBeInTheDocument()
     expect(within(section).getAllByRole("link")).toHaveLength(1)
   })
 
@@ -169,7 +170,10 @@ describe("Home", () => {
     expect((hero as HTMLElement).textContent).toMatch(
       /laboratório feito para mim/,
     )
-    expect((hero as HTMLElement).querySelectorAll("p")).toHaveLength(1)
+    // Um só parágrafo de texto; as mensagens do formulário de ping ficam fora.
+    expect(
+      (hero as HTMLElement).querySelectorAll("p:not(form p)"),
+    ).toHaveLength(1)
     expect(
       within(hero as HTMLElement).getByRole("link", { name: "no GitHub" }),
     ).toHaveAttribute("href", repo)
@@ -218,5 +222,23 @@ describe("Home", () => {
       if (text.startsWith("//")) offenders.push(text)
     }
     expect(offenders).toEqual([])
+  })
+
+  it("a faixa de tecnologias tem um botão para pausar e retomar o movimento", async () => {
+    const user = userEvent.setup()
+    const { container } = renderHome()
+    const track = container.querySelector(".logo-cloud-track") as HTMLElement
+    const button = screen.getByRole("button", { name: "Pausar animação" })
+
+    expect(track).toHaveAttribute("data-paused", "false")
+    // Com movimento reduzido a faixa já está parada, então o botão some.
+    expect(button.className).toContain("motion-reduce:hidden")
+
+    await user.click(button)
+    expect(button).toHaveTextContent("Retomar animação")
+    expect(track).toHaveAttribute("data-paused", "true")
+
+    await user.click(button)
+    expect(track).toHaveAttribute("data-paused", "false")
   })
 })

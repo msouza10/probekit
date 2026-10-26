@@ -65,16 +65,20 @@
 }
 
 /*
- * Paleta. Claro = papel e tinta de caderno; escuro = o mesmo caderno à noite
- * (marrom-escuro quente, desenhado à parte, não invertido). Uma única cor de
- * destaque, âmbar de marca-texto. Contrastes medidos (WCAG) no relatório da
- * task 1 e em ../../DESIGN.md.
+ * Paleta monocromática: só preto, cinzas e branco, sem matiz (R = G = B em
+ * todo valor). Claro = papel branco e tinta preta; escuro = o inverso, desenhado
+ * à parte (preto suave, não #000, para o texto não "vibrar"). A hierarquia vem
+ * do degrau de cinza, não de cor: destaque, erro e sucesso também são cinzas,
+ * e o sentido continua escrito no texto. Contrastes medidos (WCAG) em
+ * ../../DESIGN.md. Única exceção: os três ícones dos indicadores do repositório
+ * (--stat-*) e o selo de deploy, que usam as cores do GitHub para commit, PR, issue
+ * e deploy concluído.
  */
 :root {
   color-scheme: light;
-  --background: #faf8f4;
-  --foreground: #1d1b17;
-  --card: #f4f0e8;
+  --background: #fafafa;
+  --foreground: #171717;
+  --card: #f3f3f3;
   --card-foreground: var(--foreground);
   --popover: var(--background);
   --popover-foreground: var(--foreground);
@@ -82,17 +86,21 @@
   --primary-foreground: var(--background);
   --secondary: var(--card);
   --secondary-foreground: var(--foreground);
-  --muted: #efeae0;
-  --muted-foreground: #5e584d;
+  --muted: #ebebeb;
+  --muted-foreground: #595959;
   --accent: var(--muted);
   --accent-foreground: var(--foreground);
-  --destructive: #a8321f;
+  --destructive: #000000;
   --destructive-foreground: var(--background);
-  --destructive-surface: #f8e9e4;
-  --success: #2f6a3c;
-  --border: #e2dccf;
-  --input: #958c7c;
-  --highlight: #8a5410;
+  --destructive-surface: #e6e6e6;
+  --success: #3d3d3d;
+  --border: #dcdcdc;
+  --input: #8a8a8a;
+  --highlight: #404040;
+  --stat-commit: #0969da;
+  --stat-pr: #8250df;
+  --stat-issue: #1a7f37;
+  --stat-deploy: #1a7f37;
   --ring: var(--highlight);
   --radius: 0.5rem;
 
@@ -100,29 +108,33 @@
    * Bancada: o painel escuro onde as ferramentas mostram a saída. É escura nos
    * dois temas, então os valores não mudam com data-theme.
    */
-  --bench: #100e0b;
-  --bench-foreground: #ece8e1;
-  --bench-muted: #9b9486;
-  --bench-border: #3a342b;
-  --bench-ok: #8fb98a;
-  --bench-highlight: #e2a85e;
+  --bench: #0a0a0a;
+  --bench-foreground: #ededed;
+  --bench-muted: #9a9a9a;
+  --bench-border: #2e2e2e;
+  --bench-ok: #b8b8b8;
+  --bench-highlight: #ffffff;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --background: #1c1915;
-  --foreground: #ece6da;
-  --card: #24201a;
-  --popover: #24201a;
-  --muted: #28231d;
-  --muted-foreground: #a8a092;
-  --destructive: #ef8a78;
-  --destructive-foreground: #1c1915;
-  --destructive-surface: #3a1d17;
-  --success: #9cc596;
-  --border: #38322a;
-  --input: #6f675a;
-  --highlight: #e2a85e;
+  --background: #121212;
+  --foreground: #ededed;
+  --card: #1b1b1b;
+  --popover: #1b1b1b;
+  --muted: #242424;
+  --muted-foreground: #a3a3a3;
+  --destructive: #ffffff;
+  --destructive-foreground: #121212;
+  --destructive-surface: #2e2e2e;
+  --success: #d0d0d0;
+  --border: #333333;
+  --input: #6e6e6e;
+  --highlight: #d4d4d4;
+  --stat-commit: #58a6ff;
+  --stat-pr: #bc8cff;
+  --stat-issue: #3fb950;
+  --stat-deploy: #3fb950;
 }
 
 @theme inline {
@@ -148,6 +160,10 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-highlight: var(--highlight);
+  --color-stat-commit: var(--stat-commit);
+  --color-stat-pr: var(--stat-pr);
+  --color-stat-issue: var(--stat-issue);
+  --color-stat-deploy: var(--stat-deploy);
 
   --color-bench: var(--bench);
   --color-bench-foreground: var(--bench-foreground);

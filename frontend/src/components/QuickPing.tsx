@@ -11,6 +11,7 @@ const quickTimeout = 2
 
 type Status =
   | { kind: "idle" }
+  | { kind: "empty" }
   | { kind: "loading"; target: string }
   | { kind: "success"; result: PingResult }
   | { kind: "error"; message: string }
@@ -35,8 +36,12 @@ export function QuickPing() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
+    if (loading) return
     const host = target.trim()
-    if (!host || loading) return
+    if (!host) {
+      setStatus({ kind: "empty" })
+      return
+    }
 
     setStatus({ kind: "loading", target: host })
     try {
@@ -68,13 +73,17 @@ export function QuickPing() {
           spellCheck={false}
           placeholder="1.1.1.1 ou github.com"
           value={target}
-          onChange={(event) => setTarget(event.target.value)}
+          aria-invalid={status.kind === "empty" || undefined}
+          onChange={(event) => {
+            setTarget(event.target.value)
+            if (status.kind === "empty") setStatus({ kind: "idle" })
+          }}
           className="min-h-11 min-w-[12rem] flex-1 rounded-md border border-input bg-background px-3 py-2 font-mono text-body-sm text-foreground placeholder:text-muted-foreground sm:min-h-10"
         />
         <Button
           type="submit"
           size="lg"
-          disabled={!target.trim() || loading}
+          disabled={loading}
           className="h-11 sm:h-10"
         >
           {loading ? "Pingando…" : "Pingar"}
@@ -82,6 +91,18 @@ export function QuickPing() {
       </div>
 
       <div aria-live="polite" className="min-h-6 pt-2">
+        {status.kind === "idle" ? (
+          <p className="text-body-sm text-muted-foreground">
+            O teste parte do nosso servidor, não do seu navegador.
+          </p>
+        ) : null}
+
+        {status.kind === "empty" ? (
+          <p role="alert" className="text-body-sm text-destructive">
+            Digite um host ou IP.
+          </p>
+        ) : null}
+
         {status.kind === "loading" ? (
           <p role="status" className={`${lineClass} text-muted-foreground`}>
             Pingando {status.target}…

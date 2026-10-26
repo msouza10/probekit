@@ -14,16 +14,18 @@ import { LanguageBar } from "./LanguageBar"
 const repository = "https://github.com/msouza10/probekit"
 
 const link =
-  "text-foreground underline decoration-highlight/50 underline-offset-[0.2em] transition-colors hover:decoration-highlight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+  "inline-flex items-center pointer-coarse:min-h-11 text-foreground underline decoration-highlight/50 underline-offset-[0.2em] transition-colors hover:decoration-highlight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
 
 function Entry({
   icon: Icon,
+  iconClass,
   count,
   label,
   href,
   note,
 }: {
   icon: LucideIcon
+  iconClass: string
   count: number
   label: string
   href: string
@@ -31,7 +33,10 @@ function Entry({
 }) {
   return (
     <li className="flex items-center gap-1.5">
-      <Icon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+      <Icon
+        aria-hidden="true"
+        className={`h-3.5 w-3.5 shrink-0 ${iconClass}`}
+      />
       <a href={href} target="_blank" rel="noreferrer" className={link}>
         {count} {label}
       </a>
@@ -53,12 +58,14 @@ export function RepoStatsLine({ stats }: { stats: Stats }) {
     >
       <Entry
         icon={GitCommitHorizontal}
+        iconClass="text-stat-commit"
         count={commits}
         label={plural(commits, "commit", "commits")}
         href={`${repository}/commits/main`}
       />
       <Entry
         icon={GitPullRequest}
+        iconClass="text-stat-pr"
         count={prs.total}
         label={plural(prs.total, "PR", "PRs")}
         href={`${repository}/pulls?q=is%3Apr`}
@@ -70,6 +77,7 @@ export function RepoStatsLine({ stats }: { stats: Stats }) {
       />
       <Entry
         icon={CircleDot}
+        iconClass="text-stat-issue"
         count={issues.total}
         label={plural(issues.total, "issue", "issues")}
         href={`${repository}/issues?q=is%3Aissue`}

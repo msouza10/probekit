@@ -55,19 +55,38 @@ describe("QuickPing", () => {
     mockedRunPing.mockReset()
   })
 
-  it("tem o campo rotulado e o botão desligado enquanto está vazio", () => {
+  it("tem o campo rotulado, o botão ativo e diz de onde parte o teste", () => {
     renderQuickPing()
     expect(screen.getByRole("textbox", { name: "Host ou IP" })).toBeVisible()
-    expect(screen.getByRole("button", { name: "Pingar" })).toBeDisabled()
+    expect(screen.getByRole("button", { name: "Pingar" })).toBeEnabled()
+    expect(
+      screen.getByText(
+        "O teste parte do nosso servidor, não do seu navegador.",
+      ),
+    ).toBeInTheDocument()
     expect(mockedRunPing).not.toHaveBeenCalled()
   })
 
-  it("não chama a API com o campo só de espaços", async () => {
+  it("com o campo vazio ou só de espaços, avisa o que digitar e não chama a API", async () => {
     const user = userEvent.setup()
     renderQuickPing()
+    const button = screen.getByRole("button", { name: "Pingar" })
+
+    await user.click(button)
+    expect(screen.getByRole("alert")).toHaveTextContent("Digite um host ou IP.")
+
     await user.type(screen.getByRole("textbox"), "   ")
-    expect(screen.getByRole("button", { name: "Pingar" })).toBeDisabled()
+    await user.click(button)
+    expect(screen.getByRole("alert")).toHaveTextContent("Digite um host ou IP.")
     expect(mockedRunPing).not.toHaveBeenCalled()
+  })
+
+  it("o aviso some assim que a pessoa começa a digitar", async () => {
+    const user = userEvent.setup()
+    renderQuickPing()
+    await user.click(screen.getByRole("button", { name: "Pingar" }))
+    await user.type(screen.getByRole("textbox"), "g")
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument()
   })
 
   it("envia 3 pacotes e mostra o resultado numa linha só", async () => {

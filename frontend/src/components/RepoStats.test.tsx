@@ -13,6 +13,22 @@ const stats = {
 const repo = "https://github.com/msouza10/probekit"
 
 describe("RepoStatsLine", () => {
+  it("dá a cada ícone a sua cor, e só ao ícone", () => {
+    const { container } = render(<RepoStatsLine stats={stats} />)
+    const icons = Array.from(container.querySelectorAll("li > svg"))
+    expect(icons.map((icon) => icon.getAttribute("class"))).toEqual([
+      expect.stringContaining("text-stat-commit"),
+      expect.stringContaining("text-stat-pr"),
+      expect.stringContaining("text-stat-issue"),
+    ])
+    for (const icon of icons)
+      expect(icon).toHaveAttribute("aria-hidden", "true")
+    // O texto do link continua na cor do tema.
+    expect(screen.getByRole("link", { name: "88 commits" })).toHaveClass(
+      "text-foreground",
+    )
+  })
+
   it("mostra commits, PRs e issues, cada um levando à listagem no GitHub", () => {
     render(<RepoStatsLine stats={stats} />)
 
@@ -28,6 +44,13 @@ describe("RepoStatsLine", () => {
       "href",
       `${repo}/issues?q=is%3Aissue`,
     )
+  })
+
+  it("em tela de toque cada link ganha altura de 44px", () => {
+    render(<RepoStatsLine stats={stats} />)
+    for (const link of screen.getAllByRole("link")) {
+      expect(link).toHaveClass("pointer-coarse:min-h-11")
+    }
   })
 
   it("só fala de abertas quando existe alguma", () => {
