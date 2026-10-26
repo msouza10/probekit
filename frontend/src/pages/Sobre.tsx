@@ -43,16 +43,18 @@ const delivery: Layer = {
   tech: [{ logo: "GitHub", label: "GitHub Actions" }],
 }
 
-// DADOS DE EXEMPLO (exceto a foto e o GitHub): trocar o LinkedIn e o texto antes de publicar.
 const author: Author = {
   name: "Marcos Souza",
-  role: "DevOps e infraestrutura",
+  role: "Infraestrutura · Cloud · DevOps",
   photo: "/brand/marcos.webp",
-  bio: "Texto de exemplo: aqui entram duas ou três frases sobre o que eu faço e por que construí o Probekit.",
+  bio: [
+    "Trabalho com infraestrutura de TI há alguns anos, principalmente com Linux, AWS, Azure e automação. Tenho certificações AWS, Microsoft Azure e Linux Essentials, e interesse especial em DevOps e SRE.",
+    "Gosto de desenvolver projetos próprios para explorar tecnologias e colocar ideias em prática. O Probekit nasceu dessa vontade de aprender, experimentar e compartilhar o que construo.",
+  ],
   links: [
     { href: "https://github.com/msouza10", label: "GitHub", icon: "github" },
     {
-      href: "https://www.linkedin.com/in/exemplo",
+      href: "https://www.linkedin.com/in/marcos-vinicius-3905b1206/",
       label: "LinkedIn",
       icon: "linkedin",
     },

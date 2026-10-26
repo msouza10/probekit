@@ -127,7 +127,12 @@ describe("sumário Nesta página", () => {
 })
 
 describe("AuthorCard", () => {
-  const base = { name: "Ana Lima", role: "Dev", bio: "Texto.", links: [] }
+  const base = {
+    name: "Ana Lima",
+    role: "Dev",
+    bio: ["Texto.", "Outro parágrafo."],
+    links: [],
+  }
 
   it("usa a foto quando existe, com texto alternativo", () => {
     render(<AuthorCard author={{ ...base, photo: "/brand/ana.jpg" }} />)

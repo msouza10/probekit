@@ -100,7 +100,15 @@ describe("Sobre", () => {
     expect(
       screen.getByRole("link", { name: /Enviar sugestão/ }),
     ).toHaveAttribute("href", `${repository}/issues`)
-    expect(container.textContent).not.toMatch(/multicloud|\b(AWS|Azure)\b/i)
+    // AWS e Azure só aparecem na biografia (experiência de quem faz), nunca
+    // como parte do projeto.
+    const outsideAuthor = [...container.querySelectorAll("section")]
+      .filter(
+        (section) => section.getAttribute("aria-labelledby") !== "quem-title",
+      )
+      .map((section) => section.textContent)
+      .join(" ")
+    expect(outsideAuthor).not.toMatch(/multicloud|\b(AWS|Azure)\b/i)
   })
 
   it("não repete nenhum id", () => {
@@ -123,5 +131,14 @@ describe("Sobre", () => {
     expect(
       within(section).getByRole("link", { name: "LinkedIn" }),
     ).toBeInTheDocument()
+  })
+
+  it("mantém o papel de cada camada e a apresentação de quem faz", () => {
+    renderPage()
+    expect(screen.getByText("O que você abre no navegador")).toBeInTheDocument()
+    expect(
+      screen.getByText("Infraestrutura · Cloud · DevOps"),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Linux Essentials/)).toBeInTheDocument()
   })
 })
