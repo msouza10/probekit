@@ -42,13 +42,28 @@ describe("Home", () => {
     }
   })
 
-  it("não mostra bancada nem texto de exemplo", () => {
-    const { container } = renderHome()
-    const bench = screen
-      .queryAllByRole("region")
-      .find((region) => region.getAttribute("data-slot") === "bench")
-    expect(bench).toBeUndefined()
-    expect(container.textContent).not.toMatch(/exemplo/i)
+  it("mostra o resultado real de ping e de DNS em duas bancadas, sem rótulo de exemplo nem provedor", () => {
+    renderHome()
+    const benches = screen
+      .getAllByRole("region")
+      .filter((region) => region.getAttribute("data-slot") === "bench")
+
+    expect(benches.map((bench) => bench.getAttribute("aria-label"))).toEqual([
+      "Ping",
+      "DNS Lookup",
+    ])
+    for (const bench of benches) {
+      expect(within(bench).queryByText("exemplo")).not.toBeInTheDocument()
+      expect(within(bench).queryByText("Oracle Cloud")).not.toBeInTheDocument()
+    }
+    expect(within(benches[0]).getByText("1.564151ms")).toBeInTheDocument()
+    expect(within(benches[1]).getByText("172.67.154.227")).toBeInTheDocument()
+  })
+
+  it("não chama a API ao abrir: o exemplo é estático", () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch")
+    renderHome()
+    expect(fetchSpy).not.toHaveBeenCalled()
   })
 
   it("tem um link para a página Arquitetura", () => {
@@ -59,22 +74,16 @@ describe("Home", () => {
     expect(hrefs).toContain("/arquitetura")
   })
 
-  it("mostra o perfil do laboratório com sete pares, na ordem", () => {
-    const { container } = renderHome()
-    const dl = container.querySelector("dl")
+  it("mostra o perfil do laboratório com quatro pares, na ordem", () => {
+    renderHome()
+    const dl = screen
+      .getByRole("region", { name: "Perfil do laboratório" })
+      .querySelector("dl")
     expect(dl).not.toBeNull()
     const labels = Array.from((dl as HTMLElement).querySelectorAll("dt")).map(
       (dt) => dt.textContent,
     )
-    expect(labels).toEqual([
-      "Foco",
-      "API",
-      "Site",
-      "Infraestrutura",
-      "Entrega",
-      "Decisões",
-      "Licença",
-    ])
+    expect(labels).toEqual(["API", "Site", "Decisões", "Licença"])
     expect(
       within(dl as HTMLElement).getByRole("link", { name: "ADRs" }),
     ).toHaveAttribute("href", `${repo}/tree/main/docs/adr`)
@@ -109,11 +118,27 @@ describe("Home", () => {
     expect(owl).not.toBeNull()
     expect(
       within(hero as HTMLElement).getByRole("heading", { level: 1 }),
-    ).toHaveTextContent(/laboratório feito para mim/)
-    expect((hero as HTMLElement).querySelectorAll("p")).toHaveLength(2)
+    ).toHaveTextContent(/Teste um host ou consulte o DNS de um domínio/)
+    expect((hero as HTMLElement).textContent).toMatch(
+      /laboratório feito para mim/,
+    )
+    expect((hero as HTMLElement).querySelectorAll("p")).toHaveLength(1)
     expect(
       within(hero as HTMLElement).getByRole("link", { name: "no GitHub" }),
     ).toHaveAttribute("href", repo)
+  })
+
+  it("oferece no herói as entradas diretas para Ping e DNS Lookup", () => {
+    const { container } = renderHome()
+    const hero = container.querySelector(
+      'section[aria-labelledby="home-title"]',
+    ) as HTMLElement
+    expect(
+      within(hero).getByRole("link", { name: "Pingar um host" }),
+    ).toHaveAttribute("href", "/ping")
+    expect(
+      within(hero).getByRole("link", { name: "Consultar DNS" }),
+    ).toHaveAttribute("href", "/dns-lookup")
   })
 
   it("não chama a API ao montar", () => {

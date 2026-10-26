@@ -208,6 +208,7 @@
   }
   /* Interface: controles e navegação em sans. */
   button,
+  [data-slot="button"],
   input,
   select,
   textarea,
@@ -284,6 +285,63 @@
       background-color 180ms ease,
       border-color 180ms ease,
       color 180ms ease;
+  }
+}
+
+/*
+ * Troca de tema: os dois retratos da página (View Transition API) se
+ * dissolvem com um desfoque curto. Só opacity e filter. O mix-blend-mode
+ * normal desliga o "plus-lighter" padrão, que clarearia a sobreposição.
+ */
+@keyframes theme-blur-out {
+  to {
+    opacity: 0;
+    filter: blur(6px);
+  }
+}
+@keyframes theme-blur-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
+}
+@keyframes theme-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes theme-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 400ms;
+    animation-timing-function: ease;
+  }
+  ::view-transition-old(root) {
+    animation-name: theme-blur-out;
+  }
+  ::view-transition-new(root) {
+    animation-name: theme-blur-in;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.12s;
+  }
+  ::view-transition-old(root) {
+    animation-name: theme-fade-out;
+  }
+  ::view-transition-new(root) {
+    animation-name: theme-fade-in;
   }
 }
 

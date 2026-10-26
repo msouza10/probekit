@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { flushSync } from "react-dom"
 import { Moon, Sun } from "lucide-react"
 
 type Theme = "light" | "dark"
@@ -33,8 +34,17 @@ export function ThemeToggle() {
 
   function toggle() {
     const next = theme === "dark" ? "light" : "dark"
-    applyTheme(next)
-    setTheme(next)
+    const swap = () => {
+      applyTheme(next)
+      setTheme(next)
+    }
+    // A API tira um retrato da tela antes e outro depois do callback; o CSS
+    // anima entre os dois (index.css, "Troca de tema"). Sem ela, troca direta.
+    if (typeof document.startViewTransition === "function") {
+      document.startViewTransition(() => flushSync(swap))
+    } else {
+      swap()
+    }
     try {
       localStorage.setItem(storageKey, next)
     } catch {

@@ -216,6 +216,7 @@ O componente de assinatura. Painel escuro nos dois temas, `md`, borda `bench-lin
 - **Erro:** bloco com borda e texto `error-red` sobre `error-surface`, `role="alert"`.
 - **Carregamento:** `<p role="status">` dentro de um contêiner `aria-live="polite"` sempre montado.
 - **Foco global:** `:focus-visible` com contorno de 2px em `marker-amber` e 4px de recuo.
+- **Troca de tema:** View Transition API; o retrato do tema antigo some e o do novo aparece, com desfoque de 6px (`opacity` e `filter`, 400ms, `ease`). Com `prefers-reduced-motion`, só `opacity` em 0,12s. Sem suporte do navegador, a troca é direta. Nenhuma máscara nem `clip-path`, para ficar dentro da regra de movimento.
 
 ### Diagrama
 Figura com legenda, resumo, svg largo e lista ordenada de passos. Abaixo de 640px a lista de passos é o diagrama (cartões empilhados ligados por seta); acima, a lista fica só para leitores de tela. O movimento é CSS, ligado por `[data-motion="on"]`, e desligado com `prefers-reduced-motion`. Usa só tokens existentes: bloco `card` com borda `rule-line`, zonas tracejadas e ligações em `field-line`, fluxo e setas em `marker-amber`.

@@ -62,7 +62,6 @@ export function Ping() {
           min_rtt: `${simulatedMin}ms`,
           avg_rtt: `${simulatedAvg}ms`,
           max_rtt: `${simulatedMax}ms`,
-          origin_region: "Simulação local",
         })
         setStatus("success")
       } else {

@@ -27,6 +27,34 @@ describe("ThemeToggle", () => {
     expect(localStorage.getItem("probekit-theme")).toBe("light")
   })
 
+  it("applies the theme inside a view transition when the browser has one", async () => {
+    document.documentElement.dataset.theme = "light"
+    let update: (() => void) | undefined
+    const startViewTransition = vi.fn((callback: () => void) => {
+      update = callback
+      return { finished: Promise.resolve() }
+    })
+    Object.defineProperty(document, "startViewTransition", {
+      configurable: true,
+      value: startViewTransition,
+    })
+    const user = userEvent.setup()
+    render(<ThemeToggle />)
+    await user.click(screen.getByRole("switch"))
+
+    expect(startViewTransition).toHaveBeenCalledTimes(1)
+    // O tema só muda dentro do callback: é ele que a API usa para tirar o
+    // retrato do "depois".
+    expect(document.documentElement).toHaveAttribute("data-theme", "light")
+    update?.()
+    expect(document.documentElement).toHaveAttribute("data-theme", "dark")
+    expect(document.documentElement).toHaveClass("dark")
+    expect(screen.getByRole("switch")).toHaveAttribute("aria-checked", "true")
+    expect(localStorage.getItem("probekit-theme")).toBe("dark")
+
+    Reflect.deleteProperty(document, "startViewTransition")
+  })
+
   it("still switches when storage is unavailable", async () => {
     vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
       throw new Error("Storage blocked")

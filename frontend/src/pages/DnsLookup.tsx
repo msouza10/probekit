@@ -95,7 +95,6 @@ export function DnsLookup() {
           ns: [`ns1.${finalDomain}`, `ns2.${finalDomain}`],
           srv: [],
           ip: simulatedIps,
-          origin_region: "Simulação local",
         })
         setStatus("success")
       } else {
