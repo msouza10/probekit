@@ -34,7 +34,7 @@
 }
 
 @theme {
-  /* Tipografia — ver ../design.md. Serifa para ler, sans para operar, mono só para código e dados. */
+  /* Tipografia — ver ../../DESIGN.md. Serifa para ler, sans para operar, mono só para código e dados. */
   --font-serif:
     "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman",
     serif;
@@ -68,7 +68,7 @@
  * Paleta. Claro = papel e tinta de caderno; escuro = o mesmo caderno à noite
  * (marrom-escuro quente, desenhado à parte, não invertido). Uma única cor de
  * destaque, âmbar de marca-texto. Contrastes medidos (WCAG) no relatório da
- * task 1 e em ../design.md.
+ * task 1 e em ../../DESIGN.md.
  */
 :root {
   color-scheme: light;

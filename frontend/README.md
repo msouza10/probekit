@@ -18,7 +18,7 @@ npm run format:check   # verifica formatação sem alterar arquivos
 
 ## Cadeia de design tokens
 
-[`frontend/design.md`](./design.md) é a referência visual do projeto: paleta clara e escura com contrastes medidos, as três famílias de fonte (Newsreader, Inter e JetBrains Mono, hospedadas no site via `@fontsource`), a bancada, as regras de movimento e a lista do que não fazer. Os tokens vivem como variáveis CSS nos blocos `@theme` e `:root` de [`src/index.css`](./src/index.css); as utilities do Tailwind e os componentes shadcn/ui consomem essas variáveis diretamente, então qualquer mudança de token nesse arquivo se propaga para o app inteiro. O teste `src/design-guard.test.ts` impede o retorno de gradiente, sombra e dos nomes antigos de token.
+[`DESIGN.md`](../DESIGN.md), na raiz do repositório, é a referência visual do projeto: paleta clara e escura, as três famílias de fonte (Newsreader, Inter e JetBrains Mono, hospedadas no site via `@fontsource`), a bancada e a lista do que fazer e do que não fazer. Os tokens vivem como variáveis CSS nos blocos `@theme` e `:root` de [`src/index.css`](./src/index.css); as utilities do Tailwind e os componentes shadcn/ui consomem essas variáveis diretamente, então qualquer mudança de token nesse arquivo se propaga para o app inteiro. O teste `src/design-guard.test.ts` impede o retorno de gradiente, sombra e dos nomes antigos de token.
 
 ## Como adicionar uma nova ferramenta
 

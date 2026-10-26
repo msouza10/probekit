@@ -12,14 +12,17 @@ describe("Footer", () => {
     )
 
     expect(screen.getAllByText(/probekit/i)[0]).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: /ping icmp/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Ping" })).toHaveAttribute(
       "href",
       "/ping",
     )
-    expect(screen.getByRole("link", { name: /consulta dns/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "DNS Lookup" })).toHaveAttribute(
       "href",
       "/dns-lookup",
     )
+    expect(
+      screen.getByRole("link", { name: "Todas as ferramentas" }),
+    ).toHaveAttribute("href", "/#ferramentas")
     expect(screen.getByRole("link", { name: /arquitetura/i })).toHaveAttribute(
       "href",
       "/arquitetura",

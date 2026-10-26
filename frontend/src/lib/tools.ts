@@ -15,7 +15,7 @@ export const tools: Tool[] = [
   {
     name: "Ping",
     description:
-      "Latência, perda de pacotes e jitter até um host, medidos com ICMP de verdade.",
+      "O site ou servidor responde? Mostra quanto demora, quantos pacotes se perdem no caminho e quanto o tempo varia.",
     href: "/ping",
     category: "Rede",
     status: "Disponível",
@@ -26,7 +26,7 @@ export const tools: Tool[] = [
   {
     name: "DNS Lookup",
     description:
-      "Registros A, AAAA, CNAME, MX, TXT e NS de um domínio, e SRV quando pedido.",
+      "Que registros um domínio publica? Endereços (A, AAAA), apelidos (CNAME), e-mail (MX), textos (TXT) e servidores de nome (NS); SRV quando pedido.",
     href: "/dns-lookup",
     category: "DNS",
     status: "Disponível",

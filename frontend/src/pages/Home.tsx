@@ -75,33 +75,6 @@ export function Home() {
       </section>
 
       <section
-        aria-labelledby="perfil-title"
-        className="grid gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-x-14"
-      >
-        <h2
-          id="perfil-title"
-          className="max-w-[16ch] text-heading-sm text-foreground lg:pt-1"
-        >
-          Perfil do laboratório
-        </h2>
-        <Reveal>
-          <dl className="max-w-[40rem] border-b border-border">
-            {profile.map(({ term, detail }) => (
-              <div
-                key={term}
-                className="grid gap-x-8 gap-y-1 border-t border-border py-4 sm:grid-cols-[9rem_minmax(0,1fr)]"
-              >
-                <dt className="font-sans text-body-sm font-medium text-foreground">
-                  {term}
-                </dt>
-                <dd className="text-body text-foreground/90">{detail}</dd>
-              </div>
-            ))}
-          </dl>
-        </Reveal>
-      </section>
-
-      <section
         id="ferramentas"
         aria-labelledby="ferramentas-title"
         className="flex flex-col gap-6"
@@ -148,15 +121,42 @@ export function Home() {
           Outras ideias estão anotadas no repositório. Entram aqui quando
           estiverem rodando.
         </p>
-        <p className="font-sans text-body-sm text-muted-foreground">
-          Como tudo isso é montado:{" "}
-          <Link
-            to="/arquitetura"
-            className={`${inlineLink} inline-flex min-h-11 items-center font-medium`}
-          >
-            Arquitetura
-          </Link>
-        </p>
+      </section>
+
+      <section
+        aria-labelledby="perfil-title"
+        className="grid gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-x-14"
+      >
+        <h2
+          id="perfil-title"
+          className="max-w-[16ch] text-heading-sm text-foreground lg:pt-1"
+        >
+          Perfil do laboratório
+        </h2>
+        <Reveal className="flex flex-col gap-4">
+          <dl className="max-w-[40rem] border-b border-border">
+            {profile.map(({ term, detail }) => (
+              <div
+                key={term}
+                className="grid gap-x-8 gap-y-1 border-t border-border py-4 sm:grid-cols-[9rem_minmax(0,1fr)]"
+              >
+                <dt className="font-sans text-body-sm font-medium text-foreground">
+                  {term}
+                </dt>
+                <dd className="text-body text-foreground/90">{detail}</dd>
+              </div>
+            ))}
+          </dl>
+          <p className="font-sans text-body-sm text-muted-foreground">
+            Como tudo isso é montado:{" "}
+            <Link
+              to="/arquitetura"
+              className={`${inlineLink} inline-flex min-h-11 items-center font-medium`}
+            >
+              Arquitetura
+            </Link>
+          </p>
+        </Reveal>
       </section>
     </main>
   )

@@ -103,7 +103,7 @@ export function Header() {
                     onClick={() => setMenuOpen(false)}
                     className="inline-flex min-h-11 items-center text-xs font-medium text-highlight underline underline-offset-4"
                   >
-                    Explorar catálogo
+                    Todas as ferramentas
                   </a>
                 </div>
               </Popover.Content>

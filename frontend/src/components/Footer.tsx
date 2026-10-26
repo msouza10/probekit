@@ -15,9 +15,8 @@ export function Footer() {
             Probekit
           </span>
           <p className="max-w-[44ch] text-body-sm text-muted-foreground">
-            Montei o Probekit como um laboratório para aprender como a rede
-            funciona, testando cada ferramenta na prática. O código está aberto
-            para quem quiser olhar, usar ou sugerir melhorias.
+            Montei o Probekit para aprender como a rede funciona. O código está
+            aberto para quem quiser olhar, usar ou sugerir melhorias.
           </p>
           <a
             href={repository}
@@ -37,17 +36,17 @@ export function Footer() {
           <ul className="flex flex-col">
             <li>
               <Link className={footerLink} to="/ping">
-                Ping ICMP
+                Ping
               </Link>
             </li>
             <li>
               <Link className={footerLink} to="/dns-lookup">
-                Consulta DNS
+                DNS Lookup
               </Link>
             </li>
             <li>
               <a className={footerLink} href="/#ferramentas">
-                Ver catálogo
+                Todas as ferramentas
               </a>
             </li>
           </ul>
