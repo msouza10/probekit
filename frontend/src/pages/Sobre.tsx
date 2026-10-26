@@ -86,7 +86,11 @@ export function Sobre() {
         </p>
       </InfoSection>
 
-      <InfoSection id="decisoes" title="Como as decisões ficam registradas">
+      <InfoSection
+        id="decisoes"
+        title="Como as decisões ficam registradas"
+        tocTitle="Decisões registradas"
+      >
         <p className={prose}>
           Costumo escrever uma especificação antes de construir cada parte e
           registro as escolhas difíceis em ADRs, que são notas curtas sobre o

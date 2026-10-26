@@ -1,11 +1,9 @@
+import { useEffect, useRef, useState } from "react"
 import type { CSSProperties, ReactNode } from "react"
 import { Reveal } from "@/components/Reveal"
 import { inlineLink } from "./classes"
-
-const sectionGrid =
-  "grid gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-x-14"
-const sectionTitle =
-  "flex max-w-[16ch] flex-col gap-1 text-heading-sm text-foreground lg:pt-1"
+import { PageToc } from "./PageToc"
+import { type TocItem, useActiveId } from "./useActiveId"
 
 type InfoPageProps = {
   title: string
@@ -15,47 +13,85 @@ type InfoPageProps = {
 }
 
 /**
- * Esqueleto das páginas informativas (Sobre, Arquitetura): `h1`, abertura e
- * seções. O ritmo vertical mora aqui, como no `ToolPage`, mas com mais ar entre
- * seções, porque cada uma é um bloco de leitura.
+ * Esqueleto das páginas informativas (Sobre, Arquitetura): `h1`, abertura,
+ * seções e o sumário "Nesta página". O sumário é montado a partir das
+ * `InfoSection` da própria página (atributo `data-toc`), então nenhuma página
+ * repete a lista de seções. O ritmo vertical mora aqui, como no `ToolPage`, mas
+ * com mais ar entre seções, porque cada uma é um bloco de leitura.
  */
 export function InfoPage({ title, intro, children }: InfoPageProps) {
+  const main = useRef<HTMLElement>(null)
+  const [items, setItems] = useState<TocItem[]>([])
+  const active = useActiveId(items)
+
+  useEffect(() => {
+    const sections = main.current?.querySelectorAll<HTMLElement>("[data-toc]")
+    setItems(
+      Array.from(sections ?? [], (section) => ({
+        id: section.id,
+        title: section.dataset.toc || "",
+      })).filter((item) => item.id && item.title),
+    )
+  }, [])
+
   return (
-    <main className="flex flex-col gap-12 pt-10 pb-8 sm:gap-16 sm:pt-14">
-      <section aria-labelledby="pagina-title" className="flex flex-col gap-5">
-        <Reveal>
-          <h1
-            id="pagina-title"
-            className="max-w-[20ch] text-[2.125rem] leading-[1.12] font-medium tracking-[-0.02em] text-foreground sm:text-heading-lg"
-          >
-            {title}
-          </h1>
-        </Reveal>
-        <Reveal delay={0.08} className="flex flex-col gap-4">
-          {intro}
-        </Reveal>
-      </section>
-      {children}
+    <main
+      ref={main}
+      className="grid gap-x-14 pt-10 pb-8 sm:pt-14 lg:grid-cols-[minmax(0,1fr)_13rem]"
+    >
+      <div className="flex min-w-0 flex-col gap-12 sm:gap-16">
+        <section aria-labelledby="pagina-title" className="flex flex-col gap-5">
+          <Reveal>
+            <h1
+              id="pagina-title"
+              className="max-w-[20ch] text-[2.125rem] leading-[1.12] font-medium tracking-[-0.02em] text-foreground sm:text-heading-lg"
+            >
+              {title}
+            </h1>
+          </Reveal>
+          <Reveal delay={0.08} className="flex flex-col gap-4">
+            {intro}
+          </Reveal>
+        </section>
+        <PageToc items={items} active={active} variant="inline" />
+        {children}
+      </div>
+      <aside>
+        <div className="sticky top-[calc(var(--header-height)+24px)]">
+          <PageToc items={items} active={active} variant="side" />
+        </div>
+      </aside>
     </main>
   )
 }
 
-/** Seção com o título na coluna da esquerda e o conteúdo na da direita. */
+/** Seção com o título em cima e o conteúdo logo abaixo, numa coluna só. */
 export function InfoSection({
   id,
   title,
+  tocTitle,
   number,
   children,
 }: {
   id: string
   title: string
+  // Nome mais curto no sumário, quando o título é longo.
+  tocTitle?: string
   // Número decorativo acima do título ("01"); some para leitores de tela.
   number?: string
   children: ReactNode
 }) {
   return (
-    <section aria-labelledby={`${id}-title`} className={sectionGrid}>
-      <h2 id={`${id}-title`} className={sectionTitle}>
+    <section
+      id={id}
+      data-toc={tocTitle ?? title}
+      aria-labelledby={`${id}-title`}
+      className="flex scroll-mt-[calc(var(--header-height)+24px)] flex-col gap-5 border-t border-border pt-8"
+    >
+      <h2
+        id={`${id}-title`}
+        className="flex flex-col gap-1 text-heading-sm text-foreground"
+      >
         {number ? (
           <span
             aria-hidden="true"

@@ -253,12 +253,13 @@ Regras do padrão: o veredicto vem primeiro e diz o que aconteceu com o destino;
 
 ### Página informativa (padrão)
 Sobre, Arquitetura e as páginas de texto futuras seguem um esqueleto, montado com os componentes de `components/page/`:
-1. **`InfoPage`**: o `<main>`, o `h1` (máx. 20ch) e a abertura em `text-body-lg` apagado, com no máximo dois parágrafos. Ritmo vertical `gap-12`, `sm:gap-16` e `pt-10`, `sm:pt-14`, sem margem própria da página.
-2. **`InfoSection`**: título `h2` na coluna da esquerda (15rem) e conteúdo na da direita; em tela estreita, empilha. O número ("01") é opcional e decorativo.
-3. **`FactList`**: termo e detalhe com linha fina entre os itens, para stack e princípios.
-4. **`SourceLinks`**: links do repositório no fim da seção, em sans, abrindo em outra aba; apontam para o arquivo exato (por exemplo, o ADR certo), não para a pasta inteira.
+1. **`InfoPage`**: o `<main>`, o `h1` (máx. 20ch) e a abertura em `text-body-lg` apagado, com no máximo dois parágrafos. No desktop (lg), duas colunas: o conteúdo, flexível, e o sumário, de 13rem. Ritmo vertical `gap-12`, `sm:gap-16` e `pt-10`, `sm:pt-14`, sem margem própria da página.
+2. **`InfoSection`**: uma coluna só. Linha fina em cima, o número opcional ("01", decorativo), o título `h2` e, logo abaixo dele, o conteúdo. O título nunca fica ao lado do texto. Cada seção tem `id` e `scroll-margin-top` igual à altura do cabeçalho mais 24px, para o link do sumário não esconder o título. Título longo aceita um nome curto no sumário (`tocTitle`).
+3. **`PageToc`** ("Nesta página"): sumário montado sozinho a partir das `InfoSection` da página (atributo `data-toc`), sem lista repetida. No desktop fica na lateral direita, fixo ao rolar (`sticky`, abaixo do cabeçalho); em tela estreita vira um bloco recolhido (`details`) logo depois da abertura. O item da seção atual leva `aria-current="location"`, traço de 2px em `foreground` e peso 500; os outros ficam em tinta apagada. A seção atual é a última cujo topo passou da linha de leitura (160px do topo), e a última seção quando a página chega ao fim; antes da primeira, nenhuma. Alvo de toque de 44px com ponteiro grosso.
+4. **`FactList`**: termo e detalhe com linha fina entre os itens, para stack e princípios.
+5. **`SourceLinks`**: links do repositório no fim da seção, em sans, abrindo em outra aba; apontam para o arquivo exato (por exemplo, o ADR certo), não para a pasta inteira.
 
-Regras: cada parágrafo só afirma o que está no repositório (código, workflows, ADRs ou Terraform) e é conferido contra ele quando o código muda; links internos usam `Link` do roteador e links externos só vão para o repositório do projeto; texto em primeira pessoa, sem prometer o que não existe.
+Regras: cada parágrafo só afirma o que está no repositório (código, workflows, ADRs ou Terraform) e é conferido contra ele quando o código muda; links internos usam `Link` do roteador e links externos só vão para o repositório do projeto; texto em primeira pessoa, sem prometer o que não existe. Página de texto com mais de uma seção usa o sumário; página de uma seção só, não.
 
 ### Estados
 - **Erro de ferramenta** (falha nossa ou do pedido): `ResultStatus` em tom cinza (`role="alert"`), com a mensagem, o código em `code` e um botão de nova tentativa. Sem bloco com borda vermelha; `error-ink` e `error-surface` ficam para erros de formulário simples (por exemplo, o campo vazio do ping rápido).
