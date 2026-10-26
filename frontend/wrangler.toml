@@ -12,5 +12,8 @@ routes = [
 # Worker só de arquivos estáticos (sem código): serve o build do Vite.
 [assets]
 directory = "./dist"
-# SPA: rotas como /ping e /dns-lookup caem no index.html e o React Router assume.
-not_found_handling = "single-page-application"
+# O build (npm run build) gera um HTML por rota (ping.html, sobre.html...) e um
+# 404.html; com o html_handling padrão, /ping serve ping.html. Qualquer outro
+# endereço recebe o 404.html com status 404 de verdade (sem soft 404 para os
+# buscadores). O React Router assume no navegador depois de carregar.
+not_found_handling = "404-page"

@@ -1,0 +1,126 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=JetBrains+Mono:wght@400&display=swap');
+.pk{font-family:'Inter',system-ui,sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased;background:#faf8f4;color:#1c1b19;padding:30px 36px 40px}
+.pk *{box-sizing:border-box}
+.pk h3.t{font-family:'Newsreader',serif;font-size:22px;font-weight:500;margin:0 0 4px}
+.pk p.d{font-family:'Newsreader',serif;font-size:16.5px;color:#4a463f;margin:0 0 16px;max-width:560px}
+.pk svg{width:100%;height:auto;display:block}
+.pk svg text{font-family:'Inter',sans-serif}
+.pk .serif{font-family:'Newsreader',serif !important}
+.pk .mono{font-family:'JetBrains Mono',monospace !important}
+.pk .box{fill:#fffdf9;stroke:#cfc8b8;stroke-width:1.2}
+.pk .zone{fill:none;stroke:#d9d2c2;stroke-width:1.2;stroke-dasharray:3 5}
+.pk .zl{font-size:11px;letter-spacing:.08em;fill:#8a857a;text-transform:uppercase}
+.pk .nl{font-size:14px;fill:#1c1b19;font-weight:500}
+.pk .ns{font-size:11px;fill:#8a857a}
+.pk .line{fill:none;stroke:#b9b1a0;stroke-width:1.4}
+.pk .flow{fill:none;stroke:#8a5410;stroke-width:1.6;stroke-dasharray:4 7;animation:dash 1.6s linear infinite}
+@keyframes dash{to{stroke-dashoffset:-22}}
+.pk .gate{fill:#fffdf9;stroke:#8a5410;stroke-width:1.4;animation:gate 3.6s ease-in-out infinite}
+@keyframes gate{0%,100%{fill:#fffdf9}45%,60%{fill:#f3e3c8}}
+.pk .draw{stroke-dasharray:300;stroke-dashoffset:300;animation:draw 1.4s ease-out forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.pk .pop{opacity:0;animation:pop .6s ease-out forwards}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.pk .vm{animation:vm 3s ease-in-out infinite}
+@keyframes vm{0%,100%{stroke:#cfc8b8}50%{stroke:#8a5410}}
+.pk .hit:hover .box{stroke:#8a5410}
+.pk .section{margin:0 0 44px}
+.pk .cap{font-size:12.5px;color:#8a857a;margin-top:8px}
+@media (prefers-reduced-motion: reduce){.pk .flow,.pk .gate,.pk .vm,.pk .draw,.pk .pop{animation:none;opacity:1;stroke-dashoffset:0}}
+</style>
+
+<h2>Diagramas com movimento (mockup animado)</h2>
+<p class="subtitle">Três diagramas para a seção "Como é feito". O movimento mostra o fluxo: pacotes que viajam, o portão de aprovação que "segura" o deploy, os recursos que o Terraform cria um a um. Passe o mouse nos blocos. Diga no terminal o que manter, o que cortar e se o movimento está demais ou de menos.</p>
+
+<div class="options" style="margin-bottom:18px">
+  <div class="option" data-choice="calmo" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content"><h3>Nesse nível de movimento está bom</h3><p>Linhas que fluem, pacotes que viajam e blocos que aparecem em sequência.</p></div>
+  </div>
+  <div class="option" data-choice="mais" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content"><h3>Quero mais vida</h3><p>Mais efeitos: interação ao passar o mouse, passos que se acendem um a um, mais detalhe.</p></div>
+  </div>
+  <div class="option" data-choice="menos" onclick="toggleSelect(this)">
+    <div class="letter">3</div>
+    <div class="content"><h3>Quero mais contido</h3><p>Os diagramas ficam parados e só se desenham quando aparecem na tela.</p></div>
+  </div>
+</div>
+
+<div class="mockup"><div class="mockup-header">Como é feito — três diagramas</div><div class="mockup-body" style="padding:0">
+<div class="pk">
+
+  <!-- 1. Arquitetura -->
+  <div class="section">
+    <h3 class="t">Arquitetura</h3>
+    <p class="d">O site é estático e vive na borda da Cloudflare. Quando alguém pede um teste, o navegador chama a API, que passa por um balanceador e cai numa das duas VMs em Go.</p>
+    <svg viewBox="0 0 780 300" role="img" aria-label="Diagrama da arquitetura: navegador, Cloudflare (Worker e proxy da API), balanceador e duas VMs em Go na Oracle Cloud, em São Paulo">
+      <rect class="zone" x="160" y="28" width="210" height="244" rx="10"/><text class="zl" x="176" y="50">Cloudflare</text>
+      <rect class="zone" x="420" y="28" width="345" height="244" rx="10"/><text class="zl" x="436" y="50">Oracle Cloud · São Paulo</text>
+
+      <g class="hit"><rect class="box" x="20" y="116" width="110" height="64" rx="8"/><text class="nl" x="75" y="144" text-anchor="middle">Navegador</text><text class="ns" x="75" y="162" text-anchor="middle">você</text></g>
+      <g class="hit"><rect class="box" x="180" y="66" width="170" height="62" rx="8"/><text class="nl" x="265" y="93" text-anchor="middle">Worker</text><text class="ns" x="265" y="111" text-anchor="middle">este site, estático</text></g>
+      <g class="hit"><rect class="box" x="180" y="176" width="170" height="62" rx="8"/><text class="nl" x="265" y="203" text-anchor="middle">Proxy da API</text><text class="ns mono" x="265" y="221" text-anchor="middle">api.probekit.cc</text></g>
+      <g class="hit"><rect class="box" x="440" y="126" width="110" height="64" rx="8"/><text class="nl" x="495" y="154" text-anchor="middle">Balanceador</text><text class="ns" x="495" y="172" text-anchor="middle">TCP 443</text></g>
+      <g class="hit"><rect class="box vm" x="620" y="64" width="125" height="62" rx="8"/><text class="nl" x="682" y="91" text-anchor="middle">VM 1</text><text class="ns" x="682" y="109" text-anchor="middle">API em Go</text></g>
+      <g class="hit"><rect class="box vm" x="620" y="178" width="125" height="62" rx="8" style="animation-delay:1.5s"/><text class="nl" x="682" y="205" text-anchor="middle">VM 2</text><text class="ns" x="682" y="223" text-anchor="middle">API em Go</text></g>
+
+      <path id="a1" class="line" d="M130 140 C155 140 160 100 180 97"/>
+      <path id="a2" class="line" d="M130 156 C155 156 160 200 180 207"/>
+      <path id="a3" class="line" d="M350 207 C395 207 400 165 440 160"/>
+      <path id="a4" class="line" d="M550 150 C585 150 590 105 620 95"/>
+      <path id="a5" class="line" d="M550 166 C585 166 590 205 620 209"/>
+      <path class="flow" d="M130 156 C155 156 160 200 180 207"/><path class="flow" d="M350 207 C395 207 400 165 440 160"/><path class="flow" d="M550 150 C585 150 590 105 620 95"/><path class="flow" d="M550 166 C585 166 590 205 620 209"/>
+      <circle r="4.5" fill="#8a5410"><animateMotion dur="3.2s" repeatCount="indefinite" begin="0s"><mpath href="#a2"/></animateMotion></circle>
+      <circle r="4.5" fill="#8a5410"><animateMotion dur="3.2s" repeatCount="indefinite" begin="0.8s"><mpath href="#a3"/></animateMotion></circle>
+      <circle r="4.5" fill="#8a5410"><animateMotion dur="3.2s" repeatCount="indefinite" begin="1.6s"><mpath href="#a4"/></animateMotion></circle>
+      <circle r="3.5" fill="#6b675f"><animateMotion dur="3.2s" repeatCount="indefinite" begin="0.4s"><mpath href="#a1"/></animateMotion></circle>
+    </svg>
+    <div class="cap">Cinza: o site chegando. Laranja: um pedido de teste indo até a API.</div>
+  </div>
+
+  <!-- 2. Pipeline -->
+  <div class="section">
+    <h3 class="t">Pipeline</h3>
+    <p class="d">Um pull request roda os testes. Na <span class="mono" style="font-size:14px">main</span>, a API ganha uma release e o site passa por um portão de aprovação antes do deploy. Se algo der errado, há rollback.</p>
+    <svg viewBox="0 0 780 250" role="img" aria-label="Diagrama do pipeline: pull request, CI com Go, NPM e Terraform, main, release da API, build do site, aprovação, deploy e rollback">
+      <g class="hit"><rect class="box" x="10" y="95" width="104" height="58" rx="8"/><text class="nl" x="62" y="121" text-anchor="middle">Pull request</text><text class="ns" x="62" y="139" text-anchor="middle">mudança</text></g>
+      <g class="hit"><rect class="box" x="164" y="85" width="140" height="78" rx="8"/><text class="nl" x="234" y="111" text-anchor="middle">CI</text><text class="ns" x="234" y="130" text-anchor="middle">Go · NPM · Terraform</text><text class="ns" x="234" y="147" text-anchor="middle">testes e checagens</text></g>
+      <g class="hit"><rect class="box" x="354" y="95" width="84" height="58" rx="8"/><text class="nl mono" x="396" y="129" text-anchor="middle">main</text></g>
+
+      <g class="hit"><rect class="box" x="490" y="30" width="130" height="58" rx="8"/><text class="nl" x="555" y="56" text-anchor="middle">Release da API</text><text class="ns" x="555" y="74" text-anchor="middle">binário versionado</text></g>
+      <g class="hit"><rect class="box" x="490" y="160" width="100" height="58" rx="8"/><text class="nl" x="540" y="186" text-anchor="middle">Build</text><text class="ns" x="540" y="204" text-anchor="middle">do site</text></g>
+      <g class="hit"><rect class="gate" x="624" y="160" width="62" height="58" rx="29"/><text class="nl" x="655" y="186" text-anchor="middle">OK?</text><text class="ns" x="655" y="204" text-anchor="middle">aprovação</text></g>
+      <g class="hit"><rect class="box" x="706" y="160" width="68" height="58" rx="8"/><text class="nl" x="740" y="195" text-anchor="middle">Deploy</text></g>
+
+      <path id="p1" class="line" d="M114 124 L164 124"/><path id="p2" class="line" d="M304 124 L354 124"/>
+      <path id="p3" class="line" d="M438 118 C465 118 465 62 490 60"/><path id="p4" class="line" d="M438 130 C465 130 465 188 490 190"/>
+      <path id="p5" class="line" d="M590 189 L624 189"/><path id="p6" class="line" d="M686 189 L706 189"/>
+      <path class="line" stroke-dasharray="4 5" d="M740 220 C740 245 540 248 540 222"/><text class="ns" x="640" y="244" text-anchor="middle">rollback</text>
+      <path class="flow" d="M114 124 L164 124"/><path class="flow" d="M304 124 L354 124"/><path class="flow" d="M438 118 C465 118 465 62 490 60"/><path class="flow" d="M438 130 C465 130 465 188 490 190"/><path class="flow" d="M590 189 L624 189"/>
+      <circle r="5" fill="#8a5410"><animateMotion dur="5s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear" path="M62 124 L164 124 L304 124 L396 124 C440 130 465 188 490 190 L540 190 L655 190 L740 190"/></circle>
+    </svg>
+    <div class="cap">O ponto laranja é uma mudança atravessando o pipeline; o portão "OK?" é onde o deploy espera por aprovação.</div>
+  </div>
+
+  <!-- 3. Terraform -->
+  <div class="section">
+    <h3 class="t">Infraestrutura</h3>
+    <p class="d">Rede, duas VMs, balanceador e o registro de DNS da API saem de código Terraform. O estado fica num bucket remoto, então dá para destruir e recriar tudo.</p>
+    <svg viewBox="0 0 780 270" role="img" aria-label="Diagrama do Terraform: arquivos .tf, plan e apply, criando rede, duas VMs e balanceador na OCI e o registro DNS da API na Cloudflare, com o estado em um bucket">
+      <g class="hit"><rect class="box" x="10" y="106" width="110" height="58" rx="8"/><text class="nl mono" x="65" y="132" text-anchor="middle">*.tf</text><text class="ns" x="65" y="150" text-anchor="middle">o código</text></g>
+      <g class="hit"><rect class="box" x="170" y="106" width="130" height="58" rx="8"/><text class="nl mono" x="235" y="132" text-anchor="middle">plan → apply</text><text class="ns" x="235" y="150" text-anchor="middle">terraform</text></g>
+      <path class="line draw" d="M120 135 L170 135"/><path class="line draw" style="animation-delay:.3s" d="M300 135 C340 135 345 70 390 70"/><path class="line draw" style="animation-delay:.4s" d="M300 135 C340 135 345 135 390 135"/><path class="line draw" style="animation-delay:.5s" d="M300 135 C340 135 345 200 390 200"/>
+      <rect class="zone" x="380" y="20" width="390" height="150" rx="10"/><text class="zl" x="396" y="42">Oracle Cloud</text>
+      <g class="pop" style="animation-delay:.9s"><rect class="box" x="396" y="56" width="110" height="46" rx="8"/><text class="nl" x="451" y="84" text-anchor="middle">Rede</text></g>
+      <g class="pop" style="animation-delay:1.3s"><rect class="box" x="520" y="56" width="110" height="46" rx="8"/><text class="nl" x="575" y="84" text-anchor="middle">2 VMs</text></g>
+      <g class="pop" style="animation-delay:1.7s"><rect class="box" x="644" y="56" width="112" height="46" rx="8"/><text class="nl" x="700" y="84" text-anchor="middle">Balanceador</text></g>
+      <rect class="zone" x="380" y="182" width="190" height="72" rx="10"/><text class="zl" x="396" y="203">Cloudflare</text>
+      <g class="pop" style="animation-delay:2.1s"><rect class="box" x="396" y="210" width="158" height="36" rx="8"/><text class="nl mono" x="475" y="233" text-anchor="middle" style="font-size:12.5px">DNS api (proxied)</text></g>
+      <g class="pop" style="animation-delay:2.5s"><rect class="box" x="600" y="196" width="156" height="50" rx="8" stroke-dasharray="4 4"/><text class="nl" x="678" y="218" text-anchor="middle">Estado remoto</text><text class="ns" x="678" y="234" text-anchor="middle">bucket na OCI</text></g>
+    </svg>
+    <div class="cap">Os recursos aparecem em sequência, como num <span class="mono">apply</span>. O site em si (o Worker) é publicado pelo pipeline, não pelo Terraform.</div>
+  </div>
+
+</div></div></div>

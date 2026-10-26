@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { flushSync } from "react-dom"
 import { Moon, Sun } from "lucide-react"
 
 type Theme = "light" | "dark"
@@ -10,11 +11,14 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(() =>
-    document.documentElement.dataset.theme === "light" ? "light" : "dark",
-  )
+  // No servidor não há documento: começa em "dark" (igual ao HTML
+  // pré-renderizado) e o efeito lê o tema que o script do index.html aplicou.
+  const [theme, setTheme] = useState<Theme>("dark")
 
   useEffect(() => {
+    setTheme(
+      document.documentElement.dataset.theme === "light" ? "light" : "dark",
+    )
     const media = window.matchMedia?.("(prefers-color-scheme: dark)")
     if (!media) return
     const followSystem = () => {
@@ -33,8 +37,17 @@ export function ThemeToggle() {
 
   function toggle() {
     const next = theme === "dark" ? "light" : "dark"
-    applyTheme(next)
-    setTheme(next)
+    const swap = () => {
+      applyTheme(next)
+      setTheme(next)
+    }
+    // A API tira um retrato da tela antes e outro depois do callback; o CSS
+    // anima entre os dois (index.css, "Troca de tema"). Sem ela, troca direta.
+    if (typeof document.startViewTransition === "function") {
+      document.startViewTransition(() => flushSync(swap))
+    } else {
+      swap()
+    }
     try {
       localStorage.setItem(storageKey, next)
     } catch {
@@ -50,19 +63,19 @@ export function ThemeToggle() {
       aria-label="Modo escuro"
       title={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}
       onClick={toggle}
-      className="theme-toggle relative flex h-9 w-16 shrink-0 items-center justify-between rounded-full border border-border bg-muted px-2"
+      className="relative flex h-9 w-16 shrink-0 items-center justify-between rounded-full border border-border bg-muted px-2"
     >
       <span
         aria-hidden="true"
-        className={`theme-toggle-thumb absolute top-1 h-7 w-7 rounded-full border border-border bg-card shadow-sm ${theme === "dark" ? "left-[31px]" : "left-1"}`}
+        className={`absolute top-1 h-7 w-7 rounded-full border border-input bg-background motion-safe:transition-[left] motion-safe:duration-150 ${theme === "dark" ? "left-[31px]" : "left-1"}`}
       />
       <Sun
         aria-hidden="true"
-        className={`relative h-4 w-4 ${theme === "light" ? "text-blue-cornflower" : "text-fog"}`}
+        className={`relative h-4 w-4 ${theme === "light" ? "text-highlight" : "text-muted-foreground"}`}
       />
       <Moon
         aria-hidden="true"
-        className={`relative h-4 w-4 ${theme === "dark" ? "text-blue-cornflower" : "text-fog"}`}
+        className={`relative h-4 w-4 ${theme === "dark" ? "text-highlight" : "text-muted-foreground"}`}
       />
     </button>
   )

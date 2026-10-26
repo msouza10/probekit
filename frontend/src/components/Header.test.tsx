@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
 import { describe, expect, it } from "vitest"
@@ -15,6 +15,20 @@ describe("Header", () => {
     expect(link).toHaveAttribute("href", "/")
   })
 
+  it("mostra o rótulo da busca só a partir de md (640px não quebra)", () => {
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+    const button = screen.getByRole("button", { name: "Buscar ferramentas" })
+    expect(button).toHaveAttribute("aria-label", "Buscar ferramentas")
+    const label = within(button).getByText("Buscar ferramenta…")
+    expect(label.tagName).toBe("SPAN")
+    expect(label).toHaveClass("hidden", "md:inline")
+    expect(label).not.toHaveClass("sm:inline")
+  })
+
   it("renders a link to the Sobre page", () => {
     render(
       <MemoryRouter>
@@ -23,6 +37,16 @@ describe("Header", () => {
     )
     const link = screen.getByRole("link", { name: /sobre/i })
     expect(link).toHaveAttribute("href", "/sobre")
+  })
+
+  it("renders a link to the Arquitetura page", () => {
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+    const link = screen.getByRole("link", { name: /arquitetura/i })
+    expect(link).toHaveAttribute("href", "/arquitetura")
   })
 
   it("opens the Ferramentas dropdown and links to each tool", async () => {
@@ -45,7 +69,57 @@ describe("Header", () => {
   })
 })
 
+describe("Header navegação", () => {
+  it("não oferece Artigos nem Linha do tempo", async () => {
+    const user = userEvent.setup()
+    const { container } = render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+    await user.click(screen.getByRole("button", { name: /^ferramentas$/i }))
+    expect(container.textContent).not.toMatch(/artigos|linha do tempo/i)
+    expect(document.body.textContent).not.toMatch(/artigos|linha do tempo/i)
+  })
+
+  it("a navegação principal tem Ferramentas, Arquitetura e Sobre", () => {
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+    const nav = screen.getByRole("navigation", { name: "Navegação principal" })
+    expect(within(nav).getAllByRole("link")).toHaveLength(2)
+    expect(within(nav).getAllByRole("button")).toHaveLength(1)
+  })
+})
+
 describe("Header search", () => {
+  it("encontra DNS e abre /dns-lookup", async () => {
+    const user = userEvent.setup()
+    render(
+      <MemoryRouter>
+        <Header />
+        <Routes>
+          <Route path="/dns-lookup" element={<h1>Consulta DNS</h1>} />
+          <Route path="/" element={null} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    await user.click(screen.getByRole("button", { name: "Buscar ferramentas" }))
+    await user.type(
+      screen.getByRole("textbox", { name: "Pesquisar ferramentas" }),
+      "DNS",
+    )
+    expect(
+      screen.getByRole("button", { name: /DNS Lookup/ }),
+    ).toBeInTheDocument()
+    await user.keyboard("{Enter}")
+    expect(
+      screen.getByRole("heading", { name: "Consulta DNS" }),
+    ).toBeInTheDocument()
+  })
+
   it("filters by unaccented terms and opens a result with Enter", async () => {
     const user = userEvent.setup()
     render(

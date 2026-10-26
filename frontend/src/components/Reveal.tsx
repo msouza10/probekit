@@ -1,43 +1,35 @@
-import {
-  useEffect,
-  useRef,
-  useState,
-  type ComponentPropsWithoutRef,
-} from "react"
+import { motion, useReducedMotion } from "motion/react"
+import type { ReactNode } from "react"
+import { entrance, useHasObserver } from "@/lib/motion"
 
-/** Progressive enhancement: content stays visible without observer support. */
-export function Reveal({
-  className = "",
-  ...props
-}: ComponentPropsWithoutRef<"div">) {
-  const ref = useRef<HTMLDivElement>(null)
-  const [visible, setVisible] = useState(false)
+type RevealProps = {
+  delay?: number
+  className?: string
+  children: ReactNode
+}
 
-  useEffect(() => {
-    if (
-      !ref.current ||
-      typeof IntersectionObserver === "undefined" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    )
-      return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true)
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.08 },
-    )
-    observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [])
-
+/** Entra ao rolar para a viewport, uma única vez. */
+export function Reveal({ delay = 0, className, children }: RevealProps) {
+  const { initial, animate, transition } = entrance(
+    useReducedMotion() ?? false,
+    delay,
+  )
+  // Sem IntersectionObserver (jsdom, servidor, hidratação) o conteúdo fica
+  // visível e parado: o mesmo `motion.div`, só sem as props de animação.
+  const animated = useHasObserver()
   return (
-    <div
-      ref={ref}
-      className={`${className} ${visible ? "reveal-visible" : ""}`}
-      {...props}
-    />
+    <motion.div
+      className={className}
+      {...(animated
+        ? {
+            initial,
+            whileInView: animate,
+            viewport: { once: true, amount: 0.08 },
+            transition,
+          }
+        : {})}
+    >
+      {children}
+    </motion.div>
   )
 }

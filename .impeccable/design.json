@@ -1,0 +1,1078 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-26T22:33:18Z",
+  "title": "Design System: Probekit",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Papel",
+        "canonical": "oklch(98.5% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Tinta",
+        "canonical": "oklch(20.5% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "card-paper": {
+        "role": "neutral",
+        "displayName": "Papel de Cartão",
+        "canonical": "oklch(96.4% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "muted-paper": {
+        "role": "neutral",
+        "displayName": "Papel Apagado",
+        "canonical": "oklch(94.0% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "muted-ink": {
+        "role": "neutral",
+        "displayName": "Tinta Apagada",
+        "canonical": "oklch(46.4% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "rule-line": {
+        "role": "neutral",
+        "displayName": "Linha de Caderno",
+        "canonical": "oklch(89.4% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "field-line": {
+        "role": "neutral",
+        "displayName": "Linha de Campo",
+        "canonical": "oklch(63.3% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "marker-gray": {
+        "role": "secondary",
+        "displayName": "Cinza de Destaque",
+        "canonical": "oklch(37.1% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "error-ink": {
+        "role": "functional",
+        "displayName": "Tinta de Erro",
+        "canonical": "oklch(0.0% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "error-surface": {
+        "role": "functional",
+        "displayName": "Superfície de Erro",
+        "canonical": "oklch(92.5% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "success-gray": {
+        "role": "functional",
+        "displayName": "Cinza de Sucesso",
+        "canonical": "oklch(36.0% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "night-paper": {
+        "role": "neutral",
+        "displayName": "Papel (noite)",
+        "canonical": "oklch(18.2% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "night-ink": {
+        "role": "primary",
+        "displayName": "Tinta (noite)",
+        "canonical": "oklch(94.6% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "night-card": {
+        "role": "neutral",
+        "displayName": "Papel de Cartão (noite)",
+        "canonical": "oklch(22.2% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "night-muted": {
+        "role": "neutral",
+        "displayName": "Papel Apagado (noite)",
+        "canonical": "oklch(26.0% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "night-muted-ink": {
+        "role": "neutral",
+        "displayName": "Tinta Apagada (noite)",
+        "canonical": "oklch(71.5% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "night-rule-line": {
+        "role": "neutral",
+        "displayName": "Linha de Caderno (noite)",
+        "canonical": "oklch(32.1% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "night-field-line": {
+        "role": "neutral",
+        "displayName": "Linha de Campo (noite)",
+        "canonical": "oklch(53.8% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "night-marker-gray": {
+        "role": "secondary",
+        "displayName": "Cinza de Destaque (noite)",
+        "canonical": "oklch(87.0% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "night-error-ink": {
+        "role": "functional",
+        "displayName": "Tinta de Erro (noite)",
+        "canonical": "oklch(100.0% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "night-error-surface": {
+        "role": "functional",
+        "displayName": "Superfície de Erro (noite)",
+        "canonical": "oklch(30.1% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "night-success-gray": {
+        "role": "functional",
+        "displayName": "Cinza de Sucesso (noite)",
+        "canonical": "oklch(85.8% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "stat-commit": {
+        "role": "accent",
+        "displayName": "Azul do Commit",
+        "canonical": "oklch(54.0% 0.191 257)",
+        "tonalRamp": [
+          "#000a22",
+          "#022350",
+          "#043e86",
+          "#025cc3",
+          "#287ef1",
+          "#69a6fd",
+          "#a9cbfd",
+          "#e5effe"
+        ]
+      },
+      "stat-pr": {
+        "role": "accent",
+        "displayName": "Roxo do PR",
+        "canonical": "oklch(56.3% 0.207 295)",
+        "tonalRamp": [
+          "#100028",
+          "#2e0161",
+          "#5001a1",
+          "#6e38c7",
+          "#8f5eee",
+          "#ad8ffb",
+          "#cdbefc",
+          "#efecfe"
+        ]
+      },
+      "stat-issue": {
+        "role": "accent",
+        "displayName": "Verde da Issue",
+        "canonical": "oklch(52.4% 0.140 148)",
+        "tonalRamp": [
+          "#001002",
+          "#032e0e",
+          "#07501e",
+          "#06752e",
+          "#3a984f",
+          "#60bd71",
+          "#85e294",
+          "#c9ffcf"
+        ]
+      },
+      "stat-deploy": {
+        "role": "accent",
+        "displayName": "Verde do Deploy",
+        "canonical": "oklch(52.4% 0.140 148)",
+        "tonalRamp": [
+          "#001002",
+          "#032e0e",
+          "#07501e",
+          "#06752e",
+          "#3a984f",
+          "#60bd71",
+          "#85e294",
+          "#c9ffcf"
+        ]
+      },
+      "night-stat-commit": {
+        "role": "accent",
+        "displayName": "Azul do Commit (noite)",
+        "canonical": "oklch(71.5% 0.152 253)",
+        "tonalRamp": [
+          "#000b1e",
+          "#02254a",
+          "#05427c",
+          "#0361b4",
+          "#3584da",
+          "#61a8fb",
+          "#a5cdfc",
+          "#e4f0fe"
+        ]
+      },
+      "night-stat-pr": {
+        "role": "accent",
+        "displayName": "Roxo do PR (noite)",
+        "canonical": "oklch(73.2% 0.167 302)",
+        "tonalRamp": [
+          "#120026",
+          "#330359",
+          "#541d89",
+          "#7442ae",
+          "#9565d4",
+          "#b989fb",
+          "#d4bbfd",
+          "#f1ebfe"
+        ]
+      },
+      "night-stat-issue": {
+        "role": "accent",
+        "displayName": "Verde da Issue (noite)",
+        "canonical": "oklch(69.5% 0.181 146)",
+        "tonalRamp": [
+          "#001002",
+          "#002f08",
+          "#005114",
+          "#0f7525",
+          "#159d33",
+          "#49c258",
+          "#71e77c",
+          "#caffcb"
+        ]
+      },
+      "night-stat-deploy": {
+        "role": "accent",
+        "displayName": "Verde do Deploy (noite)",
+        "canonical": "oklch(69.5% 0.181 146)",
+        "tonalRamp": [
+          "#001002",
+          "#002f08",
+          "#005114",
+          "#0f7525",
+          "#159d33",
+          "#49c258",
+          "#71e77c",
+          "#caffcb"
+        ]
+      },
+      "status-up": {
+        "role": "accent",
+        "displayName": "Verde de Resposta",
+        "canonical": "oklch(52.4% 0.140 148)",
+        "tonalRamp": [
+          "#001002",
+          "#032e0e",
+          "#07501e",
+          "#06752e",
+          "#3a984f",
+          "#60bd71",
+          "#85e294",
+          "#c9ffcf"
+        ]
+      },
+      "status-down": {
+        "role": "accent",
+        "displayName": "Vermelho de Sem Resposta",
+        "canonical": "oklch(55.2% 0.205 25)",
+        "tonalRamp": [
+          "#1e0001",
+          "#4d0007",
+          "#800012",
+          "#b51223",
+          "#e33a3f",
+          "#fb7670",
+          "#fcb4ae",
+          "#fee9e7"
+        ]
+      },
+      "night-status-up": {
+        "role": "accent",
+        "displayName": "Verde de Resposta (noite)",
+        "canonical": "oklch(69.5% 0.181 146)",
+        "tonalRamp": [
+          "#001002",
+          "#002f08",
+          "#005114",
+          "#0f7525",
+          "#159d33",
+          "#49c258",
+          "#71e77c",
+          "#caffcb"
+        ]
+      },
+      "night-status-down": {
+        "role": "accent",
+        "displayName": "Vermelho de Sem Resposta (noite)",
+        "canonical": "oklch(73.4% 0.163 26)",
+        "tonalRamp": [
+          "#1e0001",
+          "#4c0106",
+          "#80030f",
+          "#aa2d2c",
+          "#d2524c",
+          "#fa776e",
+          "#fcb4ad",
+          "#ffe9e6"
+        ]
+      },
+      "cloud-cloudflare": {
+        "role": "accent",
+        "displayName": "Laranja Cloudflare",
+        "canonical": "oklch(64.2% 0.166 50)",
+        "tonalRamp": [
+          "#180600",
+          "#3f1900",
+          "#6a2e00",
+          "#97480c",
+          "#c86110",
+          "#f58134",
+          "#feb68e",
+          "#feeadf"
+        ]
+      },
+      "cloud-oracle": {
+        "role": "accent",
+        "displayName": "Vermelho Oracle",
+        "canonical": "oklch(57.1% 0.168 31)",
+        "tonalRamp": [
+          "#1f0000",
+          "#4b0501",
+          "#7d0f03",
+          "#ac2b1b",
+          "#d4523f",
+          "#fc7661",
+          "#fdb4a7",
+          "#fee9e5"
+        ]
+      },
+      "night-cloud-cloudflare": {
+        "role": "accent",
+        "displayName": "Laranja Cloudflare (noite)",
+        "canonical": "oklch(72.3% 0.172 54)",
+        "tonalRamp": [
+          "#170600",
+          "#3c1b03",
+          "#663207",
+          "#944a09",
+          "#c5640b",
+          "#f5811e",
+          "#ffb788",
+          "#feeadd"
+        ]
+      },
+      "night-cloud-oracle": {
+        "role": "accent",
+        "displayName": "Vermelho Oracle (noite)",
+        "canonical": "oklch(66.3% 0.169 31)",
+        "tonalRamp": [
+          "#1f0000",
+          "#4b0501",
+          "#7e0d02",
+          "#ad2a1a",
+          "#d4513e",
+          "#fd7661",
+          "#fdb4a7",
+          "#fee9e5"
+        ]
+      },
+      "bench": {
+        "role": "bench",
+        "displayName": "Fundo da Bancada",
+        "canonical": "oklch(14.5% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "bench-ink": {
+        "role": "bench",
+        "displayName": "Tinta da Bancada",
+        "canonical": "oklch(94.6% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "bench-muted": {
+        "role": "bench",
+        "displayName": "Apagado da Bancada",
+        "canonical": "oklch(68.6% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "bench-line": {
+        "role": "bench",
+        "displayName": "Linha da Bancada",
+        "canonical": "oklch(30.1% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "bench-ok": {
+        "role": "bench",
+        "displayName": "Ok da Bancada",
+        "canonical": "oklch(78.3% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      },
+      "bench-bright": {
+        "role": "bench",
+        "displayName": "Brilho da Bancada",
+        "canonical": "oklch(100.0% 0 0)",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#252525",
+          "#424242",
+          "#616161",
+          "#828282",
+          "#a5a5a5",
+          "#c9c9c9",
+          "#eeeeee"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Título do herói da Home."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Títulos de página (heading 2.5rem; heading-lg 3.25rem no topo de página)."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Subtítulos e títulos de seção (1.375rem; heading-sm 1.625rem)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto corrido em serifa, text-wrap: pretty, prosa em torno de 38rem."
+      },
+      "ui": {
+        "displayName": "UI",
+        "purpose": "Botões, campos, rótulos e navegação em sans."
+      },
+      "label": {
+        "displayName": "Label / eyebrow",
+        "purpose": "Título curto de grupo no Header e no Footer, em caixa alta (11px, 0.12em)."
+      },
+      "data": {
+        "displayName": "Data",
+        "purpose": "Saída da bancada, código e valores dos resultados, em mono com algarismos tabulares."
+      }
+    },
+    "shadows": [],
+    "motion": [
+      {
+        "name": "entrance",
+        "value": "0.5s cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Entrada de bloco: opacity, y 14 e blur 6px até nítido."
+      },
+      {
+        "name": "route-transition",
+        "value": "0.35s",
+        "purpose": "Troca de rota, mesma linguagem da entrada."
+      },
+      {
+        "name": "button-color",
+        "value": "180ms ease",
+        "purpose": "Hover do botão: só troca de cor."
+      },
+      {
+        "name": "theme-change",
+        "value": "400ms ease",
+        "purpose": "Troca de tema por View Transition: o retrato antigo some e o novo aparece com desfoque de 6px (opacity e filter), sem máscara nem clip-path."
+      },
+      {
+        "name": "reduced",
+        "value": "0.12s opacity",
+        "purpose": "Ramo de prefers-reduced-motion: só opacity."
+      },
+      {
+        "name": "rise-in-view",
+        "value": "fade + subida curta, uma vez, escalonada pela posição",
+        "purpose": "Entrada ao rolar das peças de components/page (riseInView); parada com useStaticMotion."
+      },
+      {
+        "name": "credit-logo-scale",
+        "value": "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Logo dos Créditos amplia (scale 1.3) no hover e no foco; exceção deliberada à regra de hover sem deslocamento, restrita ao logo."
+      },
+      {
+        "name": "diagram-draw",
+        "value": "1.2s ease-out, uma vez",
+        "purpose": "Ligação do diagrama se desenha na entrada e fica parada."
+      },
+      {
+        "name": "diagram-packet",
+        "value": "3.2s linear infinite (--diagram-travel)",
+        "purpose": "Ponto animado que percorre a ligação, até o destino e de volta; um por trilha."
+      },
+      {
+        "name": "diagram-pulse",
+        "value": "4s ease-in-out infinite",
+        "purpose": "Bloco que espera aprovação humana pulsa."
+      },
+      {
+        "name": "diagram-pop",
+        "value": "0.5s ease-out, uma vez",
+        "purpose": "Entrada de bloco do diagrama."
+      },
+      {
+        "name": "rise-in-view",
+        "value": "fade + subida curta, uma vez, escalonada pela posição",
+        "purpose": "Entrada ao rolar das peças de components/page (riseInView); parada com useStaticMotion."
+      },
+      {
+        "name": "credit-logo-scale",
+        "value": "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Logo dos Créditos amplia (scale 1.3) no hover e no foco; exceção deliberada à regra de hover sem deslocamento, restrita ao logo."
+      },
+      {
+        "name": "diagram-draw",
+        "value": "1.2s ease-out, uma vez",
+        "purpose": "Ligação do diagrama se desenha na entrada e fica parada."
+      },
+      {
+        "name": "diagram-packet",
+        "value": "3.2s linear infinite (--diagram-travel)",
+        "purpose": "Ponto animado que percorre a ligação, até o destino e de volta; um por trilha."
+      },
+      {
+        "name": "diagram-pulse",
+        "value": "4s ease-in-out infinite",
+        "purpose": "Bloco que espera aprovação humana pulsa."
+      },
+      {
+        "name": "diagram-pop",
+        "value": "0.5s ease-out, uma vez",
+        "purpose": "Entrada de bloco do diagrama."
+      },
+      {
+        "name": "rise-in-view",
+        "value": "fade + subida curta, uma vez, escalonada pela posição",
+        "purpose": "Entrada ao rolar das peças de components/page (riseInView); parada com useStaticMotion."
+      },
+      {
+        "name": "credit-logo-scale",
+        "value": "transform 220ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Logo dos Créditos amplia (scale 1.3) no hover e no foco; exceção deliberada à regra de hover sem deslocamento, restrita ao logo."
+      },
+      {
+        "name": "diagram-draw",
+        "value": "1.2s ease-out, uma vez",
+        "purpose": "Ligação do diagrama se desenha na entrada e fica parada."
+      },
+      {
+        "name": "diagram-packet",
+        "value": "3.2s linear infinite (--diagram-travel)",
+        "purpose": "Ponto animado que percorre a ligação, até o destino e de volta; um por trilha."
+      },
+      {
+        "name": "diagram-pulse",
+        "value": "4s ease-in-out infinite",
+        "purpose": "Bloco que espera aprovação humana pulsa."
+      },
+      {
+        "name": "diagram-pop",
+        "value": "0.5s ease-out, uma vez",
+        "purpose": "Entrada de bloco do diagrama."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      },
+      {
+        "name": "header-compact",
+        "value": "639px",
+        "purpose": "Abaixo disso o cabeçalho fixo passa de 80px para 112px (--header-height)."
+      },
+      {
+        "name": "header-compact",
+        "value": "639px",
+        "purpose": "Abaixo disso o cabeçalho fixo passa de 80px para 112px (--header-height)."
+      },
+      {
+        "name": "header-compact",
+        "value": "639px",
+        "purpose": "Abaixo disso o cabeçalho fixo passa de 80px para 112px (--header-height)."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ação principal; hover só troca cor.",
+      "html": "<button class=\"ds-btn-primary\">Testar</button>",
+      "css": ".ds-btn-primary{background:#171717;color:#fafafa;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;height:36px;padding:0 16px;border:0;border-radius:6px;transition:background-color 180ms ease}.ds-btn-primary:hover{background:#3a3a3a}.ds-btn-primary:focus-visible{outline:2px solid #404040;outline-offset:2px}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Ação secundária com borda fina.",
+      "html": "<button class=\"ds-btn-outline\">Limpar</button>",
+      "css": ".ds-btn-outline{background:transparent;color:#171717;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;height:36px;padding:0 16px;border:1px solid #dcdcdc;border-radius:6px;transition:background-color 180ms ease}.ds-btn-outline:hover{background:#ebebeb}.ds-btn-outline:focus-visible{outline:2px solid #404040;outline-offset:2px}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo com borda visível (3:1).",
+      "html": "<input class=\"ds-input\" placeholder=\"example.com\" />",
+      "css": ".ds-input{font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;min-height:44px;padding:0 12px;color:#171717;background:#fafafa;border:1px solid #8a8a8a;border-radius:6px}.ds-input:focus-visible{outline:2px solid #404040;outline-offset:2px}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Superfície plana: tom e borda, sem sombra.",
+      "html": "<div class=\"ds-card\"><strong>Ping</strong><p>Teste se um host responde.</p></div>",
+      "css": ".ds-card{background:#f3f3f3;color:#171717;border:1px solid #dcdcdc;border-radius:8px;padding:16px;font-family:'Newsreader Variable',Georgia,serif}.ds-card p{margin:4px 0 0;color:#595959}"
+    },
+    {
+      "name": "Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Rótulo retangular de cantos discretos, não pílula.",
+      "html": "<span class=\"ds-badge\">exemplo</span>",
+      "css": ".ds-badge{display:inline-block;background:#ebebeb;color:#171717;border:1px solid #dcdcdc;border-radius:6px;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:12px;padding:2px 8px}"
+    },
+    {
+      "name": "Bancada",
+      "kind": "custom",
+      "refersTo": "bench",
+      "description": "Painel escuro (nos dois temas) que mostra só o JSON bruto de uma resposta, aberto sob demanda por 'Ver JSON'. O resultado em si fica no papel.",
+      "html": "<div class=\"ds-bench\"><div class=\"ds-bench-head\"><span>RESULTADO</span><span>exemplo</span></div><pre>64 bytes from 192.0.2.1: time=12.4 ms</pre></div>",
+      "css": ".ds-bench{background:#0a0a0a;color:#ededed;border:1px solid #2e2e2e;border-radius:6px;font-family:'JetBrains Mono Variable',ui-monospace,monospace;font-size:13px}.ds-bench-head{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #2e2e2e;color:#9a9a9a}.ds-bench pre{margin:0;padding:12px;color:#b8b8b8;overflow-x:auto}"
+    },
+    {
+      "name": "Veredicto do Resultado",
+      "kind": "custom",
+      "refersTo": "components/tool/ResultStatus",
+      "description": "A primeira linha do resultado de uma ferramenta: ícone de estado (verde, vermelho ou cinza) e uma frase de veredicto em sans semibold. O sentido está sempre no texto.",
+      "html": "<div class=\"ds-status\"><svg class=\"ds-status-icon\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/></svg><h2 class=\"ds-status-title\">github.com está respondendo</h2></div>",
+      "css": ".ds-status { display: flex; align-items: flex-start; gap: 12px; } .ds-status-icon { margin-top: 4px; flex-shrink: 0; color: #1a7f37; } .ds-status-title { margin: 0; min-width: 0; font-family: Inter, system-ui, sans-serif; font-size: 20px; line-height: 1.6; font-weight: 600; letter-spacing: 0; color: #171717; word-break: break-word; }"
+    },
+    {
+      "name": "Página de Ferramenta",
+      "kind": "custom",
+      "refersTo": "components/tool/ToolPage",
+      "description": "Esqueleto de toda ferramenta: h1 com o selo de origem na ponta direita da linha, uma frase abaixo e o ritmo vertical dono da página (gap 32px, 40px a partir de sm).",
+      "html": "<div class=\"ds-tp\"><div class=\"ds-tp-row\"><h1>Ping</h1><span class=\"ds-tp-origin\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\"/><circle cx=\"12\" cy=\"10\" r=\"3\"/></svg><span class=\"ds-tp-muted\">Sonda:</span> OCI · São Paulo</span></div><p>Testa se um destino responde e mede a latência.</p></div>",
+      "css": ".ds-tp{max-width:704px;display:flex;flex-direction:column;gap:16px;color:#171717;background:#fafafa;padding:16px}.ds-tp-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px}.ds-tp h1{margin:0;font-family:'Newsreader Variable',Georgia,serif;font-weight:500;font-size:34px;line-height:1.12;letter-spacing:-0.02em}.ds-tp p{margin:0;max-width:576px;font-family:'Newsreader Variable',Georgia,serif;font-size:20px;line-height:1.6;color:#595959}.ds-tp-origin{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#f3f3f3;border:1px solid #dcdcdc;border-radius:6px;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:13px;color:#171717}.ds-tp-muted{color:#595959}"
+    },
+    {
+      "name": "Selo de Origem",
+      "kind": "chip",
+      "refersTo": "components/tool/OriginStrip",
+      "description": "Badge secundário com pino de localização e o texto 'Sonda: provedor · região'; depois do primeiro resultado mostra a região que a API devolveu.",
+      "html": "<span class=\"ds-origin\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\"/><circle cx=\"12\" cy=\"10\" r=\"3\"/></svg><span class=\"ds-origin-muted\">Sonda:</span> OCI · São Paulo</span>",
+      "css": ".ds-origin{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:#f3f3f3;color:#171717;border:1px solid #dcdcdc;border-radius:6px;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:13px;line-height:1.5}.ds-origin-muted{color:#595959}"
+    },
+    {
+      "name": "Números do Resultado",
+      "kind": "custom",
+      "refersTo": "components/tool/ResultStats",
+      "description": "Grade de rótulo pequeno em sans e valor em mono, 2 colunas no celular e 4 no desktop, sem gráfico; número sem valor aparece como traço.",
+      "html": "<dl class=\"ds-stats\"><div><dt>Latência média</dt><dd class=\"strong\">12,4 ms</dd></div><div><dt>Mínima</dt><dd>11,8 ms</dd></div><div><dt>Perda</dt><dd>0%</dd></div><div><dt>Jitter</dt><dd>—</dd></div></dl>",
+      "css": ".ds-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px 32px;margin:0;padding-top:20px;border-top:1px solid #dcdcdc;color:#171717}.ds-stats div{display:flex;flex-direction:column;gap:4px;min-width:0}.ds-stats dt{font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:13px;line-height:1.5;color:#595959}.ds-stats dd{margin:0;font-family:'JetBrains Mono Variable',ui-monospace,monospace;font-size:22px;line-height:1.35;font-feature-settings:'tnum','zero'}.ds-stats dd.strong{font-weight:500}@media (max-width:640px){.ds-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}"
+    },
+    {
+      "name": "Grupo de Registros",
+      "kind": "custom",
+      "refersTo": "components/tool/RecordGroup",
+      "description": "Grupo de registros do DNS Lookup: título pequeno em sans com a contagem e valores em mono; grupos seguidos se separam por linha fina.",
+      "html": "<section class=\"ds-rec\"><h3>MX (2)</h3><div><span>10 mx1.example.com</span><span>20 mx2.example.com</span></div></section><section class=\"ds-rec\"><h3>NS (2)</h3><div><span>a.iana-servers.net</span><span>b.iana-servers.net</span></div></section>",
+      "css": ".ds-rec{display:flex;flex-direction:column;gap:8px;padding-top:20px;border-top:1px solid #dcdcdc;color:#171717}.ds-rec:first-child{padding-top:0;border-top:0}.ds-rec h3{margin:0;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:13px;font-weight:500;color:#595959}.ds-rec div{display:flex;flex-direction:column;gap:4px;font-family:'JetBrains Mono Variable',ui-monospace,monospace;font-size:15px;line-height:1.6}"
+    },
+    {
+      "name": "Revelação do JSON",
+      "kind": "custom",
+      "refersTo": "components/tool/JsonDisclosure",
+      "description": "Dois botões outline ('Ver JSON' e 'Copiar JSON') acima da bancada; o JSON começa fechado, abre com a entrada padrão do site e 'Copiar' funciona com ele fechado.",
+      "html": "<div class=\"ds-json\"><div class=\"ds-json-actions\"><button class=\"ds-json-btn\">Ver JSON</button><button class=\"ds-json-btn\">Copiar JSON</button></div></div>",
+      "css": ".ds-json-actions{display:flex;flex-wrap:wrap;gap:12px}.ds-json-btn{background:transparent;color:#171717;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:14px;min-height:32px;padding:0 12px;border:1px solid #dcdcdc;border-radius:6px;transition:background-color 180ms ease}.ds-json-btn:hover{background:#ebebeb}.ds-json-btn:focus-visible{outline:2px solid #404040;outline-offset:2px}"
+    },
+    {
+      "name": "Página Informativa",
+      "kind": "custom",
+      "refersTo": "components/page/InfoPage",
+      "description": "Esqueleto de Sobre e Arquitetura: h1 (máx. 20ch), abertura em body-lg apagado, seções em coluna única e, em lg, o sumário de 13rem na lateral.",
+      "html": "<div class=\"ds-info\"><h1>Um laboratório para aprender fazendo</h1><p>Abertura em até dois parágrafos, em tinta apagada.</p><section><span class=\"ds-info-n\">01</span><h2>Do que é feito</h2></section></div>",
+      "css": ".ds-info{display:flex;flex-direction:column;gap:20px;max-width:640px;background:#fafafa;color:#171717;padding:16px}.ds-info h1{margin:0;max-width:20ch;font-family:'Newsreader Variable',Georgia,serif;font-weight:500;font-size:34px;line-height:1.12;letter-spacing:-0.02em}.ds-info p{margin:0;font-family:'Newsreader Variable',Georgia,serif;font-size:20px;line-height:1.6;color:#595959}.ds-info section{display:flex;flex-direction:column;gap:4px;border-top:1px solid #dcdcdc;padding-top:32px}.ds-info-n{font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;color:#595959}.ds-info h2{margin:0;font-family:'Newsreader Variable',Georgia,serif;font-weight:500;font-size:26px;line-height:1.3}"
+    },
+    {
+      "name": "Sumário da Página",
+      "kind": "nav",
+      "refersTo": "components/page/PageToc",
+      "description": "'Nesta página': lista montada sozinha a partir das seções (data-toc); o item atual leva traço de 2px, peso 500 e aria-current='location'. Em tela estreita vira um bloco recolhido (details).",
+      "html": "<nav class=\"ds-toc\" aria-label=\"Nesta página\"><p>Nesta página</p><ol><li><a href=\"#a\" aria-current=\"location\">Do que é feito</a></li><li><a href=\"#b\">Quem faz</a></li><li><a href=\"#c\">Créditos</a></li></ol></nav>",
+      "css": ".ds-toc{font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;width:208px;color:#171717}.ds-toc p{margin:0 0 12px;font-size:13px;font-weight:500}.ds-toc ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border-left:1px solid #dcdcdc;font-size:15px}.ds-toc a{display:flex;align-items:center;min-height:36px;margin-left:-1px;padding:4px 0 4px 16px;border-left:2px solid transparent;color:#595959;text-decoration:none;transition:color 180ms ease}.ds-toc a:hover{color:#171717}.ds-toc a:focus-visible{outline:2px solid #404040;outline-offset:2px}.ds-toc a[aria-current=location]{border-left-color:#171717;color:#171717;font-weight:500}"
+    },
+    {
+      "name": "Lista de Fatos e Links de Fonte",
+      "kind": "custom",
+      "refersTo": "components/page/InfoPage#FactList",
+      "description": "FactList (termo e detalhe com linha fina entre os itens) e SourceLinks (links do repositório em sans, apontando para o arquivo exato).",
+      "html": "<dl class=\"ds-fact\"><div><dt>Site</dt><dd>React, TypeScript e Vite, servidos por um Worker da Cloudflare.</dd></div><div><dt>API</dt><dd>Go, em duas VMs na Oracle Cloud.</dd></div></dl><ul class=\"ds-src\"><li><a href=\"#\">ADR-0003</a></li><li><a href=\"#\">arch.md</a></li></ul>",
+      "css": ".ds-fact{max-width:640px;margin:0;border-bottom:1px solid #dcdcdc;color:#171717}.ds-fact div{display:grid;grid-template-columns:96px minmax(0,1fr);gap:4px 32px;padding:16px 0;border-top:1px solid #dcdcdc}.ds-fact dt{font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;font-weight:500}.ds-fact dd{margin:0;font-family:'Newsreader Variable',Georgia,serif;font-size:17px;line-height:1.65;color:rgba(23,23,23,.9)}.ds-src{list-style:none;display:flex;gap:24px;padding:0;margin:12px 0 0;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px}.ds-src a{color:#171717;text-decoration:underline;text-decoration-color:rgba(64,64,64,.5);text-underline-offset:.2em;min-height:44px;display:inline-flex;align-items:center}.ds-src a:hover{text-decoration-color:#404040}.ds-src a:focus-visible{outline:2px solid #404040;outline-offset:2px}"
+    },
+    {
+      "name": "Mapa de Camadas",
+      "kind": "custom",
+      "refersTo": "components/page/StackMap",
+      "description": "Camadas num trilho vertical (Site, API, Servidor): a linha se desenha uma vez e um ponto desce por ela como um pedido; a entrega (CI/CD) fica fora do trilho, rotulada 'Publica as três camadas acima'.",
+      "html": "<ol class=\"ds-stack\"><li><h3>Site</h3><p>O que a pessoa usa no navegador.</p><ul><li class=\"ds-chip\"><svg viewBox=\"0 0 32 20\" height=\"20\" aria-hidden=\"true\"><path d=\"M10 2a8 8 0 1 0 0 16h12a8 8 0 1 0 0-16z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"4\"/></svg><span>Oracle Cloud</span></li></ul></li><li><h3>API</h3><p>Recebe o pedido e faz o teste.</p></li></ol>",
+      "css": ".ds-stack{list-style:none;margin:0;padding:0 0 0 36px;position:relative;display:flex;flex-direction:column;gap:36px;max-width:640px;color:#171717;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif}.ds-stack:before{content:'';position:absolute;top:12px;bottom:12px;left:4px;width:1px;background:#8a8a8a}.ds-stack>li{position:relative}.ds-stack>li:before{content:'';position:absolute;top:8px;left:-36px;width:9px;height:9px;border-radius:50%;border:1px solid #8a8a8a;background:#fafafa}.ds-stack h3{margin:0;font-size:17px;font-weight:500}.ds-stack p{margin:0 0 12px;font-size:15px;color:#595959}.ds-stack ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}.ds-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #dcdcdc;border-radius:6px;color:#595959;transition:color 200ms ease,border-color 200ms ease}.ds-chip:hover{color:#171717;border-color:#8a8a8a}.ds-chip span{font-size:15px;color:#171717}"
+    },
+    {
+      "name": "Chip de Tecnologia",
+      "kind": "chip",
+      "refersTo": "components/icons/techLogos",
+      "description": "Logo em cor única (currentColor, segue o tema) mais o nome; os logos vêm do catálogo techLogos (simple-icons, Oracle e Infisical desenhados à mão). Hover só troca a cor.",
+      "html": "<span class=\"ds-chip2\"><svg viewBox=\"0 0 32 20\" height=\"20\" aria-hidden=\"true\"><path d=\"M10 2a8 8 0 1 0 0 16h12a8 8 0 1 0 0-16z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"4\"/></svg><span>Oracle Cloud</span></span>",
+      "css": ".ds-chip2{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #dcdcdc;border-radius:6px;color:#595959;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;transition:color 200ms ease,border-color 200ms ease}.ds-chip2 span{color:#171717}.ds-chip2:hover{color:#171717;border-color:#8a8a8a}.ds-chip2 svg{height:16px}"
+    },
+    {
+      "name": "Cartão do Autor",
+      "kind": "custom",
+      "refersTo": "components/page/AuthorCard",
+      "description": "Retrato 4:5 (borda fina, cantos de 8px; entra com leve aproximação, parado com movimento reduzido), função em caixa alta, nome em serifa, parágrafos de até 32rem e links em botões com ícone. Sem foto, mostra as iniciais.",
+      "html": "<div class=\"ds-author\"><div class=\"ds-author-photo\" aria-hidden=\"true\">MS</div><div class=\"ds-author-text\"><p class=\"ds-author-role\">Criador</p><p class=\"ds-author-name\">Nome do Criador</p><p class=\"ds-author-bio\">Parágrafo de apresentação, em primeira pessoa.</p><a class=\"ds-author-link\" href=\"#\">GitHub</a></div></div>",
+      "css": ".ds-author{display:flex;gap:40px;align-items:flex-start;max-width:768px;color:#171717}.ds-author-photo{flex:none;width:288px;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;background:#ebebeb;border:1px solid #dcdcdc;border-radius:8px;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:36px;font-weight:500;color:#595959}.ds-author-text{display:flex;flex-direction:column;gap:12px;max-width:512px;padding-top:4px}.ds-author-role{margin:0;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#595959}.ds-author-name{margin:0;font-family:'Newsreader Variable',Georgia,serif;font-size:26px;font-weight:500;letter-spacing:-.01em}.ds-author-bio{margin:0;font-family:'Newsreader Variable',Georgia,serif;font-size:17px;line-height:1.65}.ds-author-link{align-self:flex-start;display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1px solid #dcdcdc;border-radius:6px;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;color:#171717;text-decoration:none;transition:background-color 200ms ease,border-color 200ms ease}.ds-author-link:hover{background:#ebebeb;border-color:#8a8a8a}.ds-author-link:focus-visible{outline:2px solid #404040;outline-offset:2px}"
+    },
+    {
+      "name": "Grade de Créditos",
+      "kind": "custom",
+      "refersTo": "components/page/CreditsGrid",
+      "description": "Só os logos das tecnologias em grade de 5 colunas (2 no celular) com linhas finas; cada célula é um link para a página da tecnologia. No hover ou foco o logo clareia e amplia (scale 1.3, 220ms), exceção deliberada restrita ao logo.",
+      "html": "<ul class=\"ds-credits\"><li><a class=\"ds-credit\" href=\"#\"><span class=\"ds-credit-logo\"><svg viewBox=\"0 0 32 20\" height=\"20\" aria-hidden=\"true\"><path d=\"M10 2a8 8 0 1 0 0 16h12a8 8 0 1 0 0-16z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"4\"/></svg></span><span>Oracle Cloud</span></a></li><li><a class=\"ds-credit\" href=\"#\"><span class=\"ds-credit-logo\"><svg viewBox=\"0 0 32 20\" height=\"20\" aria-hidden=\"true\"><path d=\"M10 2a8 8 0 1 0 0 16h12a8 8 0 1 0 0-16z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"4\"/></svg></span><span>Exemplo</span></a></li></ul>",
+      "css": ".ds-credits{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));max-width:640px;border-top:1px solid #dcdcdc;border-left:1px solid #dcdcdc}.ds-credits li{border-right:1px solid #dcdcdc;border-bottom:1px solid #dcdcdc}.ds-credit{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:112px;padding:20px 12px;text-align:center;color:#595959;text-decoration:none;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;font-size:15px;transition:color 200ms ease}.ds-credit span:last-child{color:#171717}.ds-credit:hover{color:#171717}.ds-credit:focus-visible{outline:2px solid #404040;outline-offset:-2px}.ds-credit-logo{display:flex;height:24px;align-items:center;transform-origin:center;transition:transform 220ms cubic-bezier(.22,1,.36,1)}.ds-credit:hover .ds-credit-logo,.ds-credit:focus-visible .ds-credit-logo{transform:scale(1.3)}@media (prefers-reduced-motion:reduce){.ds-credit-logo{transition:none}.ds-credit:hover .ds-credit-logo{transform:none}}"
+    },
+    {
+      "name": "Figura de Diagrama",
+      "kind": "custom",
+      "refersTo": "components/diagrams/Diagram",
+      "description": "Figura com legenda, resumo, svg largo e lista ordenada de passos (abaixo de 640px a lista é o diagrama). Zona tracejada com a cor do provedor (cloud-*) na borda e numa bolinha ao lado do rótulo; bloco em card com borda fina; ligação contínua com seta; o texto continua em cinza.",
+      "html": "<figure class=\"ds-diag\"><figcaption>Do navegador à API</figcaption><svg viewBox=\"0 0 420 120\" width=\"420\" height=\"120\" role=\"img\" aria-label=\"Zona Cloudflare com um bloco e uma ligação com seta\"><rect x=\"8\" y=\"8\" width=\"404\" height=\"104\" rx=\"10\" fill=\"none\" stroke=\"#d9680b\" stroke-dasharray=\"3 5\"/><circle cx=\"27\" cy=\"27\" r=\"4\" fill=\"#d9680b\"/><text x=\"39\" y=\"31\" font-size=\"13\" font-weight=\"500\" fill=\"#595959\">Cloudflare · borda</text><rect x=\"28\" y=\"48\" width=\"140\" height=\"48\" rx=\"6\" fill=\"#f3f3f3\" stroke=\"#dcdcdc\"/><text x=\"42\" y=\"76\" font-size=\"15\" fill=\"#171717\">Workers</text><path d=\"M168 72H300\" stroke=\"#d9680b\" stroke-width=\"1.5\" fill=\"none\"/><path d=\"M296 67l8 5-8 5\" stroke=\"#d9680b\" stroke-width=\"1.5\" fill=\"none\"/><rect x=\"304\" y=\"48\" width=\"96\" height=\"48\" rx=\"6\" fill=\"#f3f3f3\" stroke=\"#dcdcdc\"/><text x=\"318\" y=\"76\" font-size=\"15\" fill=\"#171717\">Proxy</text></svg></figure>",
+      "css": ".ds-diag{margin:0;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif;color:#171717}.ds-diag figcaption{font-size:15px;font-weight:500;margin-bottom:16px}.ds-diag svg{max-width:100%;height:auto;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif}"
+    },
+    {
+      "name": "Aba e Descrição da Página",
+      "kind": "custom",
+      "refersTo": "lib/pageMeta",
+      "description": "Título e descrição de cada rota (metaFor / usePageMeta): 'Nome · Probekit' na aba, e uma frase em meta description que só afirma o que o site faz. Rota desconhecida mostra 'Página não encontrada'.",
+      "html": "<div class=\"ds-tab\"><span class=\"ds-tab-title\">Ping · Probekit</span><span class=\"ds-tab-desc\">Testa se um destino responde e mede a latência, a partir de uma sonda na Oracle Cloud em São Paulo.</span></div>",
+      "css": ".ds-tab{display:flex;flex-direction:column;gap:4px;max-width:480px;padding:12px 16px;border:1px solid #dcdcdc;border-radius:8px;background:#f3f3f3;font-family:'Inter Variable',ui-sans-serif,system-ui,sans-serif}.ds-tab-title{font-size:15px;font-weight:500;color:#171717}.ds-tab-desc{font-size:13px;line-height:1.5;color:#595959}"
+    }
+  ],
+  "narrative": {
+    "northStar": "O Caderno de Laboratório",
+    "overview": "A página é um caderno: papel branco, tinta preta, texto corrido em serifa, a voz do criador em primeira pessoa. As ferramentas não saem do caderno; elas escrevem nele. O resultado de um ping ou de uma consulta DNS também fica no papel: um veredicto em uma frase, com um ícone de estado, e os números logo abaixo. A bancada, um painel escuro de terminal encaixado na página, é reservada ao JSON bruto, e só aparece quando a pessoa pede. O sistema é plano e quieto. A hierarquia vem de tom (cartão sobre papel) e de linha fina, nunca de sombra, gradiente ou movimento que chame atenção. O site é monocromático: só preto, cinzas e branco, sem matiz. O destaque (foco, seleção, o que importa no momento) é um degrau de cinza, não uma cor. O tema escuro é o mesmo caderno à noite: preto suave, desenhado à parte, não o claro invertido. O projeto é de um criador aprendendo e construindo, sem tom de vitrine. O texto diz o que a coisa faz e de onde parte o teste, sem prometer.",
+    "keyCharacteristics": [
+      "Papel e tinta; serifa para ler, sans para operar, mono só para dados.",
+      "Monocromático: preto, cinzas e branco; destaque, erro e sucesso são degraus de cinza, e o sentido vem do texto.",
+      "Plano: sem sombra, sem gradiente, sem hover que levanta.",
+      "O resultado das ferramentas fica no papel; a bancada escura (nos dois temas) mostra só o JSON bruto, sob demanda.",
+      "Movimento curto, só transform, opacity e filter, e sempre com versão prefers-reduced-motion."
+    ],
+    "rules": [
+      {
+        "name": "A Regra do Cinza Puro",
+        "body": "Nenhum valor de cor tem matiz: R, G e B são iguais. As únicas exceções são os ícones de atividade do repositório (stat-*), os de estado do resultado (status-*) e a zona de provedor, com suas ligações, setas e pontos, nos diagramas (cloud-*), descritos acima. Nada de marrom, bege ou cinza \"quente\" ou \"frio\". Destaque, erro e sucesso se distinguem por degrau de cinza e por texto, nunca só por cor. Cor nova só entra em ícone (de atividade do repositório ou de estado do resultado) ou, num diagrama, na zona de provedor e no que a liga (borda, ligação, seta, ponto), nunca em texto, fundo de bloco ou borda de componente.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra do Escuro Desenhado",
+        "body": "O tema escuro não é o claro invertido: preto suave (#121212, não #000) e cinzas reclareados para manter o contraste. Todo par de texto precisa de 4,5:1 (AA) nos dois temas.",
+        "section": "colors"
+      },
+      {
+        "name": "A Regra da Serifa de Leitura",
+        "body": "Texto corrido nunca é monoespaçado. Mono é só para código e dados.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra do Eyebrow Limpo",
+        "body": "Eyebrow é texto normal em caixa-alta. Nunca no formato // TÍTULO.",
+        "section": "typography"
+      },
+      {
+        "name": "A Regra do Plano",
+        "body": "Sem sombra, gradiente, brilho, glassmorphism nem hover que levanta (translate-y, scale no hover). Hover só troca cor.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do usar marker-gray como único destaque (um tom de cinza), para foco, seleção e o que importa agora.",
+      "Do manter o resultado das ferramentas no papel e usar a bancada escura só para o JSON bruto, sob demanda.",
+      "Do desenhar o tema escuro à parte e medir o contraste (4,5:1 para texto, 3:1 para borda de campo e foco).",
+      "Do animar só transform, opacity e filter, com um ramo reduced que só anima opacity em 0,12s.",
+      "Do rotular exemplo como exemplo e usar endereços reservados (example.com, 192.0.2.x).",
+      "Do dar foco visível a todo controle.",
+      "Do restringir a cor a três grupos de ícones e marcas: atividade do repositório (stat-*), estado do resultado (status-*) e provedor nos diagramas (cloud-*), com o sentido sempre escrito no texto ao lado.",
+      "Do abrir o resultado de toda ferramenta com um veredicto em uma frase (ícone verde, vermelho ou cinza) e montar a página com os componentes de components/tool: ToolPage, OriginStrip, ResultStatus, ResultStats ou RecordGroup, JsonDisclosure.",
+      "Do usar vermelho só quando o destino não existe ou não responde; falha nossa ou do pedido é cinza.",
+      "Do dar a cada provedor, no diagrama, a cor da marca na borda da zona, na bolinha do rótulo e nas ligações, setas e ponto animado que saem de um componente dele; o que sai do cliente ou do apply fica cinza. O ponto veste a cor da ligação que percorre, nunca a da zona.",
+      "Do usar linha contínua com seta para toda ligação de fluxo, e tracejado parado só para fronteira de zona, caminho excepcional (rollback) ou referência guardada (estado remoto).",
+      "Do desenhar um processo em etapas como faixas numeradas de cima para baixo, juntando na mesma fase as etapas que se alternam no tempo (pull request e CI), com o merge como a seta rotulada que sai dela; uma coluna por trilha quando o processo se divide de verdade, e a recuperação como caminho excepcional (tracejado, parado) ligado à produção.",
+      "Do pôr o diagrama sempre no fim da seção, depois do texto e da lista de fases, com o texto compreensível sem o desenho; se o texto já explica cada fase, o diagrama vai em modo compacto."
+    ],
+    "donts": [
+      "Don't usar gradiente, sombra, brilho, glassmorphism nem hover que levanta.",
+      "Don't usar ícone decorativo; ícone só quando diz algo que o texto não diz.",
+      "Don't montar grade de cards iguais nem seção de três colunas numeradas (desenho de template).",
+      "Don't adotar tom de vitrine: promessas, selos de confiança, chamadas de venda.",
+      "Don't escrever eyebrow no formato // TÍTULO.",
+      "Don't usar fonte monoespaçada em texto corrido.",
+      "Don't animar o traço de uma ligação depois de desenhada, nem usar tracejado para ligação de fluxo: tracejado é fronteira, caminho excepcional ou referência.",
+      "Don't apresentar dado inventado como real.",
+      "Don't criar uma segunda cor de destaque; vermelho e verde são só erro e sucesso.",
+      "Don't usar animação que chame atenção para si ou que ignore prefers-reduced-motion.",
+      "Don't usar cor fora da escala de cinza em texto, fundo ou borda; nada de marrom, bege ou âmbar."
+    ]
+  }
+}

@@ -67,7 +67,7 @@ A arquitetura inicial usa Cloudflare para hospedar o frontend e Oracle Cloud Inf
 
 ### 4.1 Carregar o site
 
-O navegador abre `https://probekit.cc`. A Cloudflare entrega o `index.html` e os arquivos estáticos pelo Worker `probekit`. Rotas como `/ping` e `/dns-lookup` não existem como arquivos: o Worker devolve o `index.html` (fallback de SPA) e o React Router monta a página. Por isso uma rota desconhecida também responde HTTP 200, com a página de "não encontrado" do React.
+O navegador abre `https://probekit.cc`. A Cloudflare entrega os arquivos estáticos pelo Worker `probekit`. O build pré-renderiza cada rota em um HTML próprio (`index.html`, `ping.html`, `dns-lookup.html`, `arquitetura.html`, `sobre.html`), com o `<head>` da página e o conteúdo já no HTML; o Worker serve `/ping` pelo `ping.html` e o React hidrata a página no navegador. Qualquer outro endereço recebe o `404.html` com status **404** (`not_found_handling = "404-page"` no `wrangler.toml`), para os buscadores não indexarem URLs inexistentes.
 
 ### 4.2 Chamar a API
 
@@ -80,7 +80,7 @@ Os passos abaixo detalham o caminho da requisição até a VM.
 3. O Network Load Balancer distribui a conexão (L4, TCP puro — não termina TLS) entre `api-probekit-01` e `api-probekit-02`.
 4. A VM escolhida termina essa segunda camada de TLS direto no binário Go (`net/http` + certificado Origin CA), processa a requisição e devolve a resposta pelo mesmo caminho.
 
-**Qual IP o Go enxerga.** O NLB preserva o IP de origem da conexão (padrão do `isPreserveSource`; confirmado em 2026-10-17 listando as conexões estabelecidas na VM com `ss`). Portanto `r.RemoteAddr` é o IP da **borda da Cloudflare** (faixa `172.64.0.0/13` e semelhantes), e o IP do usuário só aparece no cabeçalho `CF-Connecting-IP`. Hoje o rate limit usa `RemoteAddr`, o que faz todos os usuários de um mesmo ponto de presença dividirem o limite. A correção planejada confia no cabeçalho somente quando a conexão vem de uma faixa de IP da Cloudflare — como o NLB preserva a origem, quem acessar o NLB direto aparece com o próprio IP, fora das faixas, e não consegue forjar o cabeçalho.
+**Qual IP o Go enxerga.** O NLB preserva o IP de origem da conexão (padrão do `isPreserveSource`; confirmado em 2026-10-17 listando as conexões estabelecidas na VM com `ss`). Portanto `r.RemoteAddr` é o IP da **borda da Cloudflare** (faixa `172.64.0.0/13` e semelhantes), e o IP do usuário só aparece no cabeçalho `CF-Connecting-IP`. O limite de requisições usa `utils.RealIP` (`backend/api-service-golang/utils/client_ip.go`): só confia no cabeçalho quando a conexão vem de uma faixa de IP da Cloudflare, carregada da API pública da Cloudflare na inicialização do serviço; fora das faixas, usa o IP da própria conexão. Como o NLB preserva a origem, quem acessar o NLB direto aparece com o próprio IP, fora das faixas, e não consegue forjar o cabeçalho. Se a lista de faixas não carregar na inicialização, o erro vai para o log e o limite passa a usar o IP da conexão, ou seja, o da borda. Implementado no commit `4dda529` (release 1.2.1); em 2026-10-26 a API em produção respondia na versão 1.3.0. O comportamento por usuário, de ponta a ponta, ainda não foi testado de fora.
 
 **Health check.** O NLB verifica as VMs abrindo uma conexão TCP na 443 a cada 10 segundos e fechando sem fazer o handshake TLS. O Go registra cada uma como `http: TLS handshake error ... EOF`; é ruído esperado, não falha.
 

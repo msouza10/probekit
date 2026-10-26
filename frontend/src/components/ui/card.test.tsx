@@ -20,4 +20,11 @@ describe("Card", () => {
     render(<Card data-testid="card" />)
     expect(screen.getByTestId("card").className).not.toMatch(/shadow/)
   })
+
+  it("is flat: 1px border token and no hover lift", () => {
+    render(<Card data-testid="card" />)
+    const cls = screen.getByTestId("card").className
+    expect(cls).toMatch(/\bborder\b/)
+    expect(cls).not.toMatch(/hover:/)
+  })
 })

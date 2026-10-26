@@ -171,7 +171,7 @@ bash infra/shellscript/verify-api-routes.sh   # a API: saúde, preflight de CORS
 
 No navegador, abra `/ping` e `/dns-lookup`, execute uma consulta e confirme o resultado vindo da API (aba Rede: a chamada vai para `api.probekit.cc` e a resposta traz `access-control-allow-origin`).
 
-Uma rota inexistente também responde 200: o Worker devolve o `index.html` e o React mostra a página de "não encontrado". É o comportamento do fallback de SPA.
+Uma rota inexistente responde **404** com a página de "não encontrado" (`404.html`), e as cinco rotas do site respondem 200. Confira com `curl -s -o /dev/null -w '%{http_code}\n' https://probekit.cc/nao-existe` (404) e o mesmo em `/ping` (200). Se `/ping` acessado direto der 404, o build não gerou o `ping.html`: rode `npm run build` e confira o `ls dist`.
 
 ### 5.4 Voltar o site à versão anterior
 

@@ -10,7 +10,7 @@ Dentro de `frontend/`:
 npm run dev           # servidor de desenvolvimento com HMR
 npm run test           # roda a suíte de testes (Vitest) uma vez
 npm run test:watch     # roda a suíte de testes em modo watch
-npm run build          # type-check (tsc -b) + build de produção (Vite)
+npm run build          # type-check (tsc -b), build do Vite, build SSR e pré-renderização das rotas
 npm run lint           # lint (oxlint)
 npm run format         # formata o código (Prettier)
 npm run format:check   # verifica formatação sem alterar arquivos
@@ -18,18 +18,37 @@ npm run format:check   # verifica formatação sem alterar arquivos
 
 ## Cadeia de design tokens
 
-[`frontend/design.md`](./design.md) é a referência visual do projeto (cores, tipografia, espaçamento, componentes, regras de "do's and don'ts"). Esses tokens vivem como variáveis CSS nos blocos `@theme` e `:root` de [`src/index.css`](./src/index.css); as utilities do Tailwind e os componentes shadcn/ui consomem essas variáveis diretamente, então qualquer mudança de token nesse arquivo se propaga para o app inteiro.
+[`DESIGN.md`](../DESIGN.md), na raiz do repositório, é a referência visual do projeto: paleta clara e escura, as três famílias de fonte (Newsreader, Inter e JetBrains Mono, hospedadas no site via `@fontsource`), a bancada e a lista do que fazer e do que não fazer. Os tokens vivem como variáveis CSS nos blocos `@theme` e `:root` de [`src/index.css`](./src/index.css); as utilities do Tailwind e os componentes shadcn/ui consomem essas variáveis diretamente, então qualquer mudança de token nesse arquivo se propaga para o app inteiro. O teste `src/design-guard.test.ts` impede o retorno de gradiente, sombra e dos nomes antigos de token.
 
 ## Como adicionar uma nova ferramenta
 
 Edite [`src/lib/tools.ts`](./src/lib/tools.ts) — tanto a lista da home page quanto o dropdown "Ferramentas" do header leem desse mesmo array automaticamente. Basta adicionar um novo item (`name`, `description`, `href`) e, se a rota ainda não existir, registrar a página correspondente em `src/AnimatedRoutes.tsx`.
 
+## Páginas
+
+Rotas em [`src/AnimatedRoutes.tsx`](./src/AnimatedRoutes.tsx): `/` (Home), `/ping`, `/dns-lookup`, `/arquitetura`, `/sobre` e `*` (NotFound). Só a Home entra no pacote principal; as outras são carregadas quando a rota abre (`React.lazy`), com uma área reservada enquanto carregam para o rodapé não pular. Título e descrição de cada rota ficam em [`src/lib/pageMeta.ts`](./src/lib/pageMeta.ts). A Arquitetura reúne três diagramas em SVG (regras em [`DESIGN.md`](../DESIGN.md), seção Diagramas).
+
 ## Páginas `/ping` e `/dns-lookup`
 
 As duas páginas chamam a API de verdade por [`src/lib/api.ts`](./src/lib/api.ts) (`runPing` e `runDnsLookup`) e tratam os estados de carregando, sucesso e erro. O contrato da API e o comportamento esperado estão na spec [`docs/superpowers/specs/2026-10-01-probekit-ping-dns-feature-design.md`](../docs/superpowers/specs/2026-10-01-probekit-ping-dns-feature-design.md).
 
-- A região de origem exibida vem do campo `origin_region` da resposta. Enquanto a API não o devolver, o badge simplesmente não aparece.
+- A origem do teste ("Sonda: OCI · São Paulo") vem de constantes em `src/lib/api.ts` (`PROBE_PROVIDER`, `PROBE_PROVIDER_SHORT`, `PROBE_LOCATION`), porque a API roda sempre na mesma região. Se um dia houver mais de uma sonda, a origem passa a vir da resposta da API.
 - Se a API não responder, **em produção** a página mostra o erro. A simulação de resultados (valores aleatórios, marcada como "Simulação local") só existe em desenvolvimento (`import.meta.env.DEV`), para um resultado inventado nunca passar por verdadeiro.
+
+## Pré-renderização
+
+`npm run build` faz quatro passos: `tsc -b`, `vite build`, `vite build --ssr src/entry-server.tsx` (o build para o servidor sai em `node_modules/.prerender`, fora de `dist/`) e `node scripts/prerender.mjs`, que renderiza cada rota com o mesmo App e grava `dist/<rota>.html` e `dist/404.html`. O `<head>` de cada página (título, descrição, canonical, `og:`, `noindex` na 404 e JSON-LD) vem só de [`src/lib/siteMeta.ts`](./src/lib/siteMeta.ts), o mesmo módulo que atualiza a aba em tempo de execução. No navegador, [`src/mount.tsx`](./src/mount.tsx) hidrata o HTML pré-renderizado (e usa `createRoot` no `npm run dev`, onde não há HTML pronto).
+
+Para um componente funcionar nos dois lados, não leia `window`, `localStorage` nem `IntersectionObserver` durante a renderização: use efeito, ou `useStaticMotion` (em `src/lib/motion.ts`), que sai "parado" no servidor e na hidratação. Para acrescentar uma rota: página em `src/pages`, rota em `AnimatedRoutes.tsx`, metadados em `siteMeta.ts` (a rota entra sozinha na pré-renderização, que percorre as chaves de `pages`) e a URL em `public/sitemap.xml`.
+
+## Componentes das páginas
+
+- `src/components/tool/`: esqueleto e peças das páginas de ferramenta (`ToolPage`, selo de origem, status, estatísticas, JSON sob demanda).
+- `src/components/page/`: esqueleto das páginas informativas (`InfoPage`, sumário "Nesta página", `StackMap`, `AuthorCard`, `CreditsGrid`).
+- `src/components/diagrams/`: os diagramas em SVG da Arquitetura.
+- `src/components/icons/techLogos.tsx`: logos das tecnologias (Home e Sobre).
+
+O padrão visual de cada um está no [`DESIGN.md`](../DESIGN.md). As imagens de `public/brand/` são servidas como estão: mantenha-as pequenas (o retrato da Sobre tem poucos KB).
 
 ## Variáveis de ambiente
 
@@ -62,4 +81,4 @@ npx wrangler deploy
 
 Para validar a configuração sem publicar nada: `npx wrangler deploy --dry-run`.
 
-Efeito colateral do fallback de SPA: rotas inexistentes respondem **HTTP 200** com a página de "não encontrado" do React, não 404.
+Rotas inexistentes respondem **HTTP 404** (`not_found_handling = "404-page"`), servindo o `404.html` gerado no build. Cada rota tem o próprio HTML (`ping.html`, `sobre.html`...), e o Worker serve `/ping` pelo `ping.html`.

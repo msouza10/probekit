@@ -1,69 +1,150 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * Fallbacks com métricas ajustadas. Enquanto a fonte do site carrega
+ * (font-display: swap, nos CSS do @fontsource importados em main.tsx), o
+ * navegador desenha o texto com uma fonte do sistema esticada para ocupar o
+ * mesmo espaço, e a troca não empurra o layout. Valores calculados com
+ * @capsizecss/metrics (largura média e ascendente/descendente de cada família).
+ */
+@font-face {
+  font-family: "Newsreader Fallback";
+  src: local("Times New Roman"), local("Liberation Serif"), local("Tinos");
+  size-adjust: 105.48%;
+  ascent-override: 69.68%;
+  descent-override: 25.12%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "Inter Fallback";
+  src: local("Arial"), local("Liberation Sans"), local("Arimo");
+  size-adjust: 107.12%;
+  ascent-override: 90.44%;
+  descent-override: 22.52%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: "JetBrains Mono Fallback";
+  src: local("Courier New"), local("Liberation Mono"), local("Cousine");
+  size-adjust: 99.98%;
+  ascent-override: 102.02%;
+  descent-override: 30%;
+  line-gap-override: 0%;
+}
+
 @theme {
-  /* Raw design tokens — see ../design.md */
-  --color-blue-cornflower: #8bb5ff;
-  --color-page-ink: #0b111b;
-  --color-card-carbon: #151f2d;
-  --color-deep-coal: #101925;
-  --color-onyx: #000000;
-  --color-steel-border: #29374a;
-  --color-graphite: #40516a;
-  --color-fog: #94a3b8;
-  --color-ash: #b2bfd0;
-  --color-snow: #f0f4fa;
-  --color-signal-red: #e5484d;
-  --color-signal-red-surface: #2a1214;
+  /* Tipografia — ver ../../DESIGN.md. Serifa para ler, sans para operar, mono só para código e dados. */
+  --font-serif:
+    "Newsreader Variable", "Newsreader Fallback", Georgia, "Times New Roman",
+    serif;
+  --font-sans:
+    "Inter Variable", "Inter Fallback", ui-sans-serif, system-ui, sans-serif;
+  --font-mono:
+    "JetBrains Mono Variable", "JetBrains Mono Fallback", ui-monospace,
+    SFMono-Regular, Menlo, Consolas, monospace;
 
-  --font-jetbrains-mono:
-    "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    monospace;
-  --font-sans: var(--font-jetbrains-mono);
-  --font-mono: var(--font-jetbrains-mono);
-
-  --text-caption: 12px;
-  --text-body-sm: 14px;
-  --text-body: 15px;
-  --text-body-lg: 18px;
-  --text-body--line-height: 1.8;
-  --text-body-sm--line-height: 1.75;
+  --text-caption: 0.8125rem;
   --text-caption--line-height: 1.5;
-  --text-heading-sm--line-height: 1.35;
-  --text-subheading: 20px;
-  --text-heading-sm: 24px;
-  --text-heading: 40px;
-  --text-heading-lg: 56px;
-  --text-display: 64px;
+  --text-body-sm: 0.9375rem;
+  --text-body-sm--line-height: 1.6;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.65;
+  --text-body-lg: 1.25rem;
+  --text-body-lg--line-height: 1.6;
+  --text-subheading: 1.375rem;
+  --text-subheading--line-height: 1.35;
+  --text-heading-sm: 1.625rem;
+  --text-heading-sm--line-height: 1.3;
+  --text-heading: 2.5rem;
+  --text-heading--line-height: 1.15;
+  --text-heading-lg: 3.25rem;
+  --text-heading-lg--line-height: 1.1;
+  --text-display: 4rem;
+  --text-display--line-height: 1.05;
 }
 
 /*
- * shadcn/ui semantic mapping — see frontend/design.md, "shadcn/ui Theme
- * Mapping". Kept as plain CSS variables (not @theme) so they can be
- * reassigned independently later (e.g. if a light theme is ever added).
- * Probekit is dark-only today, so there is a single :root block.
+ * Paleta monocromática: só preto, cinzas e branco, sem matiz (R = G = B em
+ * todo valor). Claro = papel branco e tinta preta; escuro = o inverso, desenhado
+ * à parte (preto suave, não #000, para o texto não "vibrar"). A hierarquia vem
+ * do degrau de cinza, não de cor: destaque, erro e sucesso também são cinzas,
+ * e o sentido continua escrito no texto. Contrastes medidos (WCAG) em
+ * ../../DESIGN.md. Única exceção: os três ícones dos indicadores do repositório
+ * (--stat-*) e o selo de deploy, que usam as cores do GitHub para commit, PR, issue
+ * e deploy concluído, e o ícone de estado das páginas de
+ * ferramenta (--status-up e --status-down: respondeu, não respondeu) e a zona de cada
+ * provedor nos diagramas (--cloud-*: Cloudflare, Oracle Cloud).
  */
 :root {
-  --background: var(--color-page-ink);
-  --foreground: var(--color-snow);
-  --card: var(--color-card-carbon);
-  --card-foreground: var(--color-snow);
-  --popover: var(--color-card-carbon);
-  --popover-foreground: var(--color-snow);
-  --primary: var(--color-snow);
-  --primary-foreground: var(--color-page-ink);
-  --secondary: var(--color-card-carbon);
-  --secondary-foreground: var(--color-snow);
-  --muted: var(--color-deep-coal);
-  --muted-foreground: var(--color-ash);
-  --accent: var(--color-card-carbon);
-  --accent-foreground: var(--color-snow);
-  --destructive: var(--color-signal-red);
-  --destructive-foreground: var(--color-snow);
-  --border: var(--color-steel-border);
-  --input: var(--color-graphite);
-  --ring: var(--color-blue-cornflower);
+  color-scheme: light;
+  --background: #fafafa;
+  --foreground: #171717;
+  --card: #f3f3f3;
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --primary: var(--foreground);
+  --primary-foreground: var(--background);
+  --secondary: var(--card);
+  --secondary-foreground: var(--foreground);
+  --muted: #ebebeb;
+  --muted-foreground: #595959;
+  --accent: var(--muted);
+  --accent-foreground: var(--foreground);
+  --destructive: #000000;
+  --destructive-foreground: var(--background);
+  --destructive-surface: #e6e6e6;
+  --success: #3d3d3d;
+  --border: #dcdcdc;
+  --input: #8a8a8a;
+  --highlight: #404040;
+  --stat-commit: #0969da;
+  --stat-pr: #8250df;
+  --stat-issue: #1a7f37;
+  --stat-deploy: #1a7f37;
+  --status-up: #1a7f37;
+  --status-down: #cf222e;
+  --cloud-cloudflare: #d9680b;
+  --cloud-oracle: #c74634;
+  --ring: var(--highlight);
   --radius: 0.5rem;
+
+  /*
+   * Bancada: o painel escuro onde as ferramentas mostram a saída. É escura nos
+   * dois temas, então os valores não mudam com data-theme.
+   */
+  --bench: #0a0a0a;
+  --bench-foreground: #ededed;
+  --bench-muted: #9a9a9a;
+  --bench-border: #2e2e2e;
+  --bench-ok: #b8b8b8;
+  --bench-highlight: #ffffff;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --background: #121212;
+  --foreground: #ededed;
+  --card: #1b1b1b;
+  --popover: #1b1b1b;
+  --muted: #242424;
+  --muted-foreground: #a3a3a3;
+  --destructive: #ffffff;
+  --destructive-foreground: #121212;
+  --destructive-surface: #2e2e2e;
+  --success: #d0d0d0;
+  --border: #333333;
+  --input: #6e6e6e;
+  --highlight: #d4d4d4;
+  --stat-commit: #58a6ff;
+  --stat-pr: #bc8cff;
+  --stat-issue: #3fb950;
+  --stat-deploy: #3fb950;
+  --status-up: #3fb950;
+  --status-down: #ff7b72;
+  --cloud-cloudflare: #f6821f;
+  --cloud-oracle: #e8634f;
 }
 
 @theme inline {
@@ -83,9 +164,27 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-surface: var(--destructive-surface);
+  --color-success: var(--success);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-highlight: var(--highlight);
+  --color-stat-commit: var(--stat-commit);
+  --color-stat-pr: var(--stat-pr);
+  --color-stat-issue: var(--stat-issue);
+  --color-stat-deploy: var(--stat-deploy);
+  --color-status-up: var(--status-up);
+  --color-status-down: var(--status-down);
+  --color-cloud-cloudflare: var(--cloud-cloudflare);
+  --color-cloud-oracle: var(--cloud-oracle);
+
+  --color-bench: var(--bench);
+  --color-bench-foreground: var(--bench-foreground);
+  --color-bench-muted: var(--bench-muted);
+  --color-bench-border: var(--bench-border);
+  --color-bench-ok: var(--bench-ok);
+  --color-bench-highlight: var(--bench-highlight);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -94,31 +193,66 @@
 }
 
 @layer base {
+  /* A bancada é escura nos dois temas: só consome os tokens --bench-*. */
+  .bench {
+    color-scheme: dark;
+    background-color: var(--bench);
+    color: var(--bench-foreground);
+    border-color: var(--bench-border);
+  }
   * {
     @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-jetbrains-mono);
-    font-weight: 400;
-    font-size: 15px;
-    font-synthesis: none;
-    font-variant-numeric: tabular-nums slashed-zero;
-    min-width: 320px;
-    background-image:
-      radial-gradient(ellipse at 80% 0%, #20375480 0%, transparent 48%),
-      radial-gradient(ellipse at 0% 45%, #173b3e30 0%, transparent 45%);
-    background-repeat: no-repeat;
-    -webkit-font-smoothing: antialiased;
   }
   html {
     scroll-behavior: smooth;
     scroll-padding-top: 2rem;
-    color-scheme: dark;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-serif);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: 400;
+    font-synthesis: none;
+    font-optical-sizing: auto;
+    min-width: 320px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
   ::selection {
-    background: #8bb5ff40;
-    color: #fff;
+    background: color-mix(in oklab, var(--highlight) 24%, transparent);
+    color: var(--foreground);
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+  /* Interface: controles e navegação em sans. */
+  button,
+  [data-slot="button"],
+  input,
+  select,
+  textarea,
+  label,
+  nav {
+    font-family: var(--font-sans);
+  }
+  /* Código, saída de comando e dados: mono, com algarismos alinhados. */
+  pre,
+  code,
+  kbd,
+  samp {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums slashed-zero;
   }
   button,
   a,
@@ -129,116 +263,26 @@
   a {
     cursor: pointer;
   }
+  a {
+    text-underline-offset: 0.2em;
+    text-decoration-thickness: from-font;
+  }
   :focus-visible {
     outline: 2px solid var(--ring);
     outline-offset: 4px;
   }
-  p {
-    line-height: 1.8;
-    text-wrap: pretty;
-  }
-  h1,
-  h2,
-  h3 {
-    text-wrap: balance;
-  }
 }
 
-.hero-title {
-  font-size: clamp(1.65rem, 5.5vw, 4.5rem);
-  font-weight: 300;
-  line-height: 1.2;
-  letter-spacing: -0.06em;
-}
-
-.tool-card {
-  background: linear-gradient(145deg, #182434, #111b28);
-  box-shadow: 0 1px 0 #ffffff05 inset;
-}
-.tool-card:hover {
-  border-color: #526c8f;
-  transform: translateY(-3px);
-  box-shadow: 0 16px 32px -24px #000;
-}
-/* Keep the first viewport dedicated to the introduction. */
+/* Altura do cabeçalho fixo (Header) e âncora da lista de ferramentas da Home. */
 :root {
   --header-height: 80px;
-}
-.site-header {
-  height: var(--header-height);
-  flex-shrink: 0;
-  background: #0b111be8;
-  box-shadow:
-    0 0 0 1px #ffffff03,
-    0 12px 32px -24px #000;
-  backdrop-filter: blur(20px);
-}
-.site-header::before {
-  content: "";
-  position: absolute;
-  inset: 0 -1rem;
-  background: inherit;
-  z-index: -1;
-  border-bottom: 1px solid var(--border);
-}
-.site-header [aria-current="page"] {
-  color: var(--color-blue-cornflower);
-  background: var(--muted);
-}
-.site-header [data-slot="navigation-menu-viewport"] {
-  width: var(--radix-navigation-menu-viewport-width);
-  max-height: calc(100svh - var(--header-height) - 16px);
-  overflow-y: auto;
-  box-shadow: 0 24px 60px #0006;
-  border-radius: 12px;
-}
-.hero-section {
-  min-height: calc(100svh - var(--header-height));
-  padding: 64px 0 100px;
-}
-.hero-scroll {
-  position: absolute;
-  bottom: 24px;
 }
 #ferramentas {
   scroll-margin-top: calc(var(--header-height) + 24px);
 }
-@media (min-width: 640px) {
-  .site-header::before {
-    inset-inline: -2rem;
-  }
-}
 @media (max-width: 639px) {
   :root {
     --header-height: 112px;
-  }
-  .site-header {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 4px 12px;
-    padding-block: 10px;
-  }
-  .site-header > div:first-child {
-    display: contents;
-  }
-  .site-header > div:first-child > a {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .site-header .header-nav {
-    grid-column: 1 / -1;
-    grid-row: 2;
-  }
-  .site-header > div:last-child {
-    grid-column: 2;
-    grid-row: 1;
-    gap: 6px;
-  }
-  .site-header [data-slot="navigation-menu-content"] {
-    max-width: calc(100vw - 2rem);
-  }
-  .hero-section {
-    padding-top: 48px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -252,16 +296,9 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .tool-card:hover {
-    transform: none;
-  }
 }
 
-.hero-cta {
-  color: var(--color-page-ink);
-}
-
-/* Short, finite entrance sequences; hover feedback only on precise pointers. */
+/* Entrada curta do popover de ferramentas do Header. */
 @keyframes rise-in {
   from {
     opacity: 0;
@@ -272,166 +309,73 @@
     transform: translateY(0);
   }
 }
-@keyframes scroll-hint {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(5px);
-  }
-}
 @media (prefers-reduced-motion: no-preference) {
-  .hero-section > div:first-child {
-    animation: rise-in 550ms 100ms both;
-  }
-  .hero-title {
-    animation: rise-in 650ms 180ms both;
-  }
-  .hero-title + p {
-    animation: rise-in 650ms 280ms both;
-  }
-  .hero-title ~ div {
-    animation: rise-in 650ms 380ms both;
-  }
-  .hero-scroll {
-    animation: rise-in 500ms 600ms both;
-  }
-  .hero-scroll svg {
-    animation: scroll-hint 1600ms 1100ms 3;
-  }
-  .reveal-visible {
-    animation: rise-in 550ms both;
-  }
-  .execution-steps.reveal-visible {
-    animation: none;
-  }
-  .execution-steps.reveal-visible > div {
-    animation: rise-in 550ms both;
-  }
-  .execution-steps.reveal-visible > div:nth-child(2) {
-    animation-delay: 100ms;
-  }
-  .execution-steps.reveal-visible > div:nth-child(3) {
-    animation-delay: 200ms;
-  }
-  [data-slot="button"],
-  .tool-icon,
-  .site-header a,
-  .site-header button {
+  [data-slot="button"] {
     transition:
-      transform 180ms ease,
       background-color 180ms ease,
       border-color 180ms ease,
-      color 180ms ease,
-      box-shadow 180ms ease;
-  }
-  [data-slot="button"]:active {
-    transform: scale(0.97);
-  }
-  .site-header [data-slot="navigation-menu-content"] {
-    animation: rise-in 180ms ease-out;
-  }
-}
-@media (hover: hover) and (prefers-reduced-motion: no-preference) {
-  [data-slot="button"]:hover {
-    transform: translateY(-2px);
-  }
-  .tool-card:hover .tool-icon {
-    transform: rotate(-5deg) scale(1.08);
-  }
-  .site-header a:hover > svg {
-    transform: translateY(-1px);
-  }
-  .hero-cta:hover {
-    box-shadow: 0 6px 24px #8bb5ff26;
+      color 180ms ease;
   }
 }
 
-.header-nav-link {
-  padding: 10px 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  color: var(--muted-foreground);
+/*
+ * Troca de tema: os dois retratos da página (View Transition API) se
+ * dissolvem com um desfoque curto. Só opacity e filter. O mix-blend-mode
+ * normal desliga o "plus-lighter" padrão, que clarearia a sobreposição.
+ */
+@keyframes theme-blur-out {
+  to {
+    opacity: 0;
+    filter: blur(6px);
+  }
 }
-.header-nav-link:hover,
-.header-nav-link[data-state="open"] {
-  background: var(--muted);
-  color: var(--foreground);
+@keyframes theme-blur-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+  }
 }
-.tools-popover {
-  z-index: 60;
-  width: 360px;
-  max-width: calc(100vw - 32px);
-  max-height: var(--radix-popover-content-available-height);
-  overflow-y: auto;
-  padding: 16px 8px 8px;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: #111b28;
-  box-shadow: 0 20px 60px #0008;
+@keyframes theme-fade-out {
+  to {
+    opacity: 0;
+  }
 }
-.tool-menu-link {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 12px;
-  border-radius: 10px;
-  transition: background-color 160ms;
+@keyframes theme-fade-in {
+  from {
+    opacity: 0;
+  }
 }
-.tool-menu-link:hover,
-.tool-menu-link:focus-visible {
-  background: #203047;
-}
-.tool-menu-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  color: var(--color-blue-cornflower);
-}
-.search-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 70;
-  background: #02060bbd;
-  backdrop-filter: blur(6px);
-}
-.search-dialog {
-  position: fixed;
-  z-index: 80;
-  top: min(18svh, 140px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(580px, calc(100vw - 32px));
-  max-height: 80svh;
-  overflow-y: auto;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: #111b28;
-  box-shadow: 0 32px 100px #0009;
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .tools-popover[data-state="open"] {
-    animation: rise-in 160ms ease-out;
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 400ms;
+    animation-timing-function: ease;
+  }
+  ::view-transition-old(root) {
+    animation-name: theme-blur-out;
+  }
+  ::view-transition-new(root) {
+    animation-name: theme-blur-in;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.12s;
+  }
+  ::view-transition-old(root) {
+    animation-name: theme-fade-out;
+  }
+  ::view-transition-new(root) {
+    animation-name: theme-fade-in;
   }
 }
 
-/* JetBrains hierarchy: light display, medium headings, regular reading text. */
-.hero-title > span {
-  font-weight: 500;
-  font-style: italic;
-  letter-spacing: -0.065em;
-}
-.hero-description {
-  font-size: clamp(0.875rem, 1.4vw, 1.0625rem);
-  line-height: 1.9;
-  letter-spacing: -0.025em;
-}
+/* Rótulo curto em caixa-alta (títulos de grupo no Header e no Footer). */
 .type-eyebrow {
   font-size: 11px;
   font-weight: 500;
@@ -439,152 +383,110 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
-.page-title {
-  font-size: clamp(1.8rem, 5vw, 3rem);
-  font-weight: 400;
-  line-height: 1.2;
-  letter-spacing: -0.055em;
-}
-.section-title {
-  font-size: clamp(1.2rem, 2.4vw, 1.625rem);
-  font-weight: 500;
-  line-height: 1.4;
-  letter-spacing: -0.04em;
-}
-.tool-card [data-slot="card-title"] {
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.45;
-  letter-spacing: -0.035em;
-}
-.tool-card [data-slot="card-content"] > p {
-  font-size: 13px;
-  line-height: 1.85;
-  letter-spacing: -0.015em;
-}
-.header-nav-link {
-  font-weight: 500;
-  letter-spacing: -0.02em;
-}
 pre,
 code {
   font-variant-ligatures: none;
   letter-spacing: normal;
 }
 
-.site-footer {
-  position: relative;
+/*
+ * Diagramas (components/diagrams). O movimento é só CSS e só dentro de
+ * [data-motion="on"], que o hook liga quando o diagrama está visível e a
+ * pessoa não pediu movimento reduzido. Fora disso tudo aparece parado, no
+ * estado final, e os pontos que viajam ficam escondidos. Só animam transform,
+ * opacity, stroke-dashoffset (só ao desenhar a ligação), offset-distance e a
+ * cor do traço.
+ * Contrato: UMA classe de animação por elemento (elas se sobrepõem se
+ * juntas). Ligação é linha contínua que se desenha uma vez (.diagram-draw, que
+ * exige pathLength="1" no path: o comprimento vira 1, qualquer que seja o
+ * real). Depois de desenhada, a ligação não se anima: quem mostra o tráfego é o
+ * ponto (.diagram-packet). Tracejado é sempre parado e nunca é ligação de
+ * fluxo (ver "Diagrama" no DESIGN.md).
+ * Atrasos escalonados vão inline (animation-delay); a duração da viagem de um
+ * ponto pode ser trocada com --diagram-travel.
+ */
+.diagram-packet {
+  display: none;
+  fill: var(--highlight);
+  offset-rotate: 0deg;
 }
-.site-footer::before {
-  content: "";
-  position: absolute;
-  top: -1px;
-  left: 0;
-  width: 64px;
-  height: 1px;
-  background: var(--color-blue-cornflower);
+[data-motion="on"] .diagram-pulse {
+  animation: diagram-pulse 4s ease-in-out infinite;
 }
-.footer-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  min-height: 44px;
-  padding-block: 8px;
-  font-size: 12px;
-  line-height: 1.65;
-  color: var(--muted-foreground);
+[data-motion="on"] .diagram-draw {
+  stroke-dasharray: 1;
+  animation: diagram-draw 1.2s ease-out both;
 }
-.footer-link svg {
-  flex-shrink: 0;
-  color: var(--color-fog);
+[data-motion="on"] .diagram-pop {
+  animation: diagram-pop 0.5s ease-out both;
 }
-.footer-link:hover {
-  color: var(--foreground);
-}
-.footer-repository:hover {
-  border-color: var(--color-graphite);
-  background: var(--muted);
-}
-@media (prefers-reduced-motion: no-preference) {
-  .footer-link,
-  .footer-repository {
-    transition:
-      color 180ms,
-      border-color 180ms,
-      background-color 180ms;
+@supports (offset-path: path("M0 0")) {
+  [data-motion="on"] .diagram-packet {
+    display: block;
+    offset-distance: 0%;
+    animation: diagram-travel var(--diagram-travel, 3.2s) linear infinite;
   }
-  .footer-link svg,
-  .footer-top svg {
-    transition: transform 180ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .diagram-pulse,
+  .diagram-draw,
+  .diagram-pop {
+    animation: none !important;
   }
-  .footer-link:hover svg {
-    transform: translate(2px, -2px);
+  .diagram-packet {
+    display: none !important;
   }
-  .footer-top:hover svg {
-    transform: translateY(-3px);
+}
+@keyframes diagram-pulse {
+  0%,
+  100% {
+    stroke: var(--border);
+  }
+  50% {
+    stroke: var(--highlight);
+  }
+}
+@keyframes diagram-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes diagram-pop {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes diagram-travel {
+  from {
+    offset-distance: 0%;
+  }
+  to {
+    offset-distance: 100%;
   }
 }
 
-/* Re-map the shared palette so all tool and result surfaces follow the theme. */
-:root[data-theme="light"] {
-  color-scheme: light;
-  --color-page-ink: #f7f9fc;
-  --color-card-carbon: #ffffff;
-  --color-deep-coal: #edf2f8;
-  --color-onyx: #ffffff;
-  --color-steel-border: #cdd7e4;
-  --color-graphite: #99abc2;
-  --color-fog: #52647c;
-  --color-ash: #435670;
-  --color-snow: #14233b;
-  --color-blue-cornflower: #245fc2;
-  --color-signal-red: #bd2734;
-  --color-signal-red-surface: #fff0f1;
-  --color-emerald-400: #047857;
-  --color-emerald-500: #047857;
-}
-:root[data-theme="light"] body {
-  background-image:
-    radial-gradient(ellipse at 80% 0%, #dbe9ff90 0%, transparent 48%),
-    radial-gradient(ellipse at 0% 45%, #e0f1ed80 0%, transparent 45%);
-}
-:root[data-theme="light"] ::selection {
-  background: #245fc22b;
-  color: #14233b;
-}
-:root[data-theme="light"] .site-header {
-  background: #f7f9fcf0;
-  box-shadow: 0 12px 32px -24px #263c5b40;
-}
-:root[data-theme="light"] .tool-card {
-  background: linear-gradient(145deg, #ffffff, #f0f5fc);
-  box-shadow: 0 2px 8px #263c5b05;
-}
-:root[data-theme="light"] .tool-card:hover {
-  border-color: #829aba;
-  box-shadow: 0 16px 32px -24px #263c5b50;
-}
-:root[data-theme="light"] .tools-popover,
-:root[data-theme="light"] .search-dialog {
-  background: #ffffff;
-  box-shadow: 0 24px 60px #263c5b26;
-}
-:root[data-theme="light"] .tool-menu-link:hover,
-:root[data-theme="light"] .tool-menu-link:focus-visible {
-  background: #edf3fc;
-}
-:root[data-theme="light"] .search-overlay {
-  background: #20304755;
+/*
+ * Logo dos Créditos: enquanto o mouse está em cima (ou o link tem foco), ele
+ * fica ampliado e volta ao soltar. Exceção deliberada à regra de hover sem
+ * deslocamento, restrita ao logo: a célula, a borda e o texto não se mexem.
+ */
+.credit-logo {
+  transform-origin: center;
 }
 @media (prefers-reduced-motion: no-preference) {
-  .theme-toggle-thumb {
-    transition:
-      left 180ms ease,
-      background-color 180ms ease;
+  .credit-logo {
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   }
-}
-@media (max-width: 360px) {
-  .site-header > div:last-child > a[aria-label="Código fonte no GitHub"] {
-    display: none;
+  .credit-link:hover .credit-logo,
+  .credit-link:focus-visible .credit-logo {
+    transform: scale(1.3);
   }
 }

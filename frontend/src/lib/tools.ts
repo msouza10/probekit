@@ -13,20 +13,20 @@ export const tools: Tool[] = [
   {
     name: "Ping",
     description:
-      "Meça latência, perda de pacotes e jitter com ICMP nativo a partir do nó de nuvem.",
+      "O site ou servidor responde? Mostra quanto demora, quantos pacotes se perdem no caminho e quanto o tempo varia.",
     href: "/ping",
     category: "Rede",
-    status: "Em breve",
+    status: "Disponível",
     tags: ["ICMP", "Latência", "Jitter", "Perda"],
     iconName: "Activity",
   },
   {
     name: "DNS Lookup",
     description:
-      "Consulte e inspecione registros DNS autoritativos (A, AAAA, CNAME, MX, TXT, NS e SRV).",
+      "Que registros um domínio publica? Endereços (A, AAAA), apelidos (CNAME), e-mail (MX), textos (TXT) e servidores de nome (NS); SRV quando pedido.",
     href: "/dns-lookup",
     category: "DNS",
-    status: "Em breve",
+    status: "Disponível",
     tags: ["A / AAAA", "MX", "TXT", "NS", "SRV"],
     iconName: "Globe",
   },
