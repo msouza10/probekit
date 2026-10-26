@@ -71,14 +71,15 @@ describe("ArchitectureDiagram", () => {
     )
   })
 
-  it("ligações são linhas contínuas, na cor da cloud de destino", () => {
+  it("ligações são contínuas e levam a cor de quem as envia; o cliente é cinza", () => {
     const { container } = render(<ArchitectureDiagram />)
-    // 3 ligações Cloudflare (cliente->Workers, Workers->interface, cliente->Proxy)
-    // e 3 Oracle (Proxy->NLB, NLB->VM 1, NLB->VM 2).
-    const base = (cloud: string) =>
-      container.querySelectorAll(`path.diagram-draw.stroke-cloud-${cloud}`)
-    expect(base("cloudflare")).toHaveLength(3)
-    expect(base("oracle")).toHaveLength(3)
+    const links = (cls: string) =>
+      container.querySelectorAll(`path.diagram-draw.${cls}`)
+    // Workers->interface e Proxy->NLB saem da Cloudflare; NLB->VMs, da Oracle;
+    // cliente->Workers e cliente->Proxy saem do cliente, que não é uma cloud.
+    expect(links("stroke-cloud-cloudflare")).toHaveLength(2)
+    expect(links("stroke-cloud-oracle")).toHaveLength(2)
+    expect(links("stroke-input")).toHaveLength(2)
     // Nenhuma ligação é tracejada nem anda depois de desenhada: quem mostra o
     // tráfego é o ponto. O tracejado fica só nas zonas.
     for (const path of container.querySelectorAll("path.diagram-draw")) {
@@ -88,12 +89,41 @@ describe("ArchitectureDiagram", () => {
     expect(container.querySelectorAll("path.stroke-highlight")).toHaveLength(0)
   })
 
-  it("o ponto troca de cor ao atravessar cada zona", () => {
+  it("cada seta tem a cor da ligação em que está", () => {
+    const { container } = render(<ArchitectureDiagram />)
+    const arrows = [
+      ...container.querySelectorAll<SVGPathElement>("g[stroke-linecap] path"),
+    ].map((path) => path.getAttribute("class"))
+    expect(arrows).toEqual([
+      "stroke-input", // cliente -> Workers
+      "stroke-cloud-cloudflare", // Workers -> interface
+      "stroke-input", // cliente -> Proxy
+      "stroke-cloud-cloudflare", // Proxy -> NLB
+      "stroke-cloud-oracle", // NLB -> VM 1
+      "stroke-cloud-oracle", // NLB -> VM 2
+    ])
+  })
+
+  it("o ponto troca de cor com a ligação: cinza, Cloudflare e, na API, Oracle", () => {
     const { container } = render(<ArchitectureDiagram />)
     const css = container.querySelector("svg style")?.textContent ?? ""
-    expect(css).toMatch(/@keyframes arq-tint-api/)
-    expect(css).toMatch(/var\(--cloud-cloudflare\)/)
-    expect(css).toMatch(/var\(--cloud-oracle\)/)
+    const order = (name: string) =>
+      [
+        ...(
+          new RegExp(`@keyframes ${name} \\{([^}]*(?:\\}[^@]*)?)`).exec(
+            css,
+          )?.[1] ?? ""
+        ).matchAll(/var\(--([a-z-]+)\)/g),
+      ].map((m) => m[1])
+    expect(order("arq-tint-frontend")).toEqual([
+      "muted-foreground",
+      "cloud-cloudflare",
+    ])
+    expect(order("arq-tint-api")).toEqual([
+      "muted-foreground",
+      "cloud-cloudflare",
+      "cloud-oracle",
+    ])
     // Cada ponto roda a viagem e a troca de cor juntas, no mesmo ritmo.
     const dots = container.querySelectorAll<SVGCircleElement>(
       "circle.diagram-packet",

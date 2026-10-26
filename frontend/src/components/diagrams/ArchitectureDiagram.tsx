@@ -1,13 +1,13 @@
 import { Diagram, type DiagramStep } from "./Diagram"
 import {
-  Node,
-  Zone,
-  arrow,
-  cloudStroke,
-  delay,
-  type Box,
-  type Cloud,
-} from "./svgParts"
+  lineCloud,
+  lines,
+  packetPaths,
+  tintStops,
+  type LineKey,
+  type TintStop,
+} from "./architectureGeometry"
+import { Node, Zone, arrow, cloudStroke, delay, type Box } from "./svgParts"
 
 /*
  * Linguagem visual dos diagramas largos (o Pipeline e a Infraestrutura a
@@ -30,9 +30,11 @@ import {
  *   localização aninhadas: "Cloudflare · borda" (Workers e Proxy),
  *   "Oracle Cloud · sa-saopaulo-1" (NLB e VMs). A Interface Web fica fora de
  *   qualquer zona de provedor, porque roda no navegador do cliente.
- * - Cor por provedor: cada ligação e cada seta leva a cor da cloud para onde
- *   aponta (ou de onde sai, quando o destino é o cliente). O ponto muda de cor
- *   ao atravessar cada zona (`tint`, calculado da geometria dos caminhos).
+ * - Cor: cada ligação e sua seta levam a cor de quem a envia (Cloudflare,
+ *   Oracle); o que sai do cliente é cinza, porque o cliente não é uma cloud.
+ *   O ponto veste a cor da ligação que percorre (`tintStops`, em
+ *   architectureGeometry.ts, calculado da geometria). A zona não decide a cor
+ *   do ponto: ela só marca onde o componente roda.
  * - Pontos: círculos `diagram-packet` desenhados ANTES dos blocos, então
  *   somem por baixo de cada bloco que atravessam (o "processamento"). Todos
  *   vão até o destino e voltam (`animation-direction: alternate`), mostrando
@@ -48,75 +50,27 @@ const nlb: Box = { x: 348, y: 276, w: 100 }
 const vm1: Box = { x: 482, y: 236, w: 92 }
 const vm2: Box = { x: 482, y: 316, w: 92 }
 
-// Trechos visíveis das ligações (de borda a borda de bloco).
-const lines = {
-  frontend: "M46 174 V116 Q46 104 58 104 H136",
-  entrega: "M308 104 H372",
-  backend: "M46 238 V296 Q46 308 58 308 H136",
-  origem: "M308 308 H348",
-  vm1: "M448 308 H458 Q470 308 470 296 V280 Q470 268 482 268",
-  vm2: "M448 308 H458 Q470 308 470 320 V336 Q470 348 482 348",
-}
-
-// Cloud de cada ligação: a do bloco para onde ela aponta; a que sai do Workers
-// em direção à interface (que roda no cliente) fica com a de onde sai.
-const lineCloud: Record<keyof typeof lines, Cloud> = {
-  frontend: "cloudflare",
-  entrega: "cloudflare",
-  backend: "cloudflare",
-  origem: "oracle",
-  vm1: "oracle",
-  vm2: "oracle",
-}
-
-// Caminhos completos dos pontos: começam no centro do Cliente e terminam no
-// centro do bloco de destino, passando por dentro dos blocos (escondidos).
-const packetPaths = {
-  frontend: "M46 206 V116 Q46 104 58 104 H442",
-  vm1: "M46 206 V296 Q46 308 58 308 H458 Q470 308 470 296 V280 Q470 268 482 268 H528",
-  vm2: "M46 206 V296 Q46 308 58 308 H458 Q470 308 470 320 V336 Q470 348 482 348 H528",
-}
-
-// Cor do ponto ao longo do caminho: [cor, % do percurso em que começa]. Os
-// limites vêm de amostrar cada caminho contra as zonas (Cloudflare em x de 124
-// a 320, Oracle a partir de 334): n = neutro, cf = Cloudflare, or = Oracle.
-const tintStops = {
-  frontend: [
-    ["n", 0],
-    ["cf", 35.6],
-    ["n", 75.4],
-  ],
-  api: [
-    ["n", 0],
-    ["cf", 28.7],
-    ["n", 60.9],
-    ["or", 63.1],
-  ],
-} as const
 const tintColor = {
-  n: "var(--muted-foreground)",
-  cf: "var(--cloud-cloudflare)",
-  or: "var(--cloud-oracle)",
+  neutral: "var(--muted-foreground)",
+  cloudflare: "var(--cloud-cloudflare)",
+  oracle: "var(--cloud-oracle)",
 }
 // Em `alternate` o ponto volta pelo mesmo caminho, então as cores acompanham.
-function tintKeyframes(
-  name: string,
-  stops: readonly (readonly [string, number])[],
-) {
+function tintKeyframes(name: string, stops: readonly TintStop[]) {
   const body = stops
-    .map(([color, from], index) => {
+    .map(([cloud, from], index) => {
       const to = index + 1 < stops.length ? stops[index + 1][1] - 0.01 : 100
-      return `${from}%, ${to}% { fill: ${tintColor[color as keyof typeof tintColor]}; }`
+      return `${from}%, ${to}% { fill: ${tintColor[cloud ?? "neutral"]}; }`
     })
     .join(" ")
   return `@keyframes ${name} { ${body} }`
 }
 const tintCss = [
-  tintKeyframes("arq-tint-frontend", tintStops.frontend),
-  tintKeyframes("arq-tint-api", tintStops.api),
+  tintKeyframes("arq-tint-frontend", tintStops("frontend")),
+  tintKeyframes("arq-tint-api", tintStops("vm1")),
 ].join(" ")
 
-/** Estilo de um ponto: viaja pelo caminho e troca de cor conforme a zona. */
+/** Estilo de um ponto: viaja pelo caminho e troca de cor conforme a ligação. */
 function packetStyle(
   path: string,
   tint: string,
@@ -248,17 +202,17 @@ export function ArchitectureDiagram() {
 
           {/* Ligações: linhas contínuas, desenhadas uma vez, na cor da cloud de destino. */}
           <g className="fill-none" strokeWidth={1.25}>
-            {(Object.keys(lines) as (keyof typeof lines)[]).map(
-              (key, index) => (
-                <path
-                  key={key}
-                  d={lines[key]}
-                  pathLength={1}
-                  className={`diagram-draw ${cloudStroke[lineCloud[key]]}`}
-                  style={delay(0.3 + index * 0.12)}
-                />
-              ),
-            )}
+            {(Object.keys(lines) as LineKey[]).map((key, index) => (
+              <path
+                key={key}
+                d={lines[key]}
+                pathLength={1}
+                className={`diagram-draw ${
+                  lineCloud[key] ? cloudStroke[lineCloud[key]] : "stroke-input"
+                }`}
+                style={delay(0.3 + index * 0.12)}
+              />
+            ))}
           </g>
           {/* Pontos: antes dos blocos, para passarem por baixo deles. */}
           <circle
@@ -282,26 +236,23 @@ export function ArchitectureDiagram() {
             style={packetStyle(packetPaths.vm2, "arq-tint-api", 3.8, 5)}
           />
 
-          {/* Setas: a cor da cloud para onde apontam. */}
+          {/* Setas: a cor de quem envia a ligação (cinza, se for o cliente). */}
           <g
             className="fill-none"
             strokeWidth={1.5}
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path
-              d={arrow("right", 136, 104)}
-              className={cloudStroke.cloudflare}
-            />
+            <path d={arrow("right", 136, 104)} className="stroke-input" />
             <path
               d={arrow("right", 372, 104)}
               className={cloudStroke.cloudflare}
             />
+            <path d={arrow("right", 136, 308)} className="stroke-input" />
             <path
-              d={arrow("right", 136, 308)}
+              d={arrow("right", 348, 308)}
               className={cloudStroke.cloudflare}
             />
-            <path d={arrow("right", 348, 308)} className={cloudStroke.oracle} />
             <path d={arrow("right", 482, 268)} className={cloudStroke.oracle} />
             <path d={arrow("right", 482, 348)} className={cloudStroke.oracle} />
           </g>

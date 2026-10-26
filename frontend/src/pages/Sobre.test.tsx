@@ -20,16 +20,50 @@ describe("Sobre", () => {
     expect(container.querySelector(`a[href="${repository}"]`)).not.toBeNull()
   })
 
-  it("todo link externo aponta para o repositório do projeto", () => {
-    const { container } = renderPage()
+  it("todo link externo da seção de decisões aponta para o repositório", () => {
+    renderPage()
+    const section = screen
+      .getByRole("heading", { level: 2, name: /decisões ficam registradas/ })
+      .closest("section") as HTMLElement
     const external =
-      container.querySelectorAll<HTMLAnchorElement>('a[href^="http"]')
+      section.querySelectorAll<HTMLAnchorElement>('a[href^="http"]')
     expect(external.length).toBeGreaterThan(0)
     for (const anchor of external) {
       expect(anchor.getAttribute("href")).toMatch(
         /^https:\/\/github\.com\/msouza10\/probekit/,
       )
     }
+  })
+
+  it("avisa que um ping sem resposta não prova que o destino caiu", () => {
+    renderPage()
+    const section = screen
+      .getByRole("heading", { level: 2, name: /o que não diz/ })
+      .closest("section") as HTMLElement
+    expect(
+      within(section).getByText(/única sonda, em São Paulo/),
+    ).toBeInTheDocument()
+    expect(
+      within(section).getByText(/não prova que o destino/),
+    ).toBeInTheDocument()
+    expect(
+      within(section).getByText(/não dos servidores autoritativos/),
+    ).toBeInTheDocument()
+  })
+
+  it("mantém a ordem: feito, limites, uso, quem faz, decisões, créditos", () => {
+    renderPage()
+    const titles = screen
+      .getAllByRole("heading", { level: 2 })
+      .map((h) => h.textContent)
+    expect(titles).toEqual([
+      "Do que é feito",
+      "O que o resultado diz e o que não diz",
+      "Como funciona o uso",
+      "Quem faz",
+      "Como as decisões ficam registradas",
+      "Créditos",
+    ])
   })
 
   it("liga as ferramentas e a Arquitetura por rotas do próprio site", () => {
@@ -73,5 +107,21 @@ describe("Sobre", () => {
     const { container } = renderPage()
     const ids = [...container.querySelectorAll("[id]")].map((e) => e.id)
     expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it("mostra quem faz, com a foto e os links", () => {
+    renderPage()
+    const section = screen
+      .getByRole("heading", { level: 2, name: "Quem faz" })
+      .closest("section") as HTMLElement
+    expect(
+      within(section).getByRole("img", { name: "Foto de Marcos Souza" }),
+    ).toHaveAttribute("src", "/brand/marcos.webp")
+    expect(
+      within(section).getByRole("link", { name: "GitHub" }),
+    ).toHaveAttribute("href", "https://github.com/msouza10")
+    expect(
+      within(section).getByRole("link", { name: "LinkedIn" }),
+    ).toBeInTheDocument()
   })
 })

@@ -1,4 +1,8 @@
-import type { TargetAndTransition, Transition } from "motion/react"
+import {
+  useReducedMotion,
+  type TargetAndTransition,
+  type Transition,
+} from "motion/react"
 
 const EASE = [0.22, 1, 0.36, 1] as const
 
@@ -50,5 +54,29 @@ export function routeTransition(reduced: boolean): MotionSet & {
     },
     exit: { opacity: 0, y: -8, filter: "blur(4px)" },
     transition: { duration: 0.35, ease: EASE },
+  }
+}
+
+/**
+ * Verdadeiro quando o movimento deve ficar desligado: movimento reduzido ou
+ * ambiente sem IntersectionObserver (jsdom), onde `whileInView` não funciona e
+ * o conteúdo precisa aparecer parado.
+ */
+export function useStaticMotion(): boolean {
+  const reduced = useReducedMotion() ?? false
+  return reduced || typeof IntersectionObserver === "undefined"
+}
+
+/**
+ * Props de entrada ao rolar (fade + subida curta), uma única vez. Parado, não
+ * devolve nada: o elemento já nasce no estado final e nada observa a viewport.
+ */
+export function riseInView(isStatic: boolean, delay = 0) {
+  if (isStatic) return {}
+  return {
+    initial: { opacity: 0, y: 12 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.2 },
+    transition: { duration: 0.5, delay, ease: EASE },
   }
 }

@@ -1,6 +1,9 @@
 import { act, render, screen, waitFor, within } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { FactList, InfoPage, InfoSection, SourceLinks } from "./InfoPage"
+import { CreditsGrid } from "./CreditsGrid"
+import { StackMap } from "./StackMap"
+import { AuthorCard } from "./AuthorCard"
 
 describe("InfoPage", () => {
   it("monta h1, abertura e seções rotuladas pelo próprio título", () => {
@@ -120,5 +123,87 @@ describe("sumário Nesta página", () => {
           ).toEqual([]),
         )
       })
+  })
+})
+
+describe("AuthorCard", () => {
+  const base = { name: "Ana Lima", role: "Dev", bio: "Texto.", links: [] }
+
+  it("usa a foto quando existe, com texto alternativo", () => {
+    render(<AuthorCard author={{ ...base, photo: "/brand/ana.jpg" }} />)
+    expect(
+      screen.getByRole("img", { name: "Foto de Ana Lima" }),
+    ).toHaveAttribute("src", "/brand/ana.jpg")
+  })
+
+  it("sem foto, mostra as iniciais escondidas dos leitores de tela", () => {
+    render(<AuthorCard author={base} />)
+    expect(screen.queryByRole("img")).toBeNull()
+    expect(screen.getByText("AL")).toHaveAttribute("aria-hidden", "true")
+  })
+})
+
+describe("StackMap", () => {
+  const layer = (name: string, logo: string, label?: string) => ({
+    name,
+    role: `papel de ${name}`,
+    detail: `detalhe de ${name}`,
+    tech: [{ logo, label }],
+  })
+
+  it("mostra cada camada com seus chips e a entrega separada", () => {
+    render(
+      <StackMap
+        layers={[layer("Site", "React", "React 19"), layer("API", "Go")]}
+        delivery={layer("Entrega", "GitHub", "GitHub Actions")}
+      />,
+    )
+    expect(
+      screen.getAllByRole("heading", { level: 3 }).map((h) => h.textContent),
+    ).toEqual(["Site", "API", "Entrega"])
+    expect(screen.getByText("React 19")).toBeInTheDocument()
+    expect(screen.getByText("Go")).toBeInTheDocument()
+    expect(screen.getByText(/Publica as três camadas/)).toBeInTheDocument()
+    // Parado (sem IntersectionObserver): nenhum ponto viajante decorativo.
+    expect(
+      document.querySelectorAll("[aria-hidden='true']").length,
+    ).toBeGreaterThan(0)
+  })
+
+  it("falha alto com um logo que não existe no catálogo", () => {
+    expect(() =>
+      render(
+        <StackMap
+          layers={[layer("X", "Inexistente")]}
+          delivery={layer("Y", "Go")}
+        />,
+      ),
+    ).toThrow(/logo desconhecido/)
+  })
+})
+
+describe("CreditsGrid", () => {
+  it("mostra só os logos das tecnologias, cada um com o nome", () => {
+    render(<CreditsGrid />)
+    const list = screen.getByRole("list", {
+      name: "Logotipos das tecnologias",
+    })
+    const items = within(list).getAllByRole("listitem")
+    expect(items.map((item) => item.textContent)).toEqual(
+      expect.arrayContaining(["Go", "Oracle Cloud", "Cloudflare", "Infisical"]),
+    )
+    for (const item of items)
+      expect(item.querySelector("svg")).toHaveAttribute("aria-hidden", "true")
+  })
+
+  it("cada logo leva à página inicial da tecnologia, em outra aba", () => {
+    render(<CreditsGrid />)
+    const go = screen.getByRole("link", { name: "Go" })
+    expect(go).toHaveAttribute("href", "https://go.dev")
+    expect(go).toHaveAttribute("target", "_blank")
+    expect(go).toHaveAttribute("rel", expect.stringContaining("noreferrer"))
+    for (const link of screen.getAllByRole("link"))
+      expect(link.getAttribute("href")).toMatch(/^https:\/\//)
+    expect(screen.getAllByRole("link")).toHaveLength(10)
   })
 })

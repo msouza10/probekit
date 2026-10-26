@@ -6,37 +6,52 @@ import { injectDiagramCss } from "./testUtils"
 // Os únicos textos que o svg pode mostrar (a fonte de cada um está em
 // comentário no componente). Qualquer rótulo novo precisa entrar aqui.
 const allowedLabels = [
+  "01 · Pull request e CI",
+  "02 · Build e release",
+  "03 · Deploy",
+  "04 · Recuperação",
   "Pull request",
-  "CI",
-  "Go · NPM · Terraform",
-  "main",
+  "Go",
+  "testes",
+  "linters",
+  "Terraform",
+  "fmt",
+  "validate",
+  "NPM",
+  "lint · format",
+  "testes · build",
+  "merge na main · CI verde",
   "Release da API",
-  "mudança em",
-  "backend/api-service-golang/**",
+  "backend/** na main",
+  "testes → versão → binário",
   "Build do site",
-  "frontend/**",
+  "frontend/** na main",
+  "lint · testes · build",
   "Deploy da API",
-  "manual",
-  "Aprovação",
-  "ambiente production",
-  "Deploy",
-  "Rollback",
-  "API e site",
+  "manual · plan → aprovação",
+  "apply → VM 1 → VM 2",
+  "Deploy do site",
+  "automático · aprovação",
+  "wrangler → verifica",
+  "Oracle Cloud · sa-saopaulo-1",
+  "VM 1 · VM 2",
+  "API em Go",
+  "Cloudflare · borda",
+  "Workers",
+  "site estático",
+  "Rollback da API",
+  "manual · aprovação",
+  "marca a release anterior",
+  "Rollback do site",
+  "volta a versão do Worker",
 ]
 
-// Rótulos que aparecem exatamente uma vez (os dois ramos repetem só
-// "mudança em", que aparece duas vezes).
-const onceLabels = allowedLabels.filter((label) => label !== "mudança em")
-
-const stages = [
-  /pull request/i,
-  /^CI\b/,
-  /main/,
-  /release da API/i,
-  /build do site/i,
-  /aprovação/i,
-  /^deploy\b/i,
-  /rollback/i,
+// Quatro fases, na ordem, e o que cada uma é.
+const phases = [
+  /\bCI\b/,
+  /release/i,
+  /deploy|production/i,
+  /rollback|recupera/i,
 ]
 
 function svgTexts(container: HTMLElement) {
@@ -55,32 +70,125 @@ describe("PipelineDiagram", () => {
 
   it("mostra todos os rótulos permitidos e nenhum outro", () => {
     const { container } = render(<PipelineDiagram />)
-    const texts = svgTexts(container)
-    expect(new Set(texts)).toEqual(new Set(allowedLabels))
-    for (const label of onceLabels) {
-      expect(texts.filter((text) => text === label)).toHaveLength(1)
-    }
-    expect(texts.filter((text) => text === "mudança em")).toHaveLength(2)
+    expect(new Set(svgTexts(container))).toEqual(new Set(allowedLabels))
   })
 
-  it("usa mono só em main e nos caminhos", () => {
+  it("tem as quatro fases numeradas, na ordem", () => {
     const { container } = render(<PipelineDiagram />)
-    const mono = [...container.querySelectorAll("svg .font-mono")].map(
-      (node) => node.textContent,
+    const numbered = svgTexts(container).filter((text) =>
+      /^0\d · /.test(text ?? ""),
     )
-    expect(mono.sort()).toEqual(
-      ["main", "backend/api-service-golang/**", "frontend/**"].sort(),
-    )
+    expect(numbered).toEqual([
+      "01 · Pull request e CI",
+      "02 · Build e release",
+      "03 · Deploy",
+      "04 · Recuperação",
+    ])
   })
 
-  it("descreve o pipeline em oito passos, um por etapa e na ordem", () => {
+  it("o CI fica na mesma fase do pull request, e o merge é a seta que sai dela", () => {
+    const { container } = render(<PipelineDiagram />)
+    const texts = svgTexts(container)
+    // Não há mais uma fase "Controle de versão" separada do CI: isso obrigaria
+    // a seta a descer ao CI e voltar para a main.
+    expect(texts.some((text) => /controle de versão/i.test(text ?? ""))).toBe(
+      false,
+    )
+    expect(texts).toContain("merge na main · CI verde")
+    // O rótulo do merge fica entre a fase 1 (abaixo do NPM) e a 2 (acima do
+    // Release da API), na vertical.
+    const y = (label: string) =>
+      Number(
+        [...container.querySelectorAll("svg text")]
+          .find((node) => node.textContent?.trim() === label)
+          ?.getAttribute("y"),
+      )
+    expect(y("merge na main · CI verde")).toBeGreaterThan(y("NPM"))
+    expect(y("merge na main · CI verde")).toBeLessThan(y("Release da API"))
+    // O bloco "main" também saiu: a main aparece só no rótulo do merge e nos
+    // gatilhos das trilhas.
+    expect(texts).not.toContain("main")
+  })
+
+  it("usa mono em nenhum rótulo do desenho", () => {
+    const { container } = render(<PipelineDiagram />)
+    expect(container.querySelectorAll("svg .font-mono")).toHaveLength(0)
+  })
+
+  it("descreve o pipeline em quatro passos, um por fase e na ordem", () => {
     render(<PipelineDiagram />)
     const items = within(screen.getByRole("list")).getAllByRole("listitem")
-    expect(items).toHaveLength(stages.length)
-    stages.forEach((stage, index) => {
+    expect(items).toHaveLength(phases.length)
+    const tags = items.map(
+      (item) => item.querySelector("span.text-muted-foreground")?.textContent,
+    )
+    expect(tags).toEqual(["CI", "release", "production", "rollback"])
+    phases.forEach((phase, index) => {
       const title = items[index].querySelector("span.text-body-sm")
-      expect(title?.textContent).toMatch(stage)
+      expect(`${title?.textContent} ${tags[index]}`).toMatch(phase)
     })
+  })
+
+  it("divide a API e o site em duas trilhas nas fases 3 e 4", () => {
+    const { container } = render(<PipelineDiagram />)
+    const texts = svgTexts(container)
+    for (const label of [
+      "Release da API",
+      "Build do site",
+      "Deploy da API",
+      "Deploy do site",
+      "Rollback da API",
+      "Rollback do site",
+    ]) {
+      expect(texts).toContain(label)
+    }
+    // O gatilho é diferente: a API é manual; o site, automático.
+    expect(texts).toContain("manual · plan → aprovação")
+    expect(texts).toContain("automático · aprovação")
+  })
+
+  it("só Go e NPM ligam às trilhas; o Terraform não alimenta nenhum release", () => {
+    const { container } = render(<PipelineDiagram />)
+    const links = [...container.querySelectorAll("path.diagram-draw")].map(
+      (path) => path.getAttribute("d"),
+    )
+    // Do pull request saem três ligações (uma por job) e de dois jobs descem
+    // ligações para as trilhas (Go e NPM), nunca do Terraform.
+    const fromTerraformDown = links.filter(
+      (d) => d?.startsWith("M300 ") && !d.includes("Q"),
+    )
+    expect(fromTerraformDown).toHaveLength(1) // só a que vai do pull request ao Terraform
+  })
+
+  it("cada trilha tem o seu ponto, e os dois saem defasados", () => {
+    const { container } = render(<PipelineDiagram />)
+    const dots = [
+      ...container.querySelectorAll<SVGCircleElement>("circle.diagram-packet"),
+    ]
+    expect(dots).toHaveLength(2)
+    const paths = dots.map((dot) => dot.style.offsetPath)
+    // Os dois partem do pull request (x=300) e descem por trilhas diferentes:
+    // a da API (x=153, Go) e a do site (x=447, NPM).
+    expect(paths.every((path) => path.includes("M300 "))).toBe(true)
+    expect(paths.some((path) => path.includes("447"))).toBe(true)
+    expect(paths.some((path) => path.includes("153"))).toBe(true)
+    // Em fases diferentes: o segundo parte meio ciclo depois do primeiro.
+    const delays = dots.map((dot) => parseFloat(dot.style.animationDelay))
+    expect(Math.abs(delays[1] - delays[0])).toBe(4)
+  })
+
+  it("as zonas de provedor têm a cor da cloud e o nome escrito", () => {
+    const { container } = render(<PipelineDiagram />)
+    expect(container.querySelectorAll("rect.stroke-cloud-oracle")).toHaveLength(
+      1,
+    )
+    expect(
+      container.querySelectorAll("rect.stroke-cloud-cloudflare"),
+    ).toHaveLength(1)
+    // As ligações saem do GitHub Actions, que não é uma cloud: ficam cinza.
+    expect(
+      container.querySelectorAll("path[class*='stroke-cloud-']"),
+    ).toHaveLength(0)
   })
 
   it("não diz que toda mudança no backend gera release", () => {
@@ -106,9 +214,9 @@ describe("PipelineDiagram", () => {
     }
   })
 
-  it("o portão pulsa e o rollback não flui", () => {
+  it("os dois deploys pulsam (esperam aprovação) e o rollback não flui", () => {
     const { container } = render(<PipelineDiagram />)
-    expect(container.querySelectorAll(".diagram-pulse")).toHaveLength(1)
+    expect(container.querySelectorAll(".diagram-pulse")).toHaveLength(2)
     const dashed = container.querySelectorAll("[data-rollback]")
     expect(dashed.length).toBeGreaterThan(0)
     for (const path of dashed) {

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-26T18:44:46Z",
+  "generatedAt": "2026-10-26T19:23:40Z",
   "title": "Design System: Probekit",
   "extensions": {
     "colorMeta": {
@@ -348,8 +348,10 @@
       "Do dar foco visível a todo controle.",
       "Do abrir o resultado de toda ferramenta com um veredicto em uma frase (ícone verde, vermelho ou cinza) e montar a página com os componentes de components/tool: ToolPage, OriginStrip, ResultStatus, ResultStats ou RecordGroup, JsonDisclosure.",
       "Do usar vermelho só quando o destino não existe ou não responde; falha nossa ou do pedido é cinza.",
-      "Do dar a cada provedor, no diagrama, a cor da marca na borda da zona, na bolinha do rótulo, nas ligações e setas que apontam para ele e no ponto animado dentro da zona, com o nome escrito.",
-      "Do usar linha contínua com seta para toda ligação de fluxo, e tracejado parado só para fronteira de zona, caminho excepcional (rollback) ou referência guardada (estado remoto)."
+      "Do dar a cada provedor, no diagrama, a cor da marca na borda da zona, na bolinha do rótulo e nas ligações, setas e ponto animado que saem de um componente dele; o que sai do cliente ou do apply fica cinza. O ponto veste a cor da ligação que percorre, nunca a da zona.",
+      "Do usar linha contínua com seta para toda ligação de fluxo, e tracejado parado só para fronteira de zona, caminho excepcional (rollback) ou referência guardada (estado remoto).",
+      "Do desenhar um processo em etapas como faixas numeradas de cima para baixo, juntando na mesma fase as etapas que se alternam no tempo (pull request e CI), com o merge como a seta rotulada que sai dela; uma coluna por trilha quando o processo se divide de verdade, e a recuperação como caminho excepcional (tracejado, parado) ligado à produção.",
+      "Do pôr o diagrama sempre no fim da seção, depois do texto e da lista de fases, com o texto compreensível sem o desenho; se o texto já explica cada fase, o diagrama vai em modo compacto."
     ],
     "donts": [
       "Don't usar gradiente, sombra, brilho, glassmorphism nem hover que levanta.",

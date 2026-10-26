@@ -9,6 +9,9 @@ type DiagramProps = {
   title: string
   summary: string
   steps: DiagramStep[]
+  // O texto da seção já explica o diagrama: o resumo e o detalhe de cada passo
+  // ficam só para leitores de tela, e o celular mostra só título e etiqueta.
+  compact?: boolean
   children: (ids: { title: string; summary: string }) => ReactNode
 }
 
@@ -26,14 +29,23 @@ type DiagramProps = {
  * `pathLength="1"`; `diagram-draw`, `diagram-pulse` e
  * `diagram-pop` vão em elementos diferentes (uma animação por elemento).
  */
-export function Diagram({ id, title, summary, steps, children }: DiagramProps) {
+export function Diagram({
+  id,
+  title,
+  summary,
+  steps,
+  compact = false,
+  children,
+}: DiagramProps) {
   const { ref, on } = useDiagramMotion()
   return (
     <figure ref={ref} id={id} data-motion={on ? "on" : "off"} className="my-8">
       <figcaption className="font-sans text-body-sm font-medium text-foreground">
         {title}
       </figcaption>
-      <p className="mt-1 font-sans text-caption text-muted-foreground sm:sr-only">
+      <p
+        className={`mt-1 font-sans text-caption text-muted-foreground ${compact ? "sr-only" : "sm:sr-only"}`}
+      >
         {summary}
       </p>
       <div className="mt-4 hidden sm:block">{children(diagramIds(id))}</div>
@@ -55,7 +67,9 @@ export function Diagram({ id, title, summary, steps, children }: DiagramProps) {
                 ) : null}
               </div>
               {step.detail ? (
-                <p className="mt-1 text-caption text-muted-foreground">
+                <p
+                  className={`mt-1 text-caption text-muted-foreground${compact ? " sr-only" : ""}`}
+                >
                   {step.detail}
                 </p>
               ) : null}

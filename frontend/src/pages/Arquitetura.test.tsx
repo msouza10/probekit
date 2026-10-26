@@ -119,6 +119,72 @@ describe("Arquitetura", () => {
     expect(container.textContent).not.toMatch(/dividem? o limite/)
   })
 
+  it("explica as quatro fases do pipeline, na ordem, com as duas trilhas", () => {
+    renderPage()
+    const section = screen
+      .getByRole("heading", { level: 2, name: "Pipeline" })
+      .closest("section") as HTMLElement
+    const terms = [...section.querySelectorAll("dt")].map(
+      (dt) => dt.textContent,
+    )
+    expect(terms).toEqual([
+      "01 · Pull request e CI",
+      "02 · Build e release",
+      "03 · Deploy",
+      "04 · Recuperação",
+    ])
+    const text = section.textContent ?? ""
+    // As duas trilhas divergem de verdade, e o texto não as mistura.
+    // O CI roda no pull request, antes do merge (não há fase separada de CI).
+    expect(text).toMatch(/o CI roda nele, antes do merge/i)
+    expect(text).toMatch(
+      /só deixa o merge acontecer com esses três checks verdes/i,
+    )
+    expect(text).toMatch(/deploy da API é manual/i)
+    expect(text).toMatch(/deploy do site é automático/i)
+    expect(text).toMatch(/só se as mensagens de commit pedirem/i)
+    expect(text).toMatch(/marca uma release anterior como a mais recente/i)
+  })
+
+  it("em toda seção o diagrama vem depois do texto e antes das fontes", () => {
+    const { container } = renderPage()
+    const after = (a: Element, b: Element) =>
+      Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
+    const sections = [...container.querySelectorAll("section[id^=secao-]")]
+    expect(sections).toHaveLength(3)
+    for (const section of sections) {
+      const figure = section.querySelector("figure") as Element
+      const links = section.querySelector("ul:last-of-type") as Element
+      for (const text of section.querySelectorAll(
+        ":scope > div > p, :scope > div > dl",
+      )) {
+        expect(
+          after(text, figure),
+          `${section.id}: texto antes do diagrama`,
+        ).toBe(true)
+      }
+      expect(
+        after(figure, links),
+        `${section.id}: fontes depois do diagrama`,
+      ).toBe(true)
+    }
+  })
+
+  it("a abertura do Pipeline se entende sem ter visto o diagrama", () => {
+    renderPage()
+    const section = screen
+      .getByRole("heading", { level: 2, name: "Pipeline" })
+      .closest("section") as HTMLElement
+    const intro = section.querySelector("p") as HTMLElement
+    // Nomeia as fases e as trilhas em palavras, em vez de apontar para números
+    // que só o desenho define.
+    expect(intro.textContent).toMatch(/quatro fases/)
+    expect(intro.textContent).toMatch(
+      /pull request e CI, build e release, deploy e recuperação/,
+    )
+    expect(intro.textContent).not.toMatch(/fases 2 e 3/)
+  })
+
   it("não menciona AWS nem Azure em lugar nenhum", () => {
     const { container } = renderPage()
     expect(container.textContent).not.toMatch(/\b(AWS|Azure)\b/i)

@@ -23,6 +23,8 @@ const sections: {
   title: string
   paragraphs: string[]
   diagram: ReactNode
+  // Lista de fases explicadas, logo abaixo do diagrama.
+  phases?: { term: string; detail: string }[]
   sources: Source[]
 }[] = [
   {
@@ -51,10 +53,31 @@ const sections: {
     number: "02",
     title: "Pipeline",
     paragraphs: [
-      "Em cada pull request roda o CI, com os jobs Go, NPM e Terraform. Quando uma mudança do backend chega à main, o pipeline da API calcula a versão e só publica uma release se as mensagens de commit pedirem: feat, fix ou perf, ou uma quebra de compatibilidade (BREAKING CHANGE: ou !:), que sobe a versão maior. O site é construído quando uma mudança do frontend chega à main, e o deploy espera a aprovação do ambiente production.",
-      "O deploy da API é manual, e os dois, API e site, têm um workflow de rollback.",
+      "Do pull request à produção, o pipeline tem quatro fases: pull request e CI, build e release, deploy e recuperação. A API e o site seguem trilhas diferentes no build e no deploy, porque o gatilho, o release e o deploy de cada um são diferentes. O diagrama no fim da seção mostra as fases na ordem.",
     ],
     diagram: <PipelineDiagram />,
+    phases: [
+      {
+        term: "01 · Pull request e CI",
+        detail:
+          "Toda mudança entra por um pull request que aponta para a main, e o CI roda nele, antes do merge, com três jobs: Go (testes e linters), NPM (lint, verificação de formato, testes e build) e Terraform (fmt, init sem backend e validate, nunca um plan). O ruleset da main só deixa o merge acontecer com esses três checks verdes (Go, Terraform e NPM), e só aceita merge commit. O merge na main é o que dispara a fase seguinte.",
+      },
+      {
+        term: "02 · Build e release",
+        detail:
+          "As trilhas se separam. Uma mudança em backend/** dispara o release da API: testes, cálculo da versão e, só se as mensagens de commit pedirem (feat, fix, perf ou uma quebra de compatibilidade, com BREAKING CHANGE: ou !:), o binário Linux com checksum e a release no GitHub. Uma mudança em frontend/** dispara o build do site: lint, formato, testes, build e uma checagem de que a URL da API entrou no build.",
+      },
+      {
+        term: "03 · Deploy",
+        detail:
+          "O deploy da API é manual: um job plan gera o plano do Terraform, cifrado, e o job deploy, no ambiente production, aplica o plano, atualiza a VM 1, depois a VM 2, e verifica a API pública. O deploy do site é automático na main, depois do build, mas espera a aprovação do ambiente production; publica com wrangler e verifica o site e se a API aceita a origem dele. A API chega à Oracle Cloud; o site, à Cloudflare.",
+      },
+      {
+        term: "04 · Recuperação",
+        detail:
+          "Cada produto tem um workflow de rollback, manual e também no ambiente production, fora do caminho normal. O do site volta o Worker para uma versão anterior ou para a informada; o da API marca uma release anterior como a mais recente. Os dois conferem o alvo antes e verificam no fim que o rollback valeu.",
+      },
+    ],
     sources: [
       {
         href: `${repository}/tree/main/.github/workflows`,
@@ -122,17 +145,25 @@ export function Arquitetura() {
         </p>
       }
     >
-      {sections.map(({ id, number, title, paragraphs, diagram, sources }) => (
-        <InfoSection key={id} id={`secao-${id}`} number={number} title={title}>
-          {paragraphs.map((text) => (
-            <p key={text} className={prose}>
-              {text}
-            </p>
-          ))}
-          {diagram}
-          <SourceLinks sources={sources} />
-        </InfoSection>
-      ))}
+      {sections.map(
+        ({ id, number, title, paragraphs, diagram, phases, sources }) => (
+          <InfoSection
+            key={id}
+            id={`secao-${id}`}
+            number={number}
+            title={title}
+          >
+            {paragraphs.map((text) => (
+              <p key={text} className={prose}>
+                {text}
+              </p>
+            ))}
+            {phases ? <FactList items={phases} termWidth="13rem" /> : null}
+            {diagram}
+            <SourceLinks sources={sources} />
+          </InfoSection>
+        ),
+      )}
 
       <InfoSection id="principios" title="Princípios">
         <FactList items={principles} termWidth="10rem" />

@@ -56,6 +56,26 @@ describe("Diagram", () => {
     expect(wide).toHaveClass("hidden", "sm:block")
   })
 
+  it("no modo compacto o resumo e o detalhe dos passos ficam só para leitores de tela", () => {
+    const { container } = render(
+      <Diagram
+        id="fluxo"
+        title="Fluxo do pedido"
+        summary="Resumo"
+        steps={steps}
+        compact
+      >
+        {() => <svg role="img" aria-label="x" />}
+      </Diagram>,
+    )
+    const summary = screen.getByText("Resumo")
+    expect(summary).toHaveClass("sr-only")
+    expect(summary).not.toHaveClass("sm:sr-only")
+    for (const detail of container.querySelectorAll("li p")) {
+      expect(detail).toHaveClass("sr-only")
+    }
+  })
+
   it("começa com data-motion=off sem IntersectionObserver", () => {
     vi.stubGlobal("IntersectionObserver", undefined)
     const { container } = renderDiagram()

@@ -1,35 +1,63 @@
 import { Link } from "react-router-dom"
-import {
-  FactList,
-  InfoPage,
-  InfoSection,
-  SourceLinks,
-} from "@/components/page/InfoPage"
+import { InfoPage, InfoSection, SourceLinks } from "@/components/page/InfoPage"
+import { CreditsGrid } from "@/components/page/CreditsGrid"
+import { StackMap, type Layer } from "@/components/page/StackMap"
+import { AuthorCard, type Author } from "@/components/page/AuthorCard"
 import { inlineLink, introText, prose } from "@/components/page/classes"
 
 const repository = "https://github.com/msouza10/probekit"
 
-const stack = [
+const layers: Layer[] = [
   {
-    term: "API",
-    detail: "Go. Faz o ping (ICMP) e a consulta DNS.",
+    name: "Site",
+    role: "O que você abre no navegador",
+    detail:
+      "Interface em React 19, estilizada com Tailwind v4 e empacotada com Vite. Um Cloudflare Worker entrega os arquivos estáticos.",
+    tech: [
+      { logo: "React", label: "React 19" },
+      { logo: "Tailwind CSS", label: "Tailwind v4" },
+      { logo: "Vite" },
+      { logo: "Cloudflare", label: "Cloudflare Worker" },
+    ],
   },
   {
-    term: "Servidor",
+    name: "API",
+    role: "Quem faz a medição",
+    detail: "Escrita em Go. Faz o ping (ICMP) e a consulta DNS.",
+    tech: [{ logo: "Go" }],
+  },
+  {
+    name: "Servidor",
+    role: "Onde a API roda",
     detail:
       "Duas máquinas no free tier da Oracle Cloud, criadas com Terraform.",
-  },
-  {
-    term: "Entrega",
-    detail:
-      "GitHub Actions: verificações em pull requests, release da API e deploy da API e do site, estes com aprovação antes de publicar.",
-  },
-  {
-    term: "Site",
-    detail:
-      "React 19, Tailwind v4 e Vite, servido por um Cloudflare Worker com arquivos estáticos.",
+    tech: [{ logo: "Oracle Cloud" }, { logo: "Terraform" }],
   },
 ]
+
+const delivery: Layer = {
+  name: "Entrega",
+  role: "Como tudo chega ao ar",
+  detail:
+    "GitHub Actions: verificações em pull requests, release da API e deploy da API e do site, estes com aprovação antes de publicar.",
+  tech: [{ logo: "GitHub", label: "GitHub Actions" }],
+}
+
+// DADOS DE EXEMPLO (exceto a foto e o GitHub): trocar o LinkedIn e o texto antes de publicar.
+const author: Author = {
+  name: "Marcos Souza",
+  role: "DevOps e infraestrutura",
+  photo: "/brand/marcos.webp",
+  bio: "Texto de exemplo: aqui entram duas ou três frases sobre o que eu faço e por que construí o Probekit.",
+  links: [
+    { href: "https://github.com/msouza10", label: "GitHub", icon: "github" },
+    {
+      href: "https://www.linkedin.com/in/exemplo",
+      label: "LinkedIn",
+      icon: "linkedin",
+    },
+  ],
+}
 
 export function Sobre() {
   return (
@@ -61,7 +89,7 @@ export function Sobre() {
       }
     >
       <InfoSection id="feito" title="Do que é feito">
-        <FactList items={stack} />
+        <StackMap layers={layers} delivery={delivery} />
         <p className={prose}>
           O caminho de um pedido, o pipeline e a infraestrutura estão explicados
           na página{" "}
@@ -69,6 +97,21 @@ export function Sobre() {
             Arquitetura
           </Link>
           .
+        </p>
+      </InfoSection>
+
+      <InfoSection id="limites" title="O que o resultado diz e o que não diz">
+        <p className={prose}>
+          Cada teste é uma medição feita por uma única sonda, em São Paulo.
+          Outro ponto do mundo pode ver outro caminho e outra latência para o
+          mesmo destino.
+        </p>
+        <p className={prose}>
+          Um ping que não respondeu não prova que o destino está fora do ar:
+          muitos servidores e firewalls descartam ICMP e continuam servindo o
+          site normalmente. Na consulta DNS, a resposta vem do resolvedor da
+          máquina da sonda, não dos servidores autoritativos do domínio, então
+          pode estar em cache e demorar a refletir uma mudança recente.
         </p>
       </InfoSection>
 
@@ -84,6 +127,10 @@ export function Sobre() {
           coisa, para que o laboratório não sirva de ponte para a rede de
           ninguém. O limite é de 50 pedidos a cada 5 minutos por endereço.
         </p>
+      </InfoSection>
+
+      <InfoSection id="quem" title="Quem faz">
+        <AuthorCard author={author} />
       </InfoSection>
 
       <InfoSection
@@ -115,6 +162,14 @@ export function Sobre() {
             },
           ]}
         />
+      </InfoSection>
+
+      <InfoSection id="creditos" title="Créditos">
+        <CreditsGrid />
+        <p className={prose}>
+          Os nomes e logotipos pertencem aos seus donos e aparecem só para
+          identificar as tecnologias usadas.
+        </p>
       </InfoSection>
     </InfoPage>
   )

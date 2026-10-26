@@ -135,14 +135,14 @@ describe("InfrastructureDiagram (cores dos provedores)", () => {
     expect(
       container.querySelectorAll("rect.stroke-cloud-cloudflare"),
     ).toHaveLength(1)
-    // As ligações que o apply cria são contínuas e levam a cor do provedor de
-    // destino.
-    expect(
-      container.querySelectorAll("path.diagram-draw.stroke-cloud-oracle"),
-    ).toHaveLength(1)
-    expect(
-      container.querySelectorAll("path.diagram-draw.stroke-cloud-cloudflare"),
-    ).toHaveLength(1)
+    // As ligações saem do apply (Terraform), que não é uma cloud: contínuas e
+    // cinza. A cor do provedor fica só nas zonas.
+    const links = container.querySelectorAll("path.diagram-draw")
+    expect(links.length).toBeGreaterThan(0)
+    for (const link of links) {
+      expect(link.closest("g.stroke-input")).not.toBeNull()
+      expect(link.getAttribute("class")).not.toMatch(/cloud-/)
+    }
     expect(container.querySelectorAll(".diagram-flow")).toHaveLength(0)
     const labels = [...container.querySelectorAll("svg text")].map(
       (n) => n.textContent,
