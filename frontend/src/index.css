@@ -72,7 +72,8 @@
  * e o sentido continua escrito no texto. Contrastes medidos (WCAG) em
  * ../../DESIGN.md. Única exceção: os três ícones dos indicadores do repositório
  * (--stat-*) e o selo de deploy, que usam as cores do GitHub para commit, PR, issue
- * e deploy concluído.
+ * e deploy concluído, e o ícone de estado das páginas de
+ * ferramenta (--status-up e --status-down: respondeu, não respondeu).
  */
 :root {
   color-scheme: light;
@@ -101,6 +102,8 @@
   --stat-pr: #8250df;
   --stat-issue: #1a7f37;
   --stat-deploy: #1a7f37;
+  --status-up: #1a7f37;
+  --status-down: #cf222e;
   --ring: var(--highlight);
   --radius: 0.5rem;
 
@@ -135,6 +138,8 @@
   --stat-pr: #bc8cff;
   --stat-issue: #3fb950;
   --stat-deploy: #3fb950;
+  --status-up: #3fb950;
+  --status-down: #ff7b72;
 }
 
 @theme inline {
@@ -164,6 +169,8 @@
   --color-stat-pr: var(--stat-pr);
   --color-stat-issue: var(--stat-issue);
   --color-stat-deploy: var(--stat-deploy);
+  --color-status-up: var(--status-up);
+  --color-status-down: var(--status-down);
 
   --color-bench: var(--bench);
   --color-bench-foreground: var(--bench-foreground);

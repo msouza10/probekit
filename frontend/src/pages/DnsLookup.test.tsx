@@ -7,6 +7,8 @@ import DnsLookup from "./DnsLookup"
 
 vi.mock("@/lib/api", () => ({
   PROBE_PROVIDER: "Oracle Cloud",
+  PROBE_PROVIDER_SHORT: "OCI",
+  PROBE_LOCATION: "São Paulo",
   runDnsLookup: vi.fn(),
 }))
 
@@ -61,6 +63,99 @@ describe("DnsLookup (comportamento)", () => {
     ).toBeInTheDocument()
   })
 
+  it("o veredicto vem primeiro: resolvendo, com o resumo do que existe", async () => {
+    mockedRun.mockResolvedValue(result)
+    const user = userEvent.setup()
+    render(<DnsLookup />)
+    await submit(user, "example.com")
+
+    const heading = await screen.findByRole("heading", { level: 2 })
+    expect(heading).toHaveTextContent("example.com está resolvendo")
+    expect(heading.parentElement?.querySelector("svg")).toHaveClass(
+      "text-status-up",
+    )
+    expect(
+      screen.getByText("2 endereços · 1 MX · 1 NS · 1 TXT · 1 SRV"),
+    ).toBeInTheDocument()
+  })
+
+  it("só com MX e sem endereço, diz que tem registros mas nenhum endereço", async () => {
+    mockedRun.mockResolvedValue({ ...result, addrs: [], ip: [], srv: [] })
+    const user = userEvent.setup()
+    render(<DnsLookup />)
+    await submit(user, "example.com")
+
+    expect(await screen.findByRole("heading", { level: 2 })).toHaveTextContent(
+      "example.com tem registros, mas nenhum endereço",
+    )
+  })
+
+  it("sem nenhum registro aparece em vermelho", async () => {
+    mockedRun.mockResolvedValue({
+      ...result,
+      addrs: [],
+      ip: [],
+      mx: [],
+      txt: [],
+      ns: [],
+      srv: [],
+    })
+    const user = userEvent.setup()
+    render(<DnsLookup />)
+    await submit(user, "example.com")
+
+    const heading = await screen.findByRole("heading", { level: 2 })
+    expect(heading).toHaveTextContent("example.com não tem registros")
+    expect(heading.parentElement?.querySelector("svg")).toHaveClass(
+      "text-status-down",
+    )
+  })
+
+  it("domínio inexistente (domain_not_found) é vermelho; outros erros são cinza", async () => {
+    mockedRun.mockRejectedValueOnce({
+      error: "Domain not found",
+      code: "domain_not_found",
+    })
+    const user = userEvent.setup()
+    render(<DnsLookup />)
+    await submit(user, "naoexiste.invalid")
+
+    const heading = await screen.findByRole("heading", { level: 2 })
+    expect(heading).toHaveTextContent("naoexiste.invalid não foi encontrado")
+    expect(screen.queryByText("Domain not found")).not.toBeInTheDocument()
+    expect(
+      screen.getByText("O domínio não existe ou não tem nenhum registro."),
+    ).toBeInTheDocument()
+    expect(heading.parentElement?.querySelector("svg")).toHaveClass(
+      "text-status-down",
+    )
+  })
+
+  it("resultado fica no papel e o JSON só aparece quando pedido", async () => {
+    mockedRun.mockResolvedValue(result)
+    const user = userEvent.setup()
+    const { container } = render(<DnsLookup />)
+    await submit(user, "example.com")
+    await screen.findByText("ns1.example.com")
+
+    expect(container.querySelector("[data-slot=bench]")).toBeNull()
+    expect(
+      screen.queryByText(/"domain": "example.com"/),
+    ).not.toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Ver JSON" }))
+    expect(screen.getByText(/"domain": "example.com"/)).toBeInTheDocument()
+  })
+
+  it("o selo de origem diz de onde sai a consulta, antes e depois", async () => {
+    mockedRun.mockResolvedValue(result)
+    const user = userEvent.setup()
+    render(<DnsLookup />)
+    expect(screen.getByText("OCI · São Paulo")).toBeInTheDocument()
+
+    await submit(user, "example.com")
+    expect(await screen.findByText("OCI · sa-saopaulo-1")).toBeInTheDocument()
+  })
+
   it("com service e proto preenchidos, runDnsLookup recebe os três argumentos", async () => {
     mockedRun.mockResolvedValue(result)
     const user = userEvent.setup()
@@ -85,6 +180,10 @@ describe("DnsLookup (comportamento)", () => {
 
     expect(await screen.findByText("Domínio inválido")).toBeInTheDocument()
     expect(screen.getByText("invalid_domain")).toBeInTheDocument()
+    // Falha nossa ou do pedido: aviso cinza, nunca o vermelho de "domínio fora".
+    expect(screen.getByRole("alert").querySelector("svg")).toHaveClass(
+      "text-muted-foreground",
+    )
 
     mockedRun.mockResolvedValueOnce(result)
     await user.click(

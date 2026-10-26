@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-26T15:58:18Z",
+  "generatedAt": "2026-10-26T17:14:18Z",
   "title": "Design System: Probekit",
   "extensions": {
     "colorMeta": {
@@ -156,6 +156,18 @@
           "#d4d4d4",
           "#eeeeee"
         ]
+      },
+      "status-up": {
+        "role": "accent",
+        "displayName": "Verde de Resposta",
+        "canonical": "oklch(52% 0.140 148)",
+        "tonalRamp": []
+      },
+      "status-down": {
+        "role": "accent",
+        "displayName": "Vermelho de Sem Resposta",
+        "canonical": "oklch(54% 0.200 25)",
+        "tonalRamp": []
       }
     },
     "typographyMeta": {
@@ -264,25 +276,33 @@
       "name": "Bancada",
       "kind": "custom",
       "refersTo": "bench",
-      "description": "Painel escuro com a saída da ferramenta.",
+      "description": "Painel escuro (nos dois temas) que mostra só o JSON bruto de uma resposta, aberto sob demanda por 'Ver JSON'. O resultado em si fica no papel.",
       "html": "<div class=\"ds-bench\"><div class=\"ds-bench-head\"><span>RESULTADO</span><span>exemplo</span></div><pre>64 bytes from 192.0.2.1: time=12.4 ms</pre></div>",
       "css": ".ds-bench{background:#0a0a0a;color:#ededed;border:1px solid #2e2e2e;border-radius:6px;font-family:'JetBrains Mono Variable',ui-monospace,monospace;font-size:13px}.ds-bench-head{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #2e2e2e;color:#9a9a9a}.ds-bench pre{margin:0;padding:12px;color:#b8b8b8;overflow-x:auto}"
+    },
+    {
+      "name": "Veredicto do Resultado",
+      "kind": "custom",
+      "refersTo": "ResultStatus",
+      "description": "A primeira linha do resultado de uma ferramenta: ícone de estado (verde, vermelho ou cinza) e uma frase de veredicto em sans semibold.",
+      "html": "<div class=\"ds-status\"><svg class=\"ds-status-icon\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"/><path d=\"m9 12 2 2 4-4\"/></svg><h2 class=\"ds-status-title\">github.com está respondendo</h2></div>",
+      "css": ".ds-status { display: flex; align-items: flex-start; gap: 12px; } .ds-status-icon { margin-top: 4px; flex-shrink: 0; color: #1a7f37; } .ds-status-title { margin: 0; min-width: 0; font-family: Inter, system-ui, sans-serif; font-size: 20px; line-height: 1.6; font-weight: 600; letter-spacing: 0; color: #171717; word-break: break-word; }"
     }
   ],
   "narrative": {
     "northStar": "O Caderno de Laboratório",
-    "overview": "A página é um caderno: papel branco, tinta preta, texto corrido em serifa. As ferramentas escrevem nele; o resultado aparece numa bancada escura encaixada na página. Plano e quieto, e monocromático: só preto, cinzas e branco, sem matiz. O destaque é um degrau de cinza. O tema escuro é o mesmo caderno à noite (preto suave), desenhado à parte.",
+    "overview": "A página é um caderno: papel branco, tinta preta, texto corrido em serifa. As ferramentas escrevem nele; o resultado fica no papel, com um veredicto em uma frase, e só o JSON bruto aparece numa bancada escura, sob demanda. Plano e quieto, e monocromático: só preto, cinzas e branco, sem matiz. O destaque é um degrau de cinza. O tema escuro é o mesmo caderno à noite (preto suave), desenhado à parte.",
     "keyCharacteristics": [
       "Papel e tinta; serifa para ler, sans para operar, mono só para dados.",
-      "Monocromático: preto, cinzas e branco; destaque, erro e sucesso são degraus de cinza, e o sentido vem do texto. Exceção: os ícones de atividade do repositório (commit, PR, issue, deploy) usam as cores do GitHub.",
+      "Monocromático: preto, cinzas e branco; destaque, erro e sucesso são degraus de cinza, e o sentido vem do texto. Exceção: os ícones de atividade do repositório (commit, PR, issue, deploy) e os de estado do resultado (respondeu, não respondeu) usam cor.",
       "Plano: sem sombra, sem gradiente, sem hover que levanta.",
-      "A bancada escura isola a saída das ferramentas nos dois temas.",
+      "O resultado das ferramentas fica no papel; a bancada escura mostra só o JSON bruto, sob demanda.",
       "Movimento curto, só transform, opacity e filter, e sempre com versão prefers-reduced-motion."
     ],
     "rules": [
       {
         "name": "A Regra do Cinza Puro",
-        "body": "Nenhum valor de cor tem matiz: R, G e B são iguais. Nada de marrom, bege ou cinza quente ou frio. Destaque, erro e sucesso se distinguem por degrau de cinza e por texto, nunca só por cor. Única exceção: ícones decorativos de atividade do repositório (stat-*); cor nova nunca entra em texto, fundo ou borda.",
+        "body": "Nenhum valor de cor tem matiz: R, G e B são iguais. Nada de marrom, bege ou cinza quente ou frio. Destaque, erro e sucesso se distinguem por degrau de cinza e por texto, nunca só por cor. Únicas exceções: ícones de atividade do repositório (stat-*) e de estado do resultado (status-*); cor nova nunca entra em texto, fundo ou borda.",
         "section": "colors"
       },
       {
@@ -309,11 +329,13 @@
     "dos": [
       "Do usar marker-gray como único destaque (um tom de cinza), para foco, seleção e o que importa agora.",
       "Do restringir a cor aos ícones decorativos de atividade do repositório (stat-commit, stat-pr, stat-issue, stat-deploy), com o sentido sempre escrito no texto ao lado.",
-      "Do manter a saída das ferramentas na bancada escura e o resto no papel.",
+      "Do manter o resultado das ferramentas no papel e usar a bancada escura só para o JSON bruto, sob demanda.",
       "Do desenhar o tema escuro à parte e medir o contraste (4,5:1 para texto, 3:1 para borda de campo e foco).",
       "Do animar só transform, opacity e filter, com um ramo reduced que só anima opacity em 0,12s.",
       "Do rotular exemplo como exemplo e usar endereços reservados (example.com, 192.0.2.x).",
-      "Do dar foco visível a todo controle."
+      "Do dar foco visível a todo controle.",
+      "Do abrir o resultado de toda ferramenta com um veredicto em uma frase (ícone verde, vermelho ou cinza) e montar a página com os componentes de components/tool: ToolPage, OriginStrip, ResultStatus, ResultStats ou RecordGroup, JsonDisclosure.",
+      "Do usar vermelho só quando o destino não existe ou não responde; falha nossa ou do pedido é cinza."
     ],
     "donts": [
       "Don't usar gradiente, sombra, brilho, glassmorphism nem hover que levanta.",
