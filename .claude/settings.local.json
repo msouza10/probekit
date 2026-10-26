@@ -1,4 +1,9 @@
 {
+  "enabledMcpjsonServers": [
+    "shadcn",
+    "ado-remote-mcp",
+    "chrome-devtools"
+  ],
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
     "frontend-design@claude-plugins-official": true,
@@ -13,9 +18,5 @@
         "url": "https://github.com/affaan-m/ECC.git"
       }
     }
-  },
-  "enabledMcpjsonServers": [
-    "shadcn",
-    "ado-remote-mcp"
-  ]
+  }
 }

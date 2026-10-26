@@ -49,6 +49,7 @@ Gerenciados via `.agents/skills/` (lockfile `skills-lock.json`, instalados pelo 
 - **tdd** — apoia a responsabilidade do assistente de escrever os testes automatizados das ferramentas (ver exceção na seção "Assistente").
 - **find-skills** — meta-ferramenta para descobrir e instalar novos skills quando surgir necessidade.
 - **shadcn** (MCP) — busca/gera componentes shadcn/ui direto no projeto, conforme decidido no spec do scaffold do frontend.
+- **chrome-devtools** (MCP) — controla o Chrome para conferir o frontend de verdade: screenshots, console, rede, Lighthouse e performance.
 - **gh** (GitHub CLI) — Issues, Projects e PRs. A gestão de tasks fica no GitHub Projects ([ADR-0006](docs/adr/0006-gestao-de-tasks-no-github-projects.md)); o padrão está em `docs/README.md` e a skill **probekit-docs** (`.claude/skills/`) aplica esse padrão.
 
 ## Documentação e tasks
