@@ -18,6 +18,48 @@ describe("AnimatedRoutes", () => {
     expect(screen.getByRole("heading", { name: /ping/i })).toBeInTheDocument()
   })
 
+  it("abre /ping já com o resultado que veio do ping rápido da Home", () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/ping",
+            state: {
+              pingResult: {
+                target: "probekit.cc",
+                ip_addr: "172.67.154.227",
+                packets_sent: 3,
+                packets_recv: 3,
+                packet_loss: 0,
+                min_rtt: "1.486375ms",
+                avg_rtt: "1.564151ms",
+                max_rtt: "1.621369ms",
+              },
+            },
+          },
+        ]}
+      >
+        <AnimatedRoutes />
+      </MemoryRouter>,
+    )
+    expect(screen.getByText("1.564151ms")).toBeInTheDocument()
+    expect(screen.getByRole("textbox")).toHaveValue("probekit.cc")
+  })
+
+  it("ignora um estado de navegação que não é um resultado de ping", () => {
+    render(
+      <MemoryRouter
+        initialEntries={[
+          { pathname: "/ping", state: { pingResult: "qualquer coisa" } },
+        ]}
+      >
+        <AnimatedRoutes />
+      </MemoryRouter>,
+    )
+    expect(screen.getByRole("textbox")).toHaveValue("")
+    expect(screen.queryByText("Latência média")).not.toBeInTheDocument()
+  })
+
   it("renders the DNS Lookup placeholder page at /dns-lookup", () => {
     render(
       <MemoryRouter initialEntries={["/dns-lookup"]}>

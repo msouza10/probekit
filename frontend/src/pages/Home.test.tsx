@@ -42,57 +42,39 @@ describe("Home", () => {
     }
   })
 
-  it("mostra o resultado real de ping e de DNS em duas bancadas, sem rótulo de exemplo nem provedor", () => {
-    renderHome()
-    const benches = screen
-      .getAllByRole("region")
-      .filter((region) => region.getAttribute("data-slot") === "bench")
-
-    expect(benches.map((bench) => bench.getAttribute("aria-label"))).toEqual([
-      "Ping",
-      "DNS Lookup",
-    ])
-    for (const bench of benches) {
-      expect(within(bench).queryByText("exemplo")).not.toBeInTheDocument()
-      expect(within(bench).queryByText("Oracle Cloud")).not.toBeInTheDocument()
-    }
-    expect(within(benches[0]).getByText("1.564151ms")).toBeInTheDocument()
-    expect(within(benches[1]).getByText("172.67.154.227")).toBeInTheDocument()
+  it("não mostra bancada nem texto de exemplo", () => {
+    const { container } = renderHome()
+    const bench = screen
+      .queryAllByRole("region")
+      .find((region) => region.getAttribute("data-slot") === "bench")
+    expect(bench).toBeUndefined()
+    expect(container.textContent).not.toMatch(/exemplo/i)
   })
 
-  it("não chama a API ao abrir: o exemplo é estático", () => {
-    const fetchSpy = vi.spyOn(globalThis, "fetch")
+  it("fecha com duas portas: Arquitetura é um link do site e Artigos ainda é só texto", () => {
     renderHome()
-    expect(fetchSpy).not.toHaveBeenCalled()
+    const section = screen.getByRole("region", {
+      name: "Arquitetura e artigos",
+    })
+
+    const arquitetura = within(section).getByRole("link", {
+      name: "Arquitetura",
+    })
+    // Rota interna do site, não o GitHub.
+    expect(arquitetura).toHaveAttribute("href", "/arquitetura")
+    expect(arquitetura).not.toHaveAttribute("target")
+
+    // Enquanto a parte de artigos não existe, não há link nem promessa de data.
+    expect(within(section).getByText("Artigos")).toBeInTheDocument()
+    expect(within(section).getByText(/em breve/i)).toBeInTheDocument()
+    expect(within(section).getAllByRole("link")).toHaveLength(1)
   })
 
-  it("tem um link para a página Arquitetura", () => {
+  it("não tem mais o perfil do laboratório", () => {
     renderHome()
-    const hrefs = screen
-      .getAllByRole("link")
-      .map((link) => link.getAttribute("href"))
-    expect(hrefs).toContain("/arquitetura")
-  })
-
-  it("mostra o perfil do laboratório com quatro pares, na ordem", () => {
-    renderHome()
-    const dl = screen
-      .getByRole("region", { name: "Perfil do laboratório" })
-      .querySelector("dl")
-    expect(dl).not.toBeNull()
-    const labels = Array.from((dl as HTMLElement).querySelectorAll("dt")).map(
-      (dt) => dt.textContent,
-    )
-    expect(labels).toEqual(["API", "Site", "Decisões", "Licença"])
     expect(
-      within(dl as HTMLElement).getByRole("link", { name: "ADRs" }),
-    ).toHaveAttribute("href", `${repo}/tree/main/docs/adr`)
-    expect(
-      within(dl as HTMLElement).getByRole("link", { name: "MIT" }),
-    ).toHaveAttribute("href", `${repo}/blob/main/LICENSE`)
-    expect(
-      within(dl as HTMLElement).getByRole("link", { name: "specs" }),
-    ).toHaveAttribute("href", `${repo}/tree/main/docs/superpowers/specs`)
+      screen.queryByRole("region", { name: "Perfil do laboratório" }),
+    ).not.toBeInTheDocument()
   })
 
   it("todo link externo aponta para o repositório do projeto", () => {
@@ -118,7 +100,7 @@ describe("Home", () => {
     expect(owl).not.toBeNull()
     expect(
       within(hero as HTMLElement).getByRole("heading", { level: 1 }),
-    ).toHaveTextContent(/Teste um host ou consulte o DNS de um domínio/)
+    ).toHaveTextContent(/Teste se um host responde/)
     expect((hero as HTMLElement).textContent).toMatch(
       /laboratório feito para mim/,
     )
@@ -128,17 +110,29 @@ describe("Home", () => {
     ).toHaveAttribute("href", repo)
   })
 
-  it("oferece no herói as entradas diretas para Ping e DNS Lookup", () => {
+  it("oferece no herói só o ping rápido, sem botões de ferramenta", () => {
     const { container } = renderHome()
     const hero = container.querySelector(
       'section[aria-labelledby="home-title"]',
     ) as HTMLElement
     expect(
-      within(hero).getByRole("link", { name: "Pingar um host" }),
-    ).toHaveAttribute("href", "/ping")
+      within(hero).getByRole("textbox", { name: "Host ou IP" }),
+    ).toBeInTheDocument()
     expect(
-      within(hero).getByRole("link", { name: "Consultar DNS" }),
-    ).toHaveAttribute("href", "/dns-lookup")
+      within(hero).getByRole("button", { name: "Pingar" }),
+    ).toBeInTheDocument()
+    // O hero só tem o campo: nenhum atalho para outra ferramenta.
+    expect(within(hero).queryAllByRole("button")).toHaveLength(1)
+    expect(
+      within(hero).queryByRole("link", { name: /DNS/ }),
+    ).not.toBeInTheDocument()
+    // O campo substitui os botões "Pingar um host" e "Consultar DNS".
+    expect(
+      within(hero).queryByRole("link", { name: "Pingar um host" }),
+    ).not.toBeInTheDocument()
+    expect(
+      within(hero).queryByRole("link", { name: "Consultar DNS" }),
+    ).not.toBeInTheDocument()
   })
 
   it("não chama a API ao montar", () => {

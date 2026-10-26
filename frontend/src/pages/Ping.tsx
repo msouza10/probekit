@@ -9,15 +9,21 @@ const fieldClass =
   "min-h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-body-sm text-foreground placeholder:text-muted-foreground"
 const labelClass = "text-body-sm font-medium text-foreground"
 
-export function Ping() {
-  const [target, setTarget] = useState("")
+type PingProps = {
+  // Vindo do ping rápido da Home (pelo estado da navegação): um resultado já
+  // obtido, para abrir direto nele sem pingar de novo.
+  initialResult?: PingResult
+}
+
+export function Ping({ initialResult }: PingProps = {}) {
+  const [target, setTarget] = useState(initialResult?.target ?? "")
   const [count, setCount] = useState(5)
   const [timeout, setTimeoutSec] = useState(2)
   const [showAdvanced, setShowAdvanced] = useState(false)
   const [status, setStatus] = useState<
     "idle" | "loading" | "success" | "error"
-  >("idle")
-  const [result, setResult] = useState<PingResult | null>(null)
+  >(initialResult ? "success" : "idle")
+  const [result, setResult] = useState<PingResult | null>(initialResult ?? null)
   const [errorMessage, setErrorMessage] = useState("")
   const [errorCode, setErrorCode] = useState("")
   const [copied, setCopied] = useState(false)
@@ -89,8 +95,8 @@ export function Ping() {
         </h1>
         <p className="max-w-[36rem] text-body-lg text-muted-foreground">
           Mede quanto tempo um pacote leva para ir até um host ou IP público e
-          voltar, e quantos se perdem no caminho. É ICMP de verdade, enviado
-          pela minha sonda na nuvem.
+          voltar, e quantos se perdem no caminho. É ICMP enviado pela minha
+          sonda na nuvem.
         </p>
       </Reveal>
 

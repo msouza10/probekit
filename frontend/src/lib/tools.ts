@@ -5,8 +5,6 @@ export interface Tool {
   category?: "Rede" | "DNS" | "Segurança" | "Utilitários"
   status?: "Disponível" | "Em breve" | "Planejado"
   tags?: string[]
-  /** Por que a ferramenta existe no laboratório (texto da Home, em primeira pessoa). */
-  why?: string
   iconName?:
     "Activity" | "Globe" | "Network" | "ShieldCheck" | "FileCode2" | "Clock"
 }
@@ -19,7 +17,6 @@ export const tools: Tool[] = [
     href: "/ping",
     category: "Rede",
     status: "Disponível",
-    why: "Queria medir a distância até um servidor em vez de supor. Mandar ICMP de verdade, de uma máquina minha na nuvem, é o jeito mais direto que achei de praticar rede.",
     tags: ["ICMP", "Latência", "Jitter", "Perda"],
     iconName: "Activity",
   },
@@ -30,7 +27,6 @@ export const tools: Tool[] = [
     href: "/dns-lookup",
     category: "DNS",
     status: "Disponível",
-    why: "Muito problema estranho de rede acaba sendo DNS. Ver os registros crus, do jeito que o resolvedor devolve, me ajuda a entender o que um domínio anuncia de fato.",
     tags: ["A / AAAA", "MX", "TXT", "NS", "SRV"],
     iconName: "Globe",
   },

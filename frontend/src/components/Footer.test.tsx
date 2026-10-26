@@ -50,6 +50,6 @@ describe("Footer", () => {
         /^https:\/\/github\.com\/msouza10\/probekit/,
       )
     }
-    expect(screen.getByText(/aprender|estudar/i)).toBeInTheDocument()
+    expect(screen.getByText(/feitas por mim/i)).toBeInTheDocument()
   })
 })

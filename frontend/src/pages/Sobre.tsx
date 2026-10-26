@@ -11,7 +11,7 @@ const inlineLink =
 const stack = [
   {
     term: "API",
-    detail: "Go. Faz o ping (ICMP) e a consulta DNS de verdade.",
+    detail: "Go. Faz o ping (ICMP) e a consulta DNS.",
   },
   {
     term: "Servidor",
@@ -44,9 +44,12 @@ export function Sobre() {
         </Reveal>
         <Reveal delay={0.08} className="flex flex-col gap-4">
           <p className="max-w-[36rem] text-body-lg text-muted-foreground">
-            O Probekit é um laboratório pessoal. Estou aprendendo Go e DevOps
-            construindo ferramentas de rede de verdade, e deixei tudo aberto
-            para quem quiser usar ou olhar como foi feito.
+            O Probekit é um laboratório pessoal. É onde eu testo, aprendo e
+            aplico tecnologias, algumas que estou começando a estudar, outras
+            que já uso no dia a dia. O que aprendo fica sobretudo por trás das
+            ferramentas: Terraform, GitHub Actions, multicloud, rede e
+            arquitetura. As escolhas são minhas, então ele é opinativo e pode
+            mudar a qualquer momento.
           </p>
           <p className="max-w-[36rem] text-body-lg text-muted-foreground">
             Por enquanto são duas ferramentas, ping e consulta DNS. As próximas

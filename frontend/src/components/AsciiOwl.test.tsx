@@ -120,12 +120,13 @@ describe("AsciiOwl", () => {
       act(() => void vi.advanceTimersByTime(TICK_MS * 5))
       const shimmering = diffCount(pre.textContent ?? "", original)
       expect(shimmering).toBeGreaterThan(1)
-      // espaços da arte original nunca mudam
+      // Só os tons de sombra variam, e no máximo um nível. Espaços, quebras de
+      // linha e o "·" (ponto de textura da arte) nunca mudam.
+      const tones = "░▒▓█"
       const now = (pre.textContent ?? "").split("")
       original.split("").forEach((ch, i) => {
-        if (ch === " " || ch === "\n") expect(now[i]).toBe(ch)
+        if (!tones.includes(ch)) expect(now[i]).toBe(ch)
         else {
-          const tones = "░▒▓█"
           expect(tones).toContain(now[i])
           expect(
             Math.abs(tones.indexOf(ch) - tones.indexOf(now[i])),

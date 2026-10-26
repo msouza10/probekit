@@ -33,6 +33,28 @@ async function submit(user: ReturnType<typeof userEvent.setup>, value: string) {
   await user.click(screen.getByRole("button", { name: /disparar ping/i }))
 }
 
+describe("Ping (vindo do ping rápido da Home)", () => {
+  beforeEach(() => {
+    mockedRunPing.mockReset()
+  })
+
+  it("abre direto com o resultado recebido, sem chamar a API", () => {
+    render(<Ping initialResult={result} />)
+
+    expect(screen.getByText("12.1ms")).toBeInTheDocument()
+    expect(screen.getByText("20%")).toBeInTheDocument()
+    expect(screen.getByRole("textbox")).toHaveValue("example.com")
+    expect(mockedRunPing).not.toHaveBeenCalled()
+  })
+
+  it("sem nada, abre vazia como sempre", () => {
+    render(<Ping />)
+
+    expect(screen.getByRole("textbox")).toHaveValue("")
+    expect(screen.queryByText("Latência média")).not.toBeInTheDocument()
+  })
+})
+
 describe("Ping (comportamento)", () => {
   beforeEach(() => {
     mockedRunPing.mockReset()

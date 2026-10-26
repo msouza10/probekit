@@ -15,8 +15,8 @@ export function Footer() {
             Probekit
           </span>
           <p className="max-w-[44ch] text-body-sm text-muted-foreground">
-            Montei o Probekit para aprender como a rede funciona. O código está
-            aberto para quem quiser olhar, usar ou sugerir melhorias.
+            Ferramentas técnicas feitas por mim. O código está no GitHub, e dá
+            para sugerir melhorias pelo link ao lado.
           </p>
           <a
             href={repository}
