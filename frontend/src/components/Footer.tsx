@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom"
 import { GithubIcon } from "./icons/GithubIcon"
+import { RepoStats } from "./RepoStats"
 
 const repository = "https://github.com/msouza10/probekit"
 
@@ -89,7 +90,11 @@ export function Footer() {
         </nav>
       </div>
 
-      <div className="mt-12 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-border pt-5 text-sm text-muted-foreground sm:mt-16">
+      <div className="mt-10 sm:mt-12">
+        <RepoStats />
+      </div>
+
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-border pt-5 text-sm text-muted-foreground">
         <p>© {new Date().getFullYear()} Probekit</p>
         <a
           href="#inicio"

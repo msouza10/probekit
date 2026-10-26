@@ -25,6 +25,12 @@ const redesigned: string[] = [
 const read = (relativePath: string) =>
   readFileSync(resolve(frontendRoot, relativePath), "utf8")
 
+/*
+ * Componente de terceiros (21st.dev) usado como veio: o gradiente dele é uma
+ * máscara que apaga as pontas da faixa de tecnologias, não decoração de fundo.
+ */
+const gradientAllowed = ["src/components/ui/logo-cloud-3.tsx"]
+
 const surfaceDecoration =
   /linear-gradient|radial-gradient|box-shadow|\bshadow(-\w+)?\b/
 const liftingHover = /hover:-?translate-y|hover:scale/
@@ -70,7 +76,9 @@ describe("design guard", () => {
     (relativePath) => {
       if (relativePath === "(nenhum ainda)") return
       const content = read(relativePath)
-      expect(content).not.toMatch(surfaceDecoration)
+      if (!gradientAllowed.includes(relativePath)) {
+        expect(content).not.toMatch(surfaceDecoration)
+      }
       expect(content).not.toMatch(liftingHover)
       expect(content).not.toMatch(legacyTokenClass)
     },

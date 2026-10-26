@@ -2,7 +2,9 @@ import { ArrowRight } from "lucide-react"
 import { Link } from "react-router-dom"
 import { AsciiOwl } from "@/components/AsciiOwl"
 import { QuickPing } from "@/components/QuickPing"
+import { RepoPulse } from "@/components/RepoPulse"
 import { Reveal } from "@/components/Reveal"
+import LogoCloudBlock from "@/components/ui/logo-cloud-3"
 import { tools } from "@/lib/tools"
 
 const repository = "https://github.com/msouza10/probekit"
@@ -45,6 +47,9 @@ export function Home() {
               opinativo e pode mudar a qualquer momento. O código está todo{" "}
               <ExternalLink href={repository}>no GitHub</ExternalLink>.
             </p>
+          </Reveal>
+          <Reveal delay={0.24}>
+            <RepoPulse />
           </Reveal>
         </div>
         <AsciiOwl />
@@ -131,6 +136,8 @@ export function Home() {
           </div>
         </Reveal>
       </section>
+
+      <LogoCloudBlock />
     </main>
   )
 }
