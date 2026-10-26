@@ -73,7 +73,8 @@
  * ../../DESIGN.md. Única exceção: os três ícones dos indicadores do repositório
  * (--stat-*) e o selo de deploy, que usam as cores do GitHub para commit, PR, issue
  * e deploy concluído, e o ícone de estado das páginas de
- * ferramenta (--status-up e --status-down: respondeu, não respondeu).
+ * ferramenta (--status-up e --status-down: respondeu, não respondeu) e a zona de cada
+ * provedor nos diagramas (--cloud-*: Cloudflare, Oracle Cloud).
  */
 :root {
   color-scheme: light;
@@ -104,6 +105,8 @@
   --stat-deploy: #1a7f37;
   --status-up: #1a7f37;
   --status-down: #cf222e;
+  --cloud-cloudflare: #d9680b;
+  --cloud-oracle: #c74634;
   --ring: var(--highlight);
   --radius: 0.5rem;
 
@@ -140,6 +143,8 @@
   --stat-deploy: #3fb950;
   --status-up: #3fb950;
   --status-down: #ff7b72;
+  --cloud-cloudflare: #f6821f;
+  --cloud-oracle: #e8634f;
 }
 
 @theme inline {
@@ -171,6 +176,8 @@
   --color-stat-deploy: var(--stat-deploy);
   --color-status-up: var(--status-up);
   --color-status-down: var(--status-down);
+  --color-cloud-cloudflare: var(--cloud-cloudflare);
+  --color-cloud-oracle: var(--cloud-oracle);
 
   --color-bench: var(--bench);
   --color-bench-foreground: var(--bench-foreground);
@@ -387,24 +394,21 @@ code {
  * [data-motion="on"], que o hook liga quando o diagrama está visível e a
  * pessoa não pediu movimento reduzido. Fora disso tudo aparece parado, no
  * estado final, e os pontos que viajam ficam escondidos. Só animam transform,
- * opacity, stroke-dashoffset, offset-distance e a cor do traço.
+ * opacity, stroke-dashoffset (só ao desenhar a ligação), offset-distance e a
+ * cor do traço.
  * Contrato: UMA classe de animação por elemento (elas se sobrepõem se
- * juntas). Para linha desenhada que depois flui, use duas linhas: a base com
- * .diagram-draw e outra por cima com .diagram-flow. Todo .diagram-draw exige
- * pathLength="1" no path (o comprimento vira 1, qualquer que seja o real).
+ * juntas). Ligação é linha contínua que se desenha uma vez (.diagram-draw, que
+ * exige pathLength="1" no path: o comprimento vira 1, qualquer que seja o
+ * real). Depois de desenhada, a ligação não se anima: quem mostra o tráfego é o
+ * ponto (.diagram-packet). Tracejado é sempre parado e nunca é ligação de
+ * fluxo (ver "Diagrama" no DESIGN.md).
  * Atrasos escalonados vão inline (animation-delay); a duração da viagem de um
  * ponto pode ser trocada com --diagram-travel.
  */
-.diagram-flow {
-  stroke-dasharray: 4 7;
-}
 .diagram-packet {
   display: none;
   fill: var(--highlight);
   offset-rotate: 0deg;
-}
-[data-motion="on"] .diagram-flow {
-  animation: diagram-flow 2s linear infinite;
 }
 [data-motion="on"] .diagram-pulse {
   animation: diagram-pulse 4s ease-in-out infinite;
@@ -424,7 +428,6 @@ code {
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .diagram-flow,
   .diagram-pulse,
   .diagram-draw,
   .diagram-pop {
@@ -432,11 +435,6 @@ code {
   }
   .diagram-packet {
     display: none !important;
-  }
-}
-@keyframes diagram-flow {
-  to {
-    stroke-dashoffset: -22;
   }
 }
 @keyframes diagram-pulse {

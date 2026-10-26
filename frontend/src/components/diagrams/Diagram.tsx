@@ -23,7 +23,7 @@ type DiagramProps = {
  * `role="img"` e `aria-labelledby={`${ids.title} ${ids.summary}`}`, com
  * `<title id={ids.title}>` e `<desc id={ids.summary}>` dentro.
  * Contrato de movimento: cada linha desenhada (`diagram-draw`) leva
- * `pathLength="1"`; `diagram-flow`, `diagram-draw`, `diagram-pulse` e
+ * `pathLength="1"`; `diagram-draw`, `diagram-pulse` e
  * `diagram-pop` vão em elementos diferentes (uma animação por elemento).
  */
 export function Diagram({ id, title, summary, steps, children }: DiagramProps) {

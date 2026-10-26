@@ -28,9 +28,9 @@ const sections: {
   {
     id: "arquitetura",
     number: "01",
-    title: "Do navegador à API",
+    title: "Do cliente à API",
     paragraphs: [
-      "O site é estático, servido por um Cloudflare Worker. Quando uma ferramenta roda, o navegador chama a API em api.probekit.cc: o pedido passa pelo proxy da Cloudflare, chega ao balanceador de carga da Oracle Cloud e cai em uma das duas máquinas, onde o binário em Go termina o TLS.",
+      "O cliente faz dois pedidos independentes. O primeiro vai ao Cloudflare Workers, que serve a interface web, uma SPA em React com HTML, JS e CSS estáticos. O segundo é feito pela própria interface, já no cliente: o JavaScript dela chama a API em api.probekit.cc, em outra origem e com CORS. Esse pedido passa pelo proxy da Cloudflare, chega ao NLB da Oracle Cloud e cai em uma das duas máquinas, onde o binário em Go termina o TLS. O Workers não fica no caminho da API.",
       "Antes de qualquer pacote sair, a API confere o destino e recusa endereços privados, de loopback e de link-local. O ping usa ICMP de verdade, então a latência mostrada é a da máquina até o alvo. O limite é de 50 requisições a cada 5 minutos por visitante. Como o pedido chega pela Cloudflare, a API lê o endereço do visitante no cabeçalho CF-Connecting-IP, mas só quando a conexão vem de uma faixa de endereços da Cloudflare; quem acessar o balanceador direto não consegue forjá-lo. A contagem fica na memória de cada servidor.",
     ],
     diagram: <ArchitectureDiagram />,

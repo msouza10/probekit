@@ -26,7 +26,7 @@ describe("Arquitetura", () => {
     renderPage()
     expect(screen.getAllByRole("heading", { level: 2 })).toHaveLength(4)
     for (const name of [
-      "Do navegador à API",
+      "Do cliente à API",
       "Pipeline",
       "Infraestrutura",
       "Princípios",
@@ -65,7 +65,7 @@ describe("Arquitetura", () => {
   it("mostra o diagrama de arquitetura na seção 01", () => {
     renderPage()
     const section = screen
-      .getByRole("heading", { level: 2, name: "Do navegador à API" })
+      .getByRole("heading", { level: 2, name: "Do cliente à API" })
       .closest("section")
     expect(section).not.toBeNull()
     expect(

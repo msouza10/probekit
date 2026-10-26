@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-26T17:14:18Z",
+  "generatedAt": "2026-10-26T18:44:46Z",
   "title": "Design System: Probekit",
   "extensions": {
     "colorMeta": {
@@ -168,6 +168,18 @@
         "displayName": "Vermelho de Sem Resposta",
         "canonical": "oklch(54% 0.200 25)",
         "tonalRamp": []
+      },
+      "cloud-cloudflare": {
+        "role": "accent",
+        "displayName": "Laranja Cloudflare",
+        "canonical": "oklch(60% 0.165 52)",
+        "tonalRamp": []
+      },
+      "cloud-oracle": {
+        "role": "accent",
+        "displayName": "Vermelho Oracle",
+        "canonical": "oklch(54% 0.168 32)",
+        "tonalRamp": []
       }
     },
     "typographyMeta": {
@@ -302,7 +314,7 @@
     "rules": [
       {
         "name": "A Regra do Cinza Puro",
-        "body": "Nenhum valor de cor tem matiz: R, G e B são iguais. Nada de marrom, bege ou cinza quente ou frio. Destaque, erro e sucesso se distinguem por degrau de cinza e por texto, nunca só por cor. Únicas exceções: ícones de atividade do repositório (stat-*) e de estado do resultado (status-*); cor nova nunca entra em texto, fundo ou borda.",
+        "body": "Nenhum valor de cor tem matiz: R, G e B são iguais. Nada de marrom, bege ou cinza quente ou frio. Destaque, erro e sucesso se distinguem por degrau de cinza e por texto, nunca só por cor. Únicas exceções: ícones de atividade do repositório (stat-*) de estado do resultado (status-*) e a zona de provedor nos diagramas, com ligações, setas e pontos (cloud-*); cor nova nunca entra em texto, fundo ou borda.",
         "section": "colors"
       },
       {
@@ -335,7 +347,9 @@
       "Do rotular exemplo como exemplo e usar endereços reservados (example.com, 192.0.2.x).",
       "Do dar foco visível a todo controle.",
       "Do abrir o resultado de toda ferramenta com um veredicto em uma frase (ícone verde, vermelho ou cinza) e montar a página com os componentes de components/tool: ToolPage, OriginStrip, ResultStatus, ResultStats ou RecordGroup, JsonDisclosure.",
-      "Do usar vermelho só quando o destino não existe ou não responde; falha nossa ou do pedido é cinza."
+      "Do usar vermelho só quando o destino não existe ou não responde; falha nossa ou do pedido é cinza.",
+      "Do dar a cada provedor, no diagrama, a cor da marca na borda da zona, na bolinha do rótulo, nas ligações e setas que apontam para ele e no ponto animado dentro da zona, com o nome escrito.",
+      "Do usar linha contínua com seta para toda ligação de fluxo, e tracejado parado só para fronteira de zona, caminho excepcional (rollback) ou referência guardada (estado remoto)."
     ],
     "donts": [
       "Don't usar gradiente, sombra, brilho, glassmorphism nem hover que levanta.",
@@ -346,7 +360,8 @@
       "Don't usar fonte monoespaçada em texto corrido.",
       "Don't apresentar dado inventado como real.",
       "Don't usar cor fora da escala de cinza em texto, fundo ou borda; nada de marrom, bege ou âmbar.",
-      "Don't usar animação que chame atenção para si ou que ignore prefers-reduced-motion."
+      "Don't usar animação que chame atenção para si ou que ignore prefers-reduced-motion.",
+      "Don't animar o traço de uma ligação depois de desenhada, nem usar tracejado para ligação de fluxo: tracejado é fronteira, caminho excepcional ou referência."
     ]
   }
 }

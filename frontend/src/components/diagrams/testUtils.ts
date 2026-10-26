@@ -12,12 +12,12 @@ export function injectDiagramCss() {
     resolve(dirname(fileURLToPath(import.meta.url)), "../../index.css"),
     "utf8",
   )
-  const start = css.indexOf(".diagram-flow {")
-  const end = css.indexOf("@keyframes diagram-flow")
+  const start = css.indexOf(".diagram-packet {")
+  const end = css.indexOf("@keyframes diagram-pulse")
   if (start === -1)
-    throw new Error("marcador '.diagram-flow {' ausente no index.css")
+    throw new Error("marcador '.diagram-packet {' ausente no index.css")
   if (end === -1)
-    throw new Error("marcador '@keyframes diagram-flow' ausente no index.css")
+    throw new Error("marcador '@keyframes diagram-pulse' ausente no index.css")
   if (end <= start) throw new Error("marcadores do index.css fora de ordem")
   const style = document.createElement("style")
   style.textContent = css.slice(start, end)

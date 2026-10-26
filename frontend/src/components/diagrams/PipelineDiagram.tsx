@@ -35,7 +35,7 @@ const lines = {
   siteGate: "M415 204 V244",
   gateDeploy: "M500 276 H524",
 }
-// O que o ponto percorre (caminho do site): em destaque, com fluxo.
+// O que o ponto percorre (caminho do site): em destaque.
 const highlighted = [
   lines.prCi,
   lines.ciMain,
@@ -124,26 +124,19 @@ export function PipelineDiagram() {
           <title id={ids.title}>{title}</title>
           <desc id={ids.summary}>{summary}</desc>
 
-          {/* Ligações: base que se desenha uma vez. */}
-          <g className="fill-none stroke-input" strokeWidth={1.25}>
+          {/* Ligações: linhas contínuas, desenhadas uma vez. O caminho do ponto
+              fica em destaque; as outras, em cinza. */}
+          <g className="fill-none" strokeWidth={1.25}>
             {Object.values(lines).map((d, index) => (
               <path
                 key={d}
                 d={d}
                 pathLength={1}
-                className="diagram-draw"
+                className={`diagram-draw ${
+                  highlighted.includes(d) ? "stroke-highlight" : "stroke-input"
+                }`}
                 style={delay(0.3 + index * 0.12)}
               />
-            ))}
-          </g>
-          {/* Caminho do ponto: tracejado que flui por cima da base. */}
-          <g
-            className="diagram-pop fill-none stroke-highlight"
-            strokeWidth={1.5}
-            style={delay(1.3)}
-          >
-            {highlighted.map((d) => (
-              <path key={d} d={d} className="diagram-flow" />
             ))}
           </g>
           {/* Rollback: tracejado parado, sem fluxo e sem animação. */}

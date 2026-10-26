@@ -1,5 +1,15 @@
 import { Diagram, type DiagramStep } from "./Diagram"
-import { Node, SUB, NAME, arrow, delay, type Box } from "./svgParts"
+import {
+  Node,
+  SUB,
+  NAME,
+  Zone,
+  arrow,
+  cloudStroke,
+  delay,
+  type Box,
+  type Cloud,
+} from "./svgParts"
 
 /*
  * Mesma linguagem visual do ArchitectureDiagram (ver o comentário dele):
@@ -8,7 +18,7 @@ import { Node, SUB, NAME, arrow, delay, type Box } from "./svgParts"
  * ortogonais com cantos de raio 12 e setas abertas.
  * Aqui as linhas se desenham uma vez e os recursos entram em sequência: o
  * código, o plan → apply e, por fim, o que ele cria em cada nuvem. Só as
- * ligações que saem do apply ganham o fluxo discreto em `stroke-highlight`.
+ * ligações que saem do apply levam a cor da cloud de destino (linhas contínuas).
  * O bloco do estado remoto é tracejado e fica parado.
  */
 
@@ -30,39 +40,36 @@ const lines = {
   applyOracle: "M240 72 V120",
   applyCloudflare: "M320 72 V96 Q320 108 332 108 H484 Q496 108 496 120",
 }
-// Só o que o apply cria ganha o fluxo.
-const created = [lines.applyOracle, lines.applyCloudflare]
+// Cloud de destino das ligações que o apply cria (as outras ficam em cinza).
+const lineCloud: Partial<Record<keyof typeof lines, Cloud>> = {
+  applyOracle: "oracle",
+  applyCloudflare: "cloudflare",
+}
 // Apply -> estado remoto: tracejado e parado.
 const stateLine = "M366 40 H456"
 
-function Zone({
+function ProviderZone({
   zone,
   label,
+  cloud,
   enter,
 }: {
   zone: { x: number; y: number; w: number; h: number }
   label: string
+  cloud: Cloud
   enter: number
 }) {
   return (
     <g className="diagram-pop" style={delay(enter)}>
-      <rect
+      <Zone
         x={zone.x}
         y={zone.y}
         width={zone.w}
         height={zone.h}
-        rx={10}
-        strokeDasharray="3 5"
-        className="fill-none stroke-input"
+        label={label}
+        labelY={zone.y + 26}
+        cloud={cloud}
       />
-      <text
-        x={zone.x + 14}
-        y={zone.y + 26}
-        fontSize={SUB}
-        className="fill-muted-foreground font-medium"
-      >
-        {label}
-      </text>
     </g>
   )
 }
@@ -125,30 +132,36 @@ export function InfrastructureDiagram() {
           <desc id={ids.summary}>{summary}</desc>
 
           {/* Zonas. Fonte: infra/terraform/main.tf (módulos oci e cloudflare) */}
-          <Zone zone={oracle} label="Oracle Cloud" enter={0.5} />
-          <Zone zone={cloudflare} label="Cloudflare" enter={0.5} />
+          <ProviderZone
+            zone={oracle}
+            label="Oracle Cloud"
+            cloud="oracle"
+            enter={0.5}
+          />
+          <ProviderZone
+            zone={cloudflare}
+            label="Cloudflare"
+            cloud="cloudflare"
+            enter={0.5}
+          />
 
           {/* Ligações: base que se desenha uma vez. */}
-          <g className="fill-none stroke-input" strokeWidth={1.25}>
-            {Object.values(lines).map((d, index) => (
-              <path
-                key={d}
-                d={d}
-                pathLength={1}
-                className="diagram-draw"
-                style={delay(0.2 + index * 0.2)}
-              />
-            ))}
-          </g>
-          {/* O que o apply cria: tracejado discreto que flui por cima. */}
-          <g
-            className="diagram-pop fill-none stroke-highlight"
-            strokeWidth={1.5}
-            style={delay(1.4)}
-          >
-            {created.map((d) => (
-              <path key={d} d={d} className="diagram-flow" />
-            ))}
+          <g className="fill-none" strokeWidth={1.25}>
+            {(Object.keys(lines) as (keyof typeof lines)[]).map(
+              (key, index) => (
+                <path
+                  key={key}
+                  d={lines[key]}
+                  pathLength={1}
+                  className={`diagram-draw ${
+                    lineCloud[key]
+                      ? cloudStroke[lineCloud[key]]
+                      : "stroke-input"
+                  }`}
+                  style={delay(0.2 + index * 0.2)}
+                />
+              ),
+            )}
           </g>
           {/* Apply -> estado remoto: parado (o estado não é um fluxo). */}
           <path
@@ -158,7 +171,7 @@ export function InfrastructureDiagram() {
             strokeDasharray="5 5"
           />
 
-          {/* Setas: cinza no código e no estado, destaque no que é criado. */}
+          {/* Setas: cinza no código e no estado, cor da cloud no que é criado. */}
           <g
             className="fill-none"
             strokeWidth={1.5}
@@ -167,8 +180,11 @@ export function InfrastructureDiagram() {
           >
             <path d={arrow("right", 190, 40)} className="stroke-input" />
             <path d={arrow("right", 456, 40)} className="stroke-input" />
-            <path d={arrow("down", 240, 120)} className="stroke-highlight" />
-            <path d={arrow("down", 496, 120)} className="stroke-highlight" />
+            <path d={arrow("down", 240, 120)} className={cloudStroke.oracle} />
+            <path
+              d={arrow("down", 496, 120)}
+              className={cloudStroke.cloudflare}
+            />
           </g>
 
           {/* *.tf: infra/terraform (main.tf, backend.tf, oci/*.tf, cloudflare/) */}

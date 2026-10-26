@@ -36,6 +36,10 @@ colors:
   status-down: "#cf222e"
   night-status-up: "#3fb950"
   night-status-down: "#ff7b72"
+  cloud-cloudflare: "#d9680b"
+  cloud-oracle: "#c74634"
+  night-cloud-cloudflare: "#f6821f"
+  night-cloud-oracle: "#e8634f"
   bench: "#0a0a0a"
   bench-ink: "#ededed"
   bench-muted: "#9a9a9a"
@@ -155,13 +159,15 @@ Papel branco e tinta preta, em cinzas puros (R = G = B em todo valor). Os nomes 
 - **Tinta de Erro** (`error-ink` #000000 / `night-error-ink` #ffffff) sobre **Superfície de Erro** (`error-surface` #e6e6e6 / `night-error-surface` #2e2e2e): bloco de erro com borda e texto `destructive`. O extremo do cinza (preto no claro, branco no escuro) marca o erro; a mensagem escrita é quem diz o que houve.
 - **Cinza de Sucesso** (`success-gray` #3d3d3d / `night-success-gray` #d0d0d0): sucesso.
 
-### Exceção: ícones coloridos
-Únicas cores fora da escala de cinza, e só em ícones (nunca em texto, fundo ou borda). Dois grupos:
+### Exceção: ícones e zonas de provedor coloridos
+Únicas cores fora da escala de cinza. Ícones (nunca texto, fundo ou borda de componente) e, nos diagramas, a borda da zona de cada provedor. Três grupos:
 
 **Atividade do repositório.** Os indicadores usam as cores do GitHub, para commit, PR, issue e deploy concluído se reconhecerem de relance. Aparecem na linha do herói (`RepoPulse`) e nos números do rodapé (`RepoStats`).
 - **Commit** (`stat-commit` #0969da / `night-stat-commit` #58a6ff), **PR** (`stat-pr` #8250df / `night-stat-pr` #bc8cff), **Issue** (`stat-issue` #1a7f37 / `night-stat-issue` #3fb950) e **Deploy** (`stat-deploy`, o mesmo verde da issue).
 - Contraste sobre o papel: de 4,83 a 4,97 no claro e de 7,37 a 7,43 no escuro (mínimo de 3:1 para ícone).
 - Os ícones são decorativos (`aria-hidden`); o sentido continua escrito no texto ao lado.
+
+**Provedores nos diagramas** (`cloud-*`). Cada provedor tem a cor da marca na borda da zona tracejada, na bolinha do rótulo, nas ligações e setas que apontam para ele e no ponto animado enquanto ele atravessa a zona: **Cloudflare** (`cloud-cloudflare` #d9680b / `night-cloud-cloudflare` #f6821f, laranja) e **Oracle Cloud** (`cloud-oracle` #c74634 / `night-cloud-oracle` #e8634f, vermelho). O texto e os blocos continuam em cinza, e o nome do provedor está sempre escrito no rótulo. Ligação e seta que não entram em nenhuma cloud (por exemplo, a que vai do código ao `apply` no diagrama de infraestrutura) ficam em cinza. Contraste sobre o papel: 3,39 e 4,62 no claro, 7,25 e 5,65 no escuro (mínimo de 3:1 para elementos gráficos). O laranja claro da Cloudflare foi escurecido em relação ao da marca (#f6821f, 2,47 no claro) para passar de 3:1. Zonas de papel (Frontend, Backend) não usam cor.
 
 **Estado do resultado** (`ResultStatus`). O ícone do veredicto de uma ferramenta: **respondeu** (`status-up` #1a7f37 / `night-status-up` #3fb950, `CircleCheck`), **não respondeu, por conta do destino** (`status-down` #cf222e / `night-status-down` #ff7b72, `CircleX`) e **falha nossa ou do pedido** (cinza `muted-ink`, `CircleAlert`). Vermelho quer dizer "o destino está fora"; endereço recusado, API fora do ar e limite de uso são cinza, porque o problema não é do destino. O sentido está sempre na frase do veredicto. Contraste sobre o papel: 4,87 (verde) e 5,13 (vermelho) no claro, 7,37 e 7,43 no escuro.
 
@@ -170,7 +176,7 @@ Escura nos dois temas; os valores não mudam com `data-theme`.
 - **Fundo da Bancada** (`bench` #0a0a0a), **Tinta da Bancada** (`bench-ink` #ededed), **Apagado** (`bench-muted` #9a9a9a), **Linha** (`bench-line` #2e2e2e), **Ok** (`bench-ok` #b8b8b8) e **Brilho** (`bench-bright` #ffffff, o realce dentro da bancada).
 
 ### Named Rules
-**A Regra do Cinza Puro.** Nenhum valor de cor tem matiz: R, G e B são iguais. As únicas exceções são ícones: os de atividade do repositório (`stat-*`) e os de estado do resultado (`status-*`), descritos acima. Nada de marrom, bege ou cinza "quente" ou "frio". Destaque, erro e sucesso se distinguem por degrau de cinza e por texto, nunca só por cor. Cor nova só entra em ícone (de atividade do repositório ou de estado do resultado), nunca em texto, fundo ou borda.
+**A Regra do Cinza Puro.** Nenhum valor de cor tem matiz: R, G e B são iguais. As únicas exceções são os ícones de atividade do repositório (`stat-*`), os de estado do resultado (`status-*`) e a zona de provedor, com suas ligações, setas e pontos, nos diagramas (`cloud-*`), descritos acima. Nada de marrom, bege ou cinza "quente" ou "frio". Destaque, erro e sucesso se distinguem por degrau de cinza e por texto, nunca só por cor. Cor nova só entra em ícone (de atividade do repositório ou de estado do resultado) ou, num diagrama, na zona de provedor e no que a liga (borda, ligação, seta, ponto), nunca em texto, fundo de bloco ou borda de componente.
 
 **A Regra do Escuro Desenhado.** O tema escuro não é o claro invertido: preto suave (#121212, não #000) e cinzas reclareados para manter o contraste. Todo par de texto precisa de 4,5:1 (AA) nos dois temas.
 
@@ -269,7 +275,15 @@ Regras: cada parágrafo só afirma o que está no repositório (código, workflo
 - **Troca de tema:** View Transition API; o retrato do tema antigo some e o do novo aparece, com desfoque de 6px (`opacity` e `filter`, 400ms, `ease`). Com `prefers-reduced-motion`, só `opacity` em 0,12s. Sem suporte do navegador, a troca é direta. Nenhuma máscara nem `clip-path`, para ficar dentro da regra de movimento.
 
 ### Diagrama
-Figura com legenda, resumo, svg largo e lista ordenada de passos. Abaixo de 640px a lista de passos é o diagrama (cartões empilhados ligados por seta); acima, a lista fica só para leitores de tela. O movimento é CSS, ligado por `[data-motion="on"]`, e desligado com `prefers-reduced-motion`. Usa só tokens existentes: bloco `card` com borda `rule-line`, zonas tracejadas e ligações em `field-line`, fluxo e setas em `marker-gray`.
+Figura com legenda, resumo, svg largo e lista ordenada de passos. Abaixo de 640px a lista de passos é o diagrama (cartões empilhados ligados por seta); acima, a lista fica só para leitores de tela. O movimento é CSS, ligado por `[data-motion="on"]`, e desligado com `prefers-reduced-motion`. Usa só tokens existentes: bloco `card` com borda `rule-line`, zonas tracejadas e ligações em `field-line`, e o caminho em destaque (e suas setas) em `marker-gray`. Tom: o texto de um diagrama é técnico e descreve só o que existe (componente, protocolo, porta, região), sem segunda pessoa nem analogia; a explicação para quem não é técnico fica nos parágrafos da seção, não no desenho. Fronteira do sistema: o cliente (o navegador) é o único ator externo e entra no diagrama como a origem, à esquerda, com fundo da página e traço de campo (`external`) em vez do cartão dos componentes; é dele que partem os ramos do sistema. Os ramos se agrupam por papel (Frontend, Backend) em zonas tracejadas. Todo componente diz onde roda: dentro do papel há zonas de localização aninhadas ("Cloudflare · borda", "Oracle Cloud · sa-saopaulo-1"), e o que roda no cliente (a interface web) fica fora de qualquer zona de provedor, com "roda no navegador" no subtítulo. A zona de um provedor leva a cor dele (`cloud-*`) na borda e numa bolinha ao lado do rótulo. Cor das ligações e setas: a da cloud para onde apontam; quando o destino é o cliente (Workers para a interface web), a da cloud de onde saem. Cor do ponto: muda a cada zona que atravessa (cinza fora de zona, laranja na Cloudflare, vermelho na Oracle) e acompanha o percurso na volta; os limites são calculados da geometria do caminho contra as zonas, não escritos à mão, então mudar o desenho exige recalcular. Papel sozinho nunca basta: um bloco solto dentro de Frontend ou Backend deixa a dúvida de onde ele está. Sentido das setas: aponta para onde o dado vai, e o ponto animado vai até o destino e volta, mostrando a resposta.
+
+**Linhas (critério).** Cada estilo de linha diz uma coisa, e só essa:
+- **Contínua, com seta:** ligação por onde passa tráfego ou uma ação (uma requisição, um passo do pipeline, o `apply`). Todas as ligações de um diagrama são do mesmo tipo, porque no sistema real são todas requisição e resposta; o que as diferencia é a cloud para onde apontam (cor) ou, no Pipeline, ser o caminho em destaque.
+- **Tracejada e parada:** o que não é o fluxo principal. Três usos, e só eles: a fronteira de uma zona, um caminho excepcional (o rollback do Pipeline) e uma referência guardada (o estado remoto da Infraestrutura).
+- **Tracejada em movimento:** não existe. O ponto animado já diz que há tráfego e em que sentido; animar também o traço repetiria a informação e, na mesma cor da linha, nem apareceria.
+- **Movimento:** a ligação se desenha uma vez, na entrada, e depois fica parada. Quem anda é o ponto, e só ele.
+
+Se uma ligação nova precisar de um estilo próprio, ela tem que representar uma diferença real do sistema (por exemplo, um canal assíncrono), e essa diferença entra aqui antes do estilo.
 
 ### Coruja ASCII
 Elemento de identidade escolhido pelo criador e exceção deliberada à regra de "sem elementos decorativos". Arte em `src/assets/coruja-ascii.txt`, em `muted-ink` e mono, decorativa (`aria-hidden`), só de `lg` para cima. Desenha-se de cima para baixo e depois cintila; olhos e bico nunca são tocados pela cintilação. Com `prefers-reduced-motion` aparece completa e parada.
@@ -291,6 +305,7 @@ Elemento de identidade escolhido pelo criador e exceção deliberada à regra de
 - **Don't** adotar tom de vitrine: promessas, selos de confiança, chamadas de venda.
 - **Don't** escrever eyebrow no formato `// TÍTULO`.
 - **Don't** usar fonte monoespaçada em texto corrido.
+- **Don't** animar o traço de uma ligação depois de desenhada, nem usar tracejado para ligação de fluxo: tracejado é fronteira, caminho excepcional ou referência.
 - **Don't** apresentar dado inventado como real.
 - **Don't** criar uma segunda cor de destaque; vermelho e verde são só erro e sucesso.
 - **Don't** usar animação que chame atenção para si ou que ignore `prefers-reduced-motion`.

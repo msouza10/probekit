@@ -122,7 +122,7 @@ describe("PipelineDiagram", () => {
     expect(drawn.length).toBeGreaterThan(0)
     for (const path of drawn) expect(path).toHaveAttribute("pathLength", "1")
     const animated = container.querySelectorAll(
-      ".diagram-draw, .diagram-flow, .diagram-pulse, .diagram-pop, .diagram-packet",
+      ".diagram-draw, .diagram-pulse, .diagram-pop, .diagram-packet",
     )
     for (const element of animated) {
       const classes = [...element.classList].filter((name) =>
@@ -130,5 +130,18 @@ describe("PipelineDiagram", () => {
       )
       expect(classes).toHaveLength(1)
     }
+  })
+})
+
+describe("PipelineDiagram (linhas)", () => {
+  it("ligação é contínua; só o rollback é tracejado, e parado", () => {
+    const { container } = render(<PipelineDiagram />)
+    for (const path of container.querySelectorAll("path.diagram-draw")) {
+      expect(path).not.toHaveAttribute("stroke-dasharray")
+    }
+    expect(container.querySelectorAll(".diagram-flow")).toHaveLength(0)
+    const rollback = container.querySelectorAll("path[data-rollback]")
+    expect(rollback.length).toBeGreaterThan(0)
+    expect(rollback[0].closest("[stroke-dasharray]")).not.toBeNull()
   })
 })

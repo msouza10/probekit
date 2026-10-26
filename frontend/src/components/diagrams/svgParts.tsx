@@ -27,6 +27,7 @@ export function Node({
   monoName = false,
   lines = [],
   gate = false,
+  external = false,
   pulse,
   enter,
 }: {
@@ -37,6 +38,8 @@ export function Node({
   lines?: Line[]
   /** O portão pulsa e tem o fundo `muted`. */
   gate?: boolean
+  /** Ator fora do sistema (o cliente): fundo da página e traço de campo. */
+  external?: boolean
   /** Atraso da respiração da borda; sem ele (e sem `gate`) o bloco não respira. */
   pulse?: number
   /** Atraso da entrada do bloco. */
@@ -53,7 +56,7 @@ export function Node({
         width={box.w}
         height={h}
         rx={6}
-        className={`${gate ? "fill-muted" : "fill-card"} stroke-border${breathes ? " diagram-pulse" : ""}`}
+        className={`${gate ? "fill-muted" : external ? "fill-background" : "fill-card"} ${external ? "stroke-input" : "stroke-border"}${breathes ? " diagram-pulse" : ""}`}
         style={pulse === undefined ? undefined : delay(pulse)}
       />
       <text
@@ -77,6 +80,72 @@ export function Node({
           {text}
         </text>
       ))}
+    </g>
+  )
+}
+
+export type Cloud = "cloudflare" | "oracle"
+
+// Cor de cada provedor: só na borda da zona e na bolinha do rótulo; o texto e
+// os blocos ficam em cinza. O nome do provedor está sempre escrito no rótulo.
+export const cloudStroke: Record<Cloud, string> = {
+  cloudflare: "stroke-cloud-cloudflare",
+  oracle: "stroke-cloud-oracle",
+}
+const cloudFill: Record<Cloud, string> = {
+  cloudflare: "fill-cloud-cloudflare",
+  oracle: "fill-cloud-oracle",
+}
+
+/**
+ * Zona tracejada com rótulo no canto. Com `cloud`, a borda ganha a cor do
+ * provedor e o rótulo uma bolinha da mesma cor.
+ */
+export function Zone({
+  x,
+  y,
+  width,
+  height,
+  label,
+  labelY,
+  cloud,
+}: {
+  x: number
+  y: number
+  width: number
+  height: number
+  label: string
+  /** Linha de base do rótulo. */
+  labelY: number
+  cloud?: Cloud
+}) {
+  return (
+    <g>
+      <rect
+        x={x}
+        y={y}
+        width={width}
+        height={height}
+        rx={10}
+        strokeDasharray="3 5"
+        className={`fill-none ${cloud ? cloudStroke[cloud] : "stroke-input"}`}
+      />
+      {cloud ? (
+        <circle
+          cx={x + 19}
+          cy={labelY - 4.5}
+          r={4}
+          className={cloudFill[cloud]}
+        />
+      ) : null}
+      <text
+        x={x + (cloud ? 31 : 14)}
+        y={labelY}
+        fontSize={SUB}
+        className="fill-muted-foreground font-medium"
+      >
+        {label}
+      </text>
     </g>
   )
 }

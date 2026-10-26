@@ -104,7 +104,7 @@ describe("InfrastructureDiagram", () => {
     expect(state?.querySelector("[stroke-dasharray]")).not.toBeNull()
     expect(
       state?.querySelectorAll(
-        ".diagram-draw, .diagram-flow, .diagram-pulse, .diagram-pop, .diagram-packet",
+        ".diagram-draw, .diagram-pulse, .diagram-pop, .diagram-packet",
       ),
     ).toHaveLength(0)
   })
@@ -115,7 +115,7 @@ describe("InfrastructureDiagram", () => {
     expect(drawn.length).toBeGreaterThan(0)
     for (const path of drawn) expect(path).toHaveAttribute("pathLength", "1")
     const animated = container.querySelectorAll(
-      ".diagram-draw, .diagram-flow, .diagram-pulse, .diagram-pop, .diagram-packet",
+      ".diagram-draw, .diagram-pulse, .diagram-pop, .diagram-packet",
     )
     for (const element of animated) {
       const classes = [...element.classList].filter((name) =>
@@ -123,5 +123,31 @@ describe("InfrastructureDiagram", () => {
       )
       expect(classes).toHaveLength(1)
     }
+  })
+})
+
+describe("InfrastructureDiagram (cores dos provedores)", () => {
+  it("a zona de cada provedor tem a cor dele, e o nome continua escrito", () => {
+    const { container } = render(<InfrastructureDiagram />)
+    expect(container.querySelectorAll("rect.stroke-cloud-oracle")).toHaveLength(
+      1,
+    )
+    expect(
+      container.querySelectorAll("rect.stroke-cloud-cloudflare"),
+    ).toHaveLength(1)
+    // As ligações que o apply cria são contínuas e levam a cor do provedor de
+    // destino.
+    expect(
+      container.querySelectorAll("path.diagram-draw.stroke-cloud-oracle"),
+    ).toHaveLength(1)
+    expect(
+      container.querySelectorAll("path.diagram-draw.stroke-cloud-cloudflare"),
+    ).toHaveLength(1)
+    expect(container.querySelectorAll(".diagram-flow")).toHaveLength(0)
+    const labels = [...container.querySelectorAll("svg text")].map(
+      (n) => n.textContent,
+    )
+    expect(labels).toContain("Oracle Cloud")
+    expect(labels).toContain("Cloudflare")
   })
 })
