@@ -10,7 +10,7 @@ Dentro de `frontend/`:
 npm run dev           # servidor de desenvolvimento com HMR
 npm run test           # roda a suíte de testes (Vitest) uma vez
 npm run test:watch     # roda a suíte de testes em modo watch
-npm run build          # type-check (tsc -b) + build de produção (Vite)
+npm run build          # type-check (tsc -b), build do Vite, build SSR e pré-renderização das rotas
 npm run lint           # lint (oxlint)
 npm run format         # formata o código (Prettier)
 npm run format:check   # verifica formatação sem alterar arquivos
@@ -34,6 +34,12 @@ As duas páginas chamam a API de verdade por [`src/lib/api.ts`](./src/lib/api.ts
 
 - A origem do teste ("Sonda: OCI · São Paulo") vem de constantes em `src/lib/api.ts` (`PROBE_PROVIDER`, `PROBE_PROVIDER_SHORT`, `PROBE_LOCATION`), porque a API roda sempre na mesma região. Se um dia houver mais de uma sonda, a origem passa a vir da resposta da API.
 - Se a API não responder, **em produção** a página mostra o erro. A simulação de resultados (valores aleatórios, marcada como "Simulação local") só existe em desenvolvimento (`import.meta.env.DEV`), para um resultado inventado nunca passar por verdadeiro.
+
+## Pré-renderização
+
+`npm run build` faz quatro passos: `tsc -b`, `vite build`, `vite build --ssr src/entry-server.tsx` (o build para o servidor sai em `node_modules/.prerender`, fora de `dist/`) e `node scripts/prerender.mjs`, que renderiza cada rota com o mesmo App e grava `dist/<rota>.html` e `dist/404.html`. O `<head>` de cada página (título, descrição, canonical, `og:`, `noindex` na 404 e JSON-LD) vem só de [`src/lib/siteMeta.ts`](./src/lib/siteMeta.ts), o mesmo módulo que atualiza a aba em tempo de execução. No navegador, [`src/mount.tsx`](./src/mount.tsx) hidrata o HTML pré-renderizado (e usa `createRoot` no `npm run dev`, onde não há HTML pronto).
+
+Para um componente funcionar nos dois lados, não leia `window`, `localStorage` nem `IntersectionObserver` durante a renderização: use efeito, ou `useStaticMotion` (em `src/lib/motion.ts`), que sai "parado" no servidor e na hidratação. Para acrescentar uma rota: página em `src/pages`, rota em `AnimatedRoutes.tsx`, metadados em `siteMeta.ts` (a rota entra sozinha na pré-renderização, que percorre as chaves de `pages`) e a URL em `public/sitemap.xml`.
 
 ## Componentes das páginas
 
@@ -75,4 +81,4 @@ npx wrangler deploy
 
 Para validar a configuração sem publicar nada: `npx wrangler deploy --dry-run`.
 
-Efeito colateral do fallback de SPA: rotas inexistentes respondem **HTTP 200** com a página de "não encontrado" do React, não 404.
+Rotas inexistentes respondem **HTTP 404** (`not_found_handling = "404-page"`), servindo o `404.html` gerado no build. Cada rota tem o próprio HTML (`ping.html`, `sobre.html`...), e o Worker serve `/ping` pelo `ping.html`.

@@ -4,6 +4,7 @@ import { JsonDisclosure } from "@/components/tool/JsonDisclosure"
 import { OriginStrip } from "@/components/tool/OriginStrip"
 import { ResultStats } from "@/components/tool/ResultStats"
 import { ResultStatus } from "@/components/tool/ResultStatus"
+import { ToolNotes } from "@/components/tool/ToolNotes"
 import { ToolPage } from "@/components/tool/ToolPage"
 import { Button } from "@/components/ui/button"
 import { PROBE_PROVIDER, type PingResult, runPing } from "@/lib/api"
@@ -22,6 +23,29 @@ type PingProps = {
   // obtido, para abrir direto nele sem pingar de novo.
   initialResult?: PingResult
 }
+
+const pingNotes = [
+  {
+    term: "Latência",
+    detail:
+      "O tempo que um pacote leva para ir da sonda até o destino e voltar, em milissegundos. Vale para o caminho entre a sonda e o destino, não para o seu.",
+  },
+  {
+    term: "Perda de pacotes",
+    detail:
+      "Quantos dos pacotes enviados não voltaram dentro do tempo limite. Zero é o normal; perda constante indica um caminho ou um destino com problema.",
+  },
+  {
+    term: "Sem resposta",
+    detail:
+      "Não prova que o destino está fora do ar: muitos servidores e firewalls descartam o ping (ICMP) e continuam servindo o site normalmente.",
+  },
+  {
+    term: "De onde sai",
+    detail:
+      "De uma única sonda, na Oracle Cloud em São Paulo, e não do seu navegador. Outro ponto do mundo pode ver outro caminho.",
+  },
+]
 
 export function Ping({ initialResult }: PingProps = {}) {
   const [target, setTarget] = useState(initialResult?.target ?? "")
@@ -308,6 +332,7 @@ export function Ping({ initialResult }: PingProps = {}) {
           </div>
         </Reveal>
       )}
+      <ToolNotes id="ler-ping" items={pingNotes} />
     </ToolPage>
   )
 }

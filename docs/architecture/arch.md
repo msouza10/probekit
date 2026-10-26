@@ -67,7 +67,7 @@ A arquitetura inicial usa Cloudflare para hospedar o frontend e Oracle Cloud Inf
 
 ### 4.1 Carregar o site
 
-O navegador abre `https://probekit.cc`. A Cloudflare entrega o `index.html` e os arquivos estáticos pelo Worker `probekit`. Rotas como `/ping` e `/dns-lookup` não existem como arquivos: o Worker devolve o `index.html` (fallback de SPA) e o React Router monta a página. Por isso uma rota desconhecida também responde HTTP 200, com a página de "não encontrado" do React.
+O navegador abre `https://probekit.cc`. A Cloudflare entrega os arquivos estáticos pelo Worker `probekit`. O build pré-renderiza cada rota em um HTML próprio (`index.html`, `ping.html`, `dns-lookup.html`, `arquitetura.html`, `sobre.html`), com o `<head>` da página e o conteúdo já no HTML; o Worker serve `/ping` pelo `ping.html` e o React hidrata a página no navegador. Qualquer outro endereço recebe o `404.html` com status **404** (`not_found_handling = "404-page"` no `wrangler.toml`), para os buscadores não indexarem URLs inexistentes.
 
 ### 4.2 Chamar a API
 

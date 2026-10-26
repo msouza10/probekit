@@ -39,7 +39,8 @@ export interface ApiError {
   code: string
 }
 
-// Quem hospeda a sonda. A região exata vem da resposta da API (origin_region).
+// Quem hospeda a sonda e onde fica. Valores fixos, porque a API roda sempre na
+// mesma região; `origin_region` na resposta, se vier, não é usado para isso.
 export const PROBE_PROVIDER = "Oracle Cloud"
 export const PROBE_PROVIDER_SHORT = "OCI"
 export const PROBE_LOCATION = "São Paulo"

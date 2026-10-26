@@ -70,7 +70,7 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 - ✅ Testes com Vitest (incluindo o cliente da API e as páginas).
 - ✅ **Site no ar** como Cloudflare Worker com assets estáticos (`frontend/wrangler.toml`), nos domínios `probekit.cc` e `www.probekit.cc`, com deploy pelo workflow `deploy-frontend.yml` (ver abaixo); o passo a passo manual com o Wrangler continua no [`runbook`](./docs/runbook-deploy.md).
 - ✅ As páginas de ferramenta mostram a origem do teste ("Sonda: OCI · São Paulo"), com valores fixos em `frontend/src/lib/api.ts` (`PROBE_*`), porque as VMs ficam sempre na mesma região. O campo `origin_region` da API não é mais necessário para isso.
-- ⏳ Rotas inexistentes respondem HTTP 200 com a página NotFound do React (fallback de SPA do Worker), não 404.
+- ✅ Rotas inexistentes respondem HTTP 404 (`not_found_handling = "404-page"`), e o build pré-renderiza um HTML por rota (com título, descrição, canonical e dados estruturados próprios). Validado localmente com `wrangler dev` em 2026-10-26; em produção só depois do próximo deploy do site.
 - ✅ CI em pull request (`ci.yml`, com os jobs Go, NPM e Terraform) e deploy do site pelo workflow `deploy-frontend.yml` quando algo em `frontend/**` entra na `main`, com aprovação do ambiente `production` ([ADR-0008](./docs/adr/0008-deploy-do-site-pelo-github-actions.md); verificado em 2026-10-21 e 2026-10-22).
 
 **Infraestrutura e deploy da API:**

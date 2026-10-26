@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { describe, expect, it, vi } from "vitest"
 import { JsonDisclosure } from "./JsonDisclosure"
@@ -6,6 +6,7 @@ import { OriginStrip } from "./OriginStrip"
 import { EmptyRecords, RecordGroup } from "./RecordGroup"
 import { ResultStats } from "./ResultStats"
 import { ResultStatus } from "./ResultStatus"
+import { ToolNotes } from "./ToolNotes"
 import { ToolPage } from "./ToolPage"
 
 vi.mock("@/lib/api", () => ({
@@ -127,5 +128,27 @@ describe("RecordGroup", () => {
     expect(screen.getByText("Nenhum registro NS encontrado.")).toHaveClass(
       "text-muted-foreground",
     )
+  })
+})
+
+describe("ToolNotes", () => {
+  it("mostra o título fixo, os itens e um id próprio para a seção", () => {
+    render(
+      <ToolNotes
+        id="ler-x"
+        items={[
+          { term: "Latência", detail: "Tempo de ida e volta." },
+          { term: "Perda", detail: "Pacotes que não voltaram." },
+        ]}
+      />,
+    )
+    const section = screen
+      .getByRole("heading", { level: 2, name: "Como ler o resultado" })
+      .closest("section") as HTMLElement
+    expect(section).toHaveAttribute("id", "ler-x")
+    expect(within(section).getByText("Latência")).toBeInTheDocument()
+    expect(
+      within(section).getByText("Pacotes que não voltaram."),
+    ).toBeInTheDocument()
   })
 })

@@ -17,28 +17,31 @@ Em aberto. O criador não definiu um diferencial frente a ping.eu ou dnschecker.
 
 ## Operating Context
 - Frontend: Cloudflare Worker com assets estáticos. API em `api.probekit.cc` (Go, duas VMs OCI atrás de um NLB), chamada pelo navegador com CORS.
-- Os testes de rede partem do servidor, não do usuário. As diretrizes do OVERVIEW pedem informar a origem do teste (`origin_region`, ainda não implementado) para o resultado ser interpretável.
-- Rate limit de 50 requisições por IP a cada 5 minutos; destinos privados ou reservados são rejeitados (erro 400 padronizado `{"error","code"}`).
+- Os testes de rede partem do servidor, não do usuário. Cada resultado informa a origem do teste, para ser interpretável: o site mostra "Sonda: OCI · São Paulo" com valores fixos (`frontend/src/lib/api.ts`), porque há uma única sonda. A API ainda não devolve `origin_region`; se um dia houver mais de uma sonda, a origem passa a vir da resposta.
+- Rate limit de 50 requisições por IP a cada 5 minutos, pelo IP real do cliente (`CF-Connecting-IP`, aceito só quando a conexão vem de faixa da Cloudflare; em produção desde a release 1.2.1); destinos privados ou reservados são rejeitados (erro 400 padronizado `{"error","code"}`).
 
 ## Capabilities and Constraints
 - Sem contas nem autenticação.
 - Ferramentas atuais: `/api/ping` (`count`/`timeout` configuráveis, jitter) e `/api/dns-lookup`.
 - Free tier dos provedores; frontend em um único provedor.
 - Preferir processamento no navegador quando a operação permitir.
+- Limites do resultado (já explicados na página Sobre): uma única sonda, em São Paulo; um ping sem resposta não prova que o destino está fora do ar (muitos hosts descartam ICMP); a consulta DNS usa o resolvedor da máquina da sonda, não os servidores autoritativos do domínio.
 - Terminologia: "ping", "DNS lookup" (consulta de registros DNS), "ferramenta".
 
 ## Brand Commitments
 - Nome: Probekit.
-- Interface e voz em português do Brasil.
+- Interface e voz em português do Brasil, em primeira pessoa do criador ("eu testo, aprendo, construo"), sem tom de empresa.
+- O criador assina o projeto: Marcos Souza, infraestrutura, cloud e DevOps, com GitHub e LinkedIn na página Sobre.
 - A coruja ASCII (AsciiOwl) é a mascote; logo e favicon atuais são identidade a preservar.
 
 ## Evidence on Hand
-Não há depoimentos, números de uso, casos de cliente nem promessa de uptime. Nada disso pode ser inventado em copy. O sistema visual está documentado em `DESIGN.md`.
+Não há depoimentos, números de uso, casos de cliente nem promessa de uptime. Nada disso pode ser inventado em copy. O que existe de real e pode aparecer no site: o retrato e a bio do criador (`frontend/public/brand/marcos.webp` e a página Sobre), o repositório público e seus números (commits, PRs, issues) e os ADRs e specs em `docs/`. O sistema visual está documentado em `DESIGN.md`.
 
 ## Product Principles
 - Resolver a tarefa em poucos segundos, sem cadastro.
 - Resultado legível por quem não é técnico, sem esconder o dado bruto de quem é.
 - Dizer a verdade sobre o que foi medido e de onde partiu o teste.
+- Dizer também o que a medição não prova: uma sonda só, em São Paulo; sem resposta ao ping não é o mesmo que fora do ar.
 - Crescer o catálogo aos poucos, sem prometer ferramentas que não existem.
 
 ## Accessibility & Inclusion

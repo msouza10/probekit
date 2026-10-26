@@ -69,7 +69,10 @@ describe("DnsLookup (comportamento)", () => {
     render(<DnsLookup />)
     await submit(user, "example.com")
 
-    const heading = await screen.findByRole("heading", { level: 2 })
+    const heading = await screen.findByRole("heading", {
+      level: 2,
+      name: /^(?!Como ler o resultado)/,
+    })
     expect(heading).toHaveTextContent("example.com está resolvendo")
     expect(heading.parentElement?.querySelector("svg")).toHaveClass(
       "text-status-up",
@@ -85,9 +88,12 @@ describe("DnsLookup (comportamento)", () => {
     render(<DnsLookup />)
     await submit(user, "example.com")
 
-    expect(await screen.findByRole("heading", { level: 2 })).toHaveTextContent(
-      "example.com tem registros, mas nenhum endereço",
-    )
+    expect(
+      await screen.findByRole("heading", {
+        level: 2,
+        name: /^(?!Como ler o resultado)/,
+      }),
+    ).toHaveTextContent("example.com tem registros, mas nenhum endereço")
   })
 
   it("sem nenhum registro aparece em vermelho", async () => {
@@ -104,7 +110,10 @@ describe("DnsLookup (comportamento)", () => {
     render(<DnsLookup />)
     await submit(user, "example.com")
 
-    const heading = await screen.findByRole("heading", { level: 2 })
+    const heading = await screen.findByRole("heading", {
+      level: 2,
+      name: /^(?!Como ler o resultado)/,
+    })
     expect(heading).toHaveTextContent("example.com não tem registros")
     expect(heading.parentElement?.querySelector("svg")).toHaveClass(
       "text-status-down",
@@ -120,7 +129,10 @@ describe("DnsLookup (comportamento)", () => {
     render(<DnsLookup />)
     await submit(user, "naoexiste.invalid")
 
-    const heading = await screen.findByRole("heading", { level: 2 })
+    const heading = await screen.findByRole("heading", {
+      level: 2,
+      name: /^(?!Como ler o resultado)/,
+    })
     expect(heading).toHaveTextContent("naoexiste.invalid não foi encontrado")
     expect(screen.queryByText("Domain not found")).not.toBeInTheDocument()
     expect(
@@ -246,5 +258,16 @@ describe("DnsLookup (acessibilidade)", () => {
     resolve(result)
     await screen.findByText("ns1.example.com")
     expect(document.querySelector('[aria-live="polite"]')).toBe(live)
+  })
+
+  it("explica como ler o resultado, também antes de usar a ferramenta", () => {
+    render(<DnsLookup />)
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Como ler o resultado" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("De onde vem")).toBeInTheDocument()
+    expect(
+      screen.getByText(/resolvedor da máquina da sonda/),
+    ).toBeInTheDocument()
   })
 })

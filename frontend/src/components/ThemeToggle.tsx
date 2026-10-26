@@ -11,11 +11,14 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>(() =>
-    document.documentElement.dataset.theme === "light" ? "light" : "dark",
-  )
+  // No servidor não há documento: começa em "dark" (igual ao HTML
+  // pré-renderizado) e o efeito lê o tema que o script do index.html aplicou.
+  const [theme, setTheme] = useState<Theme>("dark")
 
   useEffect(() => {
+    setTheme(
+      document.documentElement.dataset.theme === "light" ? "light" : "dark",
+    )
     const media = window.matchMedia?.("(prefers-color-scheme: dark)")
     if (!media) return
     const followSystem = () => {

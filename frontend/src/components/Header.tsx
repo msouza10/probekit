@@ -43,7 +43,7 @@ export function Header() {
           aria-label="Probekit início"
         >
           <img
-            src="/brand/favicon.png"
+            src="/brand/owl.webp"
             alt=""
             width={32}
             height={32}

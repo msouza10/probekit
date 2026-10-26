@@ -4,6 +4,7 @@ import { JsonDisclosure } from "@/components/tool/JsonDisclosure"
 import { OriginStrip } from "@/components/tool/OriginStrip"
 import { EmptyRecords, RecordGroup } from "@/components/tool/RecordGroup"
 import { ResultStatus } from "@/components/tool/ResultStatus"
+import { ToolNotes } from "@/components/tool/ToolNotes"
 import { ToolPage } from "@/components/tool/ToolPage"
 import { Button } from "@/components/ui/button"
 import { type DnsLookupResult, PROBE_PROVIDER, runDnsLookup } from "@/lib/api"
@@ -34,6 +35,36 @@ function summary(result: DnsLookupResult): string {
   if (result.srv?.length) parts.push(`${result.srv.length} SRV`)
   return parts.join(" · ")
 }
+
+const dnsNotes = [
+  {
+    term: "A e AAAA",
+    detail: "Os endereços do domínio: A é IPv4 e AAAA é IPv6.",
+  },
+  {
+    term: "CNAME",
+    detail: "Um apelido: o nome aponta para outro nome, que tem os endereços.",
+  },
+  {
+    term: "MX",
+    detail:
+      "Os servidores que recebem o e-mail do domínio, em ordem de prioridade.",
+  },
+  {
+    term: "TXT",
+    detail:
+      "Texto livre. É onde ficam, por exemplo, a verificação de propriedade do domínio e as políticas de e-mail.",
+  },
+  {
+    term: "NS",
+    detail: "Os servidores de nomes que respondem pelo domínio.",
+  },
+  {
+    term: "De onde vem",
+    detail:
+      "A resposta vem do resolvedor da máquina da sonda, em São Paulo, e não dos servidores do próprio domínio. Por isso pode estar em cache e demorar a refletir uma mudança recente.",
+  },
+]
 
 export function DnsLookup() {
   const [domain, setDomain] = useState("")
@@ -415,6 +446,7 @@ export function DnsLookup() {
           </div>
         </Reveal>
       )}
+      <ToolNotes id="ler-dns" items={dnsNotes} />
     </ToolPage>
   )
 }

@@ -50,8 +50,10 @@ export function AnimatedRoutes() {
   const page = routeTransition(useReducedMotion() ?? false)
   usePageMeta(location.pathname)
 
+  // initial={false}: a primeira renderização (HTML pré-renderizado) já nasce
+  // visível, sem opacity 0 preso; as trocas de rota continuam animadas.
   return (
-    <AnimatePresence mode="wait">
+    <AnimatePresence mode="wait" initial={false}>
       <motion.div
         key={location.pathname}
         initial={page.initial}

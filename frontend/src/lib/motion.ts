@@ -1,3 +1,4 @@
+import { useSyncExternalStore } from "react"
 import {
   useReducedMotion,
   type TargetAndTransition,
@@ -57,14 +58,30 @@ export function routeTransition(reduced: boolean): MotionSet & {
   }
 }
 
+const noopSubscribe = () => () => {}
+
+/**
+ * Verdadeiro quando o ambiente tem IntersectionObserver. No servidor (build
+ * pré-renderizado) e na hidratação vale `false`, para o HTML e a primeira
+ * renderização do cliente coincidirem; depois o React troca para o valor real.
+ */
+export function useHasObserver(): boolean {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => typeof IntersectionObserver !== "undefined",
+    () => false,
+  )
+}
+
 /**
  * Verdadeiro quando o movimento deve ficar desligado: movimento reduzido ou
- * ambiente sem IntersectionObserver (jsdom), onde `whileInView` não funciona e
- * o conteúdo precisa aparecer parado.
+ * ambiente sem IntersectionObserver (jsdom, servidor, hidratação), onde
+ * `whileInView` não funciona e o conteúdo precisa aparecer parado.
  */
 export function useStaticMotion(): boolean {
   const reduced = useReducedMotion() ?? false
-  return reduced || typeof IntersectionObserver === "undefined"
+  const hasObserver = useHasObserver()
+  return reduced || !hasObserver
 }
 
 /**

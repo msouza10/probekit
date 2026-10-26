@@ -89,7 +89,10 @@ describe("Ping (comportamento)", () => {
     render(<Ping />)
     await submit(user, "example.com")
 
-    const heading = await screen.findByRole("heading", { level: 2 })
+    const heading = await screen.findByRole("heading", {
+      level: 2,
+      name: /^(?!Como ler o resultado)/,
+    })
     expect(heading).toHaveTextContent("example.com está respondendo")
     expect(heading).not.toHaveTextContent("perda")
     expect(heading.parentElement?.querySelector("svg")).toHaveClass(
@@ -103,9 +106,12 @@ describe("Ping (comportamento)", () => {
     render(<Ping />)
     await submit(user, "example.com")
 
-    expect(await screen.findByRole("heading", { level: 2 })).toHaveTextContent(
-      "example.com está respondendo, com 20% de perda",
-    )
+    expect(
+      await screen.findByRole("heading", {
+        level: 2,
+        name: /^(?!Como ler o resultado)/,
+      }),
+    ).toHaveTextContent("example.com está respondendo, com 20% de perda")
   })
 
   it("host que não devolveu nenhum pacote aparece em vermelho, sem latências", async () => {
@@ -121,7 +127,10 @@ describe("Ping (comportamento)", () => {
     render(<Ping />)
     await submit(user, "example.com")
 
-    const heading = await screen.findByRole("heading", { level: 2 })
+    const heading = await screen.findByRole("heading", {
+      level: 2,
+      name: /^(?!Como ler o resultado)/,
+    })
     expect(heading).toHaveTextContent("example.com não respondeu")
     expect(heading.parentElement?.querySelector("svg")).toHaveClass(
       "text-status-down",
@@ -190,7 +199,10 @@ describe("Ping (comportamento)", () => {
     render(<Ping />)
     await submit(user, "naoexiste.invalid")
 
-    const heading = await screen.findByRole("heading", { level: 2 })
+    const heading = await screen.findByRole("heading", {
+      level: 2,
+      name: /^(?!Como ler o resultado)/,
+    })
     expect(heading).toHaveTextContent("naoexiste.invalid não foi encontrado")
     expect(heading.parentElement?.querySelector("svg")).toHaveClass(
       "text-status-down",
@@ -228,5 +240,16 @@ describe("Ping (comportamento)", () => {
     await waitFor(() =>
       expect(writeText).toHaveBeenCalledWith(JSON.stringify(result, null, 2)),
     )
+  })
+
+  it("explica como ler o resultado, também antes de usar a ferramenta", () => {
+    render(<Ping />)
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Como ler o resultado" }),
+    ).toBeInTheDocument()
+    expect(screen.getByText("Sem resposta")).toBeInTheDocument()
+    expect(
+      screen.getByText(/Não prova que o destino está fora do ar/),
+    ).toBeInTheDocument()
   })
 })

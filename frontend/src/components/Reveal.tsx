@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from "motion/react"
 import type { ReactNode } from "react"
-import { entrance } from "@/lib/motion"
+import { entrance, useHasObserver } from "@/lib/motion"
 
 type RevealProps = {
   delay?: number
@@ -14,16 +14,20 @@ export function Reveal({ delay = 0, className, children }: RevealProps) {
     useReducedMotion() ?? false,
     delay,
   )
-  // Sem IntersectionObserver (jsdom, navegadores antigos) o conteúdo fica visível.
-  if (typeof IntersectionObserver === "undefined")
-    return <div className={className}>{children}</div>
+  // Sem IntersectionObserver (jsdom, servidor, hidratação) o conteúdo fica
+  // visível e parado: o mesmo `motion.div`, só sem as props de animação.
+  const animated = useHasObserver()
   return (
     <motion.div
       className={className}
-      initial={initial}
-      whileInView={animate}
-      viewport={{ once: true, amount: 0.08 }}
-      transition={transition}
+      {...(animated
+        ? {
+            initial,
+            whileInView: animate,
+            viewport: { once: true, amount: 0.08 },
+            transition,
+          }
+        : {})}
     >
       {children}
     </motion.div>

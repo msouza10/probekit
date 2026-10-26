@@ -9,7 +9,7 @@ const srcDir = path.resolve(
   "./src",
 )
 
-export default defineConfig({
+export default defineConfig(({ isSsrBuild }) => ({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
@@ -26,9 +26,16 @@ export default defineConfig({
       },
     },
   },
+  // O build SSR (src/entry-server.tsx) só alimenta scripts/prerender.mjs: fica
+  // fora de dist/ e sem copiar public/.
+  build: isSsrBuild
+    ? { outDir: "node_modules/.prerender", copyPublicDir: false }
+    : {},
   test: {
     environment: "jsdom",
     setupFiles: "./src/setupTests.ts",
+    // Renderiza as rotas no servidor uma vez para os testes de hidratação.
+    globalSetup: "./scripts/ssrGlobalSetup.mjs",
     globals: true,
   },
-})
+}))

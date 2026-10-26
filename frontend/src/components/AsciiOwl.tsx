@@ -1,6 +1,6 @@
-import { useReducedMotion } from "motion/react"
 import { useEffect, useRef } from "react"
 import art from "@/assets/coruja-ascii.txt?raw"
+import { useStaticMotion } from "@/lib/motion"
 import { cn } from "@/lib/utils"
 
 const lines = art.replace(/\n+$/, "").split("\n")
@@ -49,9 +49,8 @@ const pick = (n: number) => Math.floor(Math.random() * n)
  * caracteres a cada tick.
  */
 export function AsciiOwl({ className }: { className?: string }) {
-  const reduced = useReducedMotion() ?? false
   const preRef = useRef<HTMLPreElement>(null)
-  const isStatic = reduced || typeof IntersectionObserver === "undefined"
+  const isStatic = useStaticMotion()
 
   useEffect(() => {
     const pre = preRef.current

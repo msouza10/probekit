@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
 import { describe, expect, it } from "vitest"
 import { Footer } from "./Footer"
@@ -51,5 +51,28 @@ describe("Footer", () => {
       )
     }
     expect(screen.getByText(/feitas por mim/i)).toBeInTheDocument()
+  })
+
+  it("as duas colunas de links têm a mesma quantidade e a licença fica na base", () => {
+    render(
+      <MemoryRouter>
+        <Footer />
+      </MemoryRouter>,
+    )
+    const tools = screen.getByRole("navigation", {
+      name: "Ferramentas no rodapé",
+    })
+    const project = screen.getByRole("navigation", {
+      name: "Projeto no rodapé",
+    })
+    expect(within(tools).getAllByRole("link")).toHaveLength(3)
+    expect(within(project).getAllByRole("link")).toHaveLength(3)
+    expect(screen.getByRole("link", { name: "Licença MIT" })).toHaveAttribute(
+      "href",
+      "https://github.com/msouza10/probekit/blob/main/LICENSE",
+    )
+    expect(
+      within(project).queryByRole("link", { name: "Licença MIT" }),
+    ).toBeNull()
   })
 })
