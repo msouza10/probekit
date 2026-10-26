@@ -1,13 +1,18 @@
+import { lazy, Suspense } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { Route, Routes, useLocation } from "react-router-dom"
 import type { PingResult } from "./lib/api"
 import { routeTransition } from "./lib/motion"
-import Arquitetura from "./pages/Arquitetura"
-import DnsLookup from "./pages/DnsLookup"
+import { usePageMeta } from "./lib/pageMeta"
 import Home from "./pages/Home"
-import NotFound from "./pages/NotFound"
-import Ping from "./pages/Ping"
-import Sobre from "./pages/Sobre"
+
+// A Home entra no bundle principal; as outras páginas são carregadas quando
+// a rota é aberta (code splitting), para a primeira visita baixar menos.
+const Arquitetura = lazy(() => import("./pages/Arquitetura"))
+const DnsLookup = lazy(() => import("./pages/DnsLookup"))
+const NotFound = lazy(() => import("./pages/NotFound"))
+const Ping = lazy(() => import("./pages/Ping"))
+const Sobre = lazy(() => import("./pages/Sobre"))
 
 function isPingResult(value: unknown): value is PingResult {
   if (typeof value !== "object" || value === null) return false
@@ -34,9 +39,16 @@ function PingRoute() {
   return <Ping initialResult={initialResult} />
 }
 
+// Enquanto a página da rota carrega, reserva a altura de uma tela: sem isso o
+// rodapé aparece no topo e salta para baixo quando o conteúdo chega (CLS).
+function RouteFallback() {
+  return <div aria-hidden="true" className="min-h-[75vh]" />
+}
+
 export function AnimatedRoutes() {
   const location = useLocation()
   const page = routeTransition(useReducedMotion() ?? false)
+  usePageMeta(location.pathname)
 
   return (
     <AnimatePresence mode="wait">
@@ -47,14 +59,16 @@ export function AnimatedRoutes() {
         exit={page.exit}
         transition={page.transition}
       >
-        <Routes location={location}>
-          <Route path="/" element={<Home />} />
-          <Route path="/ping" element={<PingRoute />} />
-          <Route path="/dns-lookup" element={<DnsLookup />} />
-          <Route path="/arquitetura" element={<Arquitetura />} />
-          <Route path="/sobre" element={<Sobre />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<RouteFallback />}>
+          <Routes location={location}>
+            <Route path="/" element={<Home />} />
+            <Route path="/ping" element={<PingRoute />} />
+            <Route path="/dns-lookup" element={<DnsLookup />} />
+            <Route path="/arquitetura" element={<Arquitetura />} />
+            <Route path="/sobre" element={<Sobre />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </motion.div>
     </AnimatePresence>
   )
