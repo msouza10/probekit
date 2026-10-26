@@ -2,7 +2,8 @@
   "enabledMcpjsonServers": [
     "shadcn",
     "ado-remote-mcp",
-    "chrome-devtools"
+    "chrome-devtools",
+    "dashboard-icons"
   ],
   "enabledPlugins": {
     "superpowers@claude-plugins-official": true,
