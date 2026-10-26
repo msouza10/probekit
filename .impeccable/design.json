@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-25T23:55:03+00:00",
+  "generatedAt": "2026-10-26T14:36:11+00:00",
   "title": "Design System: Probekit",
   "extensions": {
     "colorMeta": {
@@ -180,6 +180,11 @@
         "purpose": "Hover do botão: só troca de cor."
       },
       {
+        "name": "theme-change",
+        "value": "400ms ease",
+        "purpose": "Troca de tema por View Transition: o retrato antigo some e o novo aparece com desfoque de 6px (opacity e filter), sem máscara nem clip-path."
+      },
+      {
         "name": "reduced",
         "value": "0.12s opacity",
         "purpose": "Ramo de prefers-reduced-motion: só opacity."
@@ -254,7 +259,7 @@
       "Uma voz de destaque (âmbar), mais erro e sucesso funcionais.",
       "Plano: sem sombra, sem gradiente, sem hover que levanta.",
       "A bancada escura isola a saída das ferramentas nos dois temas.",
-      "Movimento curto e sempre com versão prefers-reduced-motion."
+      "Movimento curto, só transform, opacity e filter, e sempre com versão prefers-reduced-motion."
     ],
     "rules": [
       {
