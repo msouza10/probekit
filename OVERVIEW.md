@@ -81,6 +81,7 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 - ✅ ICMP sem privilégio liberado só para o grupo do usuário do serviço (`net.ipv4.ping_group_range`); sem isso o `/api/ping` respondia 500 nas VMs.
 - ✅ Release automática do binário (`probekit-linux-amd64-api-go-X.Y.Z`, na 1.3.0 em 2026-10-26) e atualização das VMs por timer de 5 minutos ([ADR-0005](./docs/adr/0005-atualizacao-das-vms-e-deploy-inicial.md)).
 - ✅ Workflow *Deploy* (manual): `terraform apply`, espera do cloud-init, entrega do certificado e execução do `deploy-api-go.sh` por SSH nas duas VMs. Rodou com sucesso mais de uma vez.
+- ✅ O *Deploy* tem dois jobs: `Plan deploy` (ambiente `plan`, sem pausa) e `Deploy` (ambiente `production`, que espera a aprovação e aplica o plano salvo e cifrado). O primeiro run nesse formato passou em 2026-10-20 ([ADR-0005](./docs/adr/0005-atualizacao-das-vms-e-deploy-inicial.md), [ADR-0007](./docs/adr/0007-gestao-de-segredos-com-infisical.md)). O workflow usa `concurrency` (grupo `deploy`, `cancel-in-progress: false`), então um segundo deploy espera o primeiro; conferido no arquivo em 2026-10-27, ainda sem teste com duas execuções simultâneas.
 - ✅ Smoke test em produção (2026-10-17): `/`, `/api/ping` e `/api/dns-lookup` respondem 200, ping para IP privado responde 400, e o preflight de CORS responde 204 só para as origens permitidas.
 - ⏳ Teste de derrubar uma VM e confirmar que o NLB continua respondendo.
 
@@ -108,6 +109,6 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 O primeiro marco (ping e DNS lookup no ar, com infraestrutura reproduzível) está concluído. O acompanhamento tarefa a tarefa fica em [`docs/superpowers/plans/2026-10-09-probekit-first-deploy.md`](./docs/superpowers/plans/2026-10-09-probekit-first-deploy.md). O que vem a seguir, em ordem:
 
 1. **Backend (Task 3, restante):** devolver `origin_region` nas respostas de ping e DNS lookup, se ainda fizer sentido (o site já mostra a origem com valores fixos).
-2. **Operação:** teste de derrubar uma VM, `concurrency` nos workflows e aprovação obrigatória no ambiente `production`.
+2. **Operação:** teste de derrubar uma VM.
 3. **Endurecimento (Task 13):** restringir a 443 às faixas de IP da Cloudflare, restringir o SSH, distribuir as VMs em fault domains distintos e avaliar *Authenticated Origin Pulls*.
 4. **Próximas ferramentas** do catálogo, definidas conforme as necessidades.
