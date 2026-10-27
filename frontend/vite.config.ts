@@ -3,6 +3,8 @@ import { fileURLToPath } from "node:url"
 import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
 import { defineConfig } from "vitest/config"
+import { diagramNames } from "./src/components/article/diagramNames.ts"
+import { articlesPlugin } from "./vite/articlesPlugin.ts"
 
 const srcDir = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -10,7 +12,7 @@ const srcDir = path.resolve(
 )
 
 export default defineConfig(({ isSsrBuild }) => ({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), articlesPlugin({ diagramNames })],
   resolve: {
     alias: {
       "@": srcDir,

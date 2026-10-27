@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { Route, Routes, useLocation } from "react-router-dom"
 import type { PingResult } from "./lib/api"
+import { articles } from "./lib/articles"
 import { routeTransition } from "./lib/motion"
 import { usePageMeta } from "./lib/pageMeta"
 import Home from "./pages/Home"
@@ -9,6 +10,8 @@ import Home from "./pages/Home"
 // A Home entra no bundle principal; as outras páginas são carregadas quando
 // a rota é aberta (code splitting), para a primeira visita baixar menos.
 const Arquitetura = lazy(() => import("./pages/Arquitetura"))
+const Artigo = lazy(() => import("./pages/Artigo"))
+const Artigos = lazy(() => import("./pages/Artigos"))
 const DnsLookup = lazy(() => import("./pages/DnsLookup"))
 const NotFound = lazy(() => import("./pages/NotFound"))
 const Ping = lazy(() => import("./pages/Ping"))
@@ -68,6 +71,13 @@ export function AnimatedRoutes() {
             <Route path="/dns-lookup" element={<DnsLookup />} />
             <Route path="/arquitetura" element={<Arquitetura />} />
             <Route path="/sobre" element={<Sobre />} />
+            {/* A seção só existe quando há pelo menos um artigo. */}
+            {articles.length > 0 ? (
+              <>
+                <Route path="/artigos" element={<Artigos />} />
+                <Route path="/artigos/:slug" element={<Artigo />} />
+              </>
+            ) : null}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>

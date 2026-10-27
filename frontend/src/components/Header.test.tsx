@@ -1,8 +1,20 @@
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { MemoryRouter, Route, Routes } from "react-router-dom"
-import { describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Header } from "./Header"
+
+// O link "Artigos" só existe quando há artigos: cada teste escolhe o catálogo.
+const catalog = vi.hoisted(() => ({ list: [] as unknown[] }))
+vi.mock("@/lib/articles", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/articles")>()),
+  get articles() {
+    return catalog.list
+  },
+}))
+beforeEach(() => {
+  catalog.list = []
+})
 
 describe("Header", () => {
   it("renders the Probekit site name as a link to the home page", () => {
@@ -80,6 +92,27 @@ describe("Header navegação", () => {
     await user.click(screen.getByRole("button", { name: /^ferramentas$/i }))
     expect(container.textContent).not.toMatch(/artigos|linha do tempo/i)
     expect(document.body.textContent).not.toMatch(/artigos|linha do tempo/i)
+  })
+
+  it("com artigos, oferece o link Artigos entre Arquitetura e Sobre", () => {
+    catalog.list = [{ slug: "um-artigo" }]
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+    const nav = screen.getByRole("navigation", { name: "Navegação principal" })
+    const links = within(nav).getAllByRole("link")
+
+    expect(links.map((link) => link.textContent)).toEqual([
+      "Arquitetura",
+      "Artigos",
+      "Sobre",
+    ])
+    expect(within(nav).getByRole("link", { name: "Artigos" })).toHaveAttribute(
+      "href",
+      "/artigos",
+    )
   })
 
   it("a navegação principal tem Ferramentas, Arquitetura e Sobre", () => {

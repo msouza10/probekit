@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import { articles } from "@/lib/articles"
 import { GithubIcon } from "./icons/GithubIcon"
 import { RepoStats } from "./RepoStats"
 
@@ -61,6 +62,13 @@ export function Footer() {
                 Arquitetura
               </Link>
             </li>
+            {articles.length > 0 ? (
+              <li>
+                <Link className={footerLink} to="/artigos">
+                  Artigos
+                </Link>
+              </li>
+            ) : null}
             <li>
               <Link className={footerLink} to="/sobre">
                 Sobre o projeto

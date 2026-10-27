@@ -67,7 +67,7 @@ A arquitetura inicial usa Cloudflare para hospedar o frontend e Oracle Cloud Inf
 
 ### 4.1 Carregar o site
 
-O navegador abre `https://probekit.cc`. A Cloudflare entrega os arquivos estáticos pelo Worker `probekit`. O build pré-renderiza cada rota em um HTML próprio (`index.html`, `ping.html`, `dns-lookup.html`, `arquitetura.html`, `sobre.html`), com o `<head>` da página e o conteúdo já no HTML; o Worker serve `/ping` pelo `ping.html` e o React hidrata a página no navegador. Qualquer outro endereço recebe o `404.html` com status **404** (`not_found_handling = "404-page"` no `wrangler.toml`), para os buscadores não indexarem URLs inexistentes.
+O navegador abre `https://probekit.cc`. A Cloudflare entrega os arquivos estáticos pelo Worker `probekit`. O build pré-renderiza cada rota em um HTML próprio (`index.html`, `ping.html`, `dns-lookup.html`, `arquitetura.html`, `sobre.html`), com o `<head>` da página e o conteúdo já no HTML; o Worker serve `/ping` pelo `ping.html` e o React hidrata a página no navegador. Quando há artigos em `frontend/content/articles/*.md`, o mesmo build compila cada um (markdown para uma árvore, com o código colorido), grava `artigos.html` e `artigos/<slug>.html` e gera a imagem social `og/<slug>.png`; nada disso roda no servidor depois do deploy ([runbook de artigos](../runbook-artigos.md)). Qualquer outro endereço recebe o `404.html` com status **404** (`not_found_handling = "404-page"` no `wrangler.toml`), para os buscadores não indexarem URLs inexistentes.
 
 ### 4.2 Chamar a API
 

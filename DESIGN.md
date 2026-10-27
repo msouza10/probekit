@@ -204,7 +204,7 @@ Escura nos dois temas; os valores não mudam com `data-theme`.
 
 ## Layout
 
-Coluna única de leitura. O `Layout` limita o conteúdo a 1200px com `px-4` (16px) e `sm:px-8` (32px); prosa fica em torno de 38rem e os formulários e resultados das ferramentas em 44rem. Espaçamento na escala padrão do Tailwind (múltiplos de 4px). Sem grade de cards iguais: listas e linhas finas no lugar.
+Coluna única de leitura. O `Layout` limita o conteúdo a 1200px com `px-4` (16px) e `sm:px-8` (32px); prosa fica em torno de 38rem, e o texto dos artigos, os formulários e os resultados das ferramentas em 44rem (os artigos são longos e têm código e tabelas na largura da coluna; com 38rem o texto ficava estreito perto deles). Espaçamento na escala padrão do Tailwind (múltiplos de 4px). Sem grade de cards iguais: listas e linhas finas no lugar.
 
 Cabeçalho fixo de 80px (112px abaixo de 640px); a âncora `#ferramentas` usa isso em `scroll-margin-top`. O corpo tem `min-width: 320px` e os layouts foram desenhados para 375px e 1280px. A coruja ASCII aparece só a partir de `lg` (1024px); abaixo disso o herói volta a uma coluna.
 

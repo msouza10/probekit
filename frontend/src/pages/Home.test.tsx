@@ -1,9 +1,17 @@
 import { render, screen, within } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
 import { MemoryRouter } from "react-router-dom"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { tools } from "@/lib/tools"
 import Home from "./Home"
+
+// A Home só aponta para um artigo quando há artigos: cada teste escolhe o catálogo.
+const catalog = vi.hoisted(() => ({ list: [] as unknown[] }))
+vi.mock("@/lib/articles", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/articles")>()),
+  get articles() {
+    return catalog.list
+  },
+}))
 
 const repo = "https://github.com/msouza10/probekit"
 
@@ -17,6 +25,7 @@ function renderHome() {
 
 describe("Home", () => {
   beforeEach(() => {
+    catalog.list = []
     sessionStorage.clear()
     // O hero consulta a API do GitHub ao montar; aqui ela sempre falha.
     vi.spyOn(globalThis, "fetch").mockResolvedValue(
@@ -223,22 +232,98 @@ describe("Home", () => {
     }
     expect(offenders).toEqual([])
   })
+})
 
-  it("a faixa de tecnologias tem um botão para pausar e retomar o movimento", async () => {
-    const user = userEvent.setup()
-    const { container } = renderHome()
-    const track = container.querySelector(".logo-cloud-track") as HTMLElement
-    const button = screen.getByRole("button", { name: "Pausar animação" })
+describe("Home e o artigo mais recente", () => {
+  const newest = {
+    slug: "mais-novo",
+    title: "O artigo mais novo",
+    description: "Descrição do mais novo.",
+    date: "2026-10-26",
+    readingMinutes: 3,
+  }
+  const oldest = {
+    slug: "mais-antigo",
+    title: "O artigo mais antigo",
+    description: "Descrição do mais antigo.",
+    date: "2026-01-10",
+    readingMinutes: 7,
+  }
 
-    expect(track).toHaveAttribute("data-paused", "false")
-    // Com movimento reduzido a faixa já está parada, então o botão some.
-    expect(button.className).toContain("motion-reduce:hidden")
+  beforeEach(() => {
+    catalog.list = []
+    sessionStorage.clear()
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response("{}", { status: 500 }),
+    )
+  })
 
-    await user.click(button)
-    expect(button).toHaveTextContent("Retomar animação")
-    expect(track).toHaveAttribute("data-paused", "true")
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
 
-    await user.click(button)
-    expect(track).toHaveAttribute("data-paused", "false")
+  it("sem artigos, não há a linha, o bloco nem link para /artigos", () => {
+    renderHome()
+
+    expect(screen.queryByText("Último artigo")).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("region", { name: "Artigos" }),
+    ).not.toBeInTheDocument()
+    const hrefs = screen
+      .getAllByRole("link")
+      .map((link) => link.getAttribute("href"))
+    expect(hrefs.some((href) => href?.startsWith("/artigos"))).toBe(false)
+  })
+
+  it("com artigos, o herói tem a linha com o título do mais recente", () => {
+    catalog.list = [newest, oldest]
+    renderHome()
+    const hero = screen.getByRole("region", {
+      name: "Teste se um host responde.",
+    })
+
+    expect(within(hero).getByText("Último artigo")).toBeInTheDocument()
+    expect(
+      within(hero).getByRole("link", { name: "O artigo mais novo" }),
+    ).toHaveAttribute("href", "/artigos/mais-novo")
+  })
+
+  it("com artigos, o fechamento tem o bloco Artigos ao lado de Arquitetura", () => {
+    catalog.list = [newest, oldest]
+    renderHome()
+    const region = screen.getByRole("region", { name: "Artigos" })
+
+    expect(
+      within(region).getByRole("link", { name: "O artigo mais novo" }),
+    ).toHaveAttribute("href", "/artigos/mais-novo")
+    expect(
+      within(region).getByRole("link", { name: "Todos os artigos" }),
+    ).toHaveAttribute("href", "/artigos")
+  })
+
+  it("mostra só o artigo mais recente", () => {
+    catalog.list = [newest, oldest]
+    renderHome()
+
+    expect(screen.queryByText("O artigo mais antigo")).not.toBeInTheDocument()
+  })
+
+  it("a região Arquitetura continua com um único link", () => {
+    catalog.list = [newest, oldest]
+    renderHome()
+    const arquitetura = screen.getByRole("region", { name: "Arquitetura" })
+
+    expect(within(arquitetura).getAllByRole("link")).toHaveLength(1)
+  })
+
+  it("não chama a API do Probekit ao montar", () => {
+    catalog.list = [newest]
+    const fetchSpy = vi.spyOn(globalThis, "fetch")
+    renderHome()
+    const urls = fetchSpy.mock.calls.map(([input]) => String(input))
+
+    expect(
+      urls.filter((url) => !url.startsWith("https://api.github.com/")),
+    ).toEqual([])
   })
 })

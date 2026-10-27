@@ -8,7 +8,7 @@ O motivo: os artigos são o veículo de conteúdo do site (ver o [plano de SEO](
 
 ## O que entra
 
-- Arquivos `frontend/content/artigos/<slug>.md`. O nome do arquivo (sem `.md`) é o slug da URL.
+- Arquivos `frontend/content/articles/<slug>.md`. O nome do arquivo (sem `.md`) é o slug da URL.
 - Cabeçalho (front matter) com `title`, `description`, `date` (AAAA-MM-DD) e, opcional, `updated`. Sem tags, sem rascunho, sem RSS (decisão do criador em 2026-10-26: ficam para depois, se fizerem falta).
 - Rotas `/artigos` (lista, do mais novo para o mais antigo) e `/artigos/<slug>`.
 - Markdown comum (títulos, listas, tabelas, links, citações) mais:
@@ -17,6 +17,9 @@ O motivo: os artigos são o veículo de conteúdo do site (ver o [plano de SEO](
   - **Diagrama por nome**: uma linha `::diagram{name="arquitetura"}` renderiza o componente registrado com esse nome.
 - **Imagem OG por artigo** (1200×630), gerada no build com o título do artigo.
 - A seção só existe com **pelo menos um artigo**: sem artigo não há rota `/artigos`, item de menu nem entrada no sitemap (o menu mostra só o que existe, como no [redesign](./2026-10-23-probekit-frontend-redesign-design.md)).
+- Um comando (`npm run check:articles`) confere todos os artigos de uma vez, antes do pull request (pedido do criador em 2026-10-26). Ele lista **todos** os problemas de cada arquivo, com a linha quando há, e separa o que derruba o build (erro) do que só deixa o artigo pior (aviso): título longo demais para o buscador, descrição curta, artigo sem seções, bloco de código sem linguagem, data no futuro, título repetido em dois artigos. Termina com código de saída 1 se houver erro.
+- Um comando cria o arquivo de um artigo já no formato certo (`npm run new:article -- <slug> "<título>"`, pedido do criador em 2026-10-26): grava `content/articles/<slug>.md` com o cabeçalho preenchido (título e data de hoje) e um esqueleto com textos `TODO` a preencher. Recusa slug inválido e não sobrescreve um arquivo existente sem `--force`. O conferidor avisa quando sobra `TODO` no título, na descrição ou no corpo, para um modelo esquecido não ir ao ar. A skill `probekit-articles` usa esse comando para criar os arquivos.
+- A Home aponta para o artigo mais recente, também só quando há artigo (decisão do criador em 2026-10-26): uma linha discreta no herói, abaixo da linha de atividade do repositório ("Último artigo" e o título), e um bloco "Artigos" ao lado de "Arquitetura" no fechamento, com título, descrição, data e um link para todos os artigos. Sem artigos, a Home fica como hoje. A linha diz "Último artigo", e não "Novo", para nunca ficar desatualizada.
 - Cada artigo entra sozinho no `siteMeta` (título, descrição, canonical, JSON-LD `BlogPosting`), no prerender, no sitemap e no cabeçalho do site ("Artigos").
 
 ## O que não entra (agora)

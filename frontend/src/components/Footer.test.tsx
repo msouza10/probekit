@@ -1,7 +1,19 @@
 import { render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom"
-import { describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { Footer } from "./Footer"
+
+// O link "Artigos" só existe quando há artigos: cada teste escolhe o catálogo.
+const catalog = vi.hoisted(() => ({ list: [] as unknown[] }))
+vi.mock("@/lib/articles", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/articles")>()),
+  get articles() {
+    return catalog.list
+  },
+}))
+beforeEach(() => {
+  catalog.list = []
+})
 
 describe("Footer", () => {
   it("renders brand name, navigation links, and GitHub reference", () => {
@@ -33,6 +45,32 @@ describe("Footer", () => {
     expect(
       screen.getByRole("link", { name: /repositório github/i }),
     ).toHaveAttribute("href", "https://github.com/msouza10/probekit")
+  })
+
+  it("sem artigos, não tem o link Artigos", () => {
+    render(
+      <MemoryRouter>
+        <Footer />
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByRole("link", { name: "Artigos" })).toBeNull()
+  })
+
+  it("com artigos, tem o link Artigos na coluna do projeto", () => {
+    catalog.list = [{ slug: "um-artigo" }]
+    render(
+      <MemoryRouter>
+        <Footer />
+      </MemoryRouter>,
+    )
+    const project = screen.getByRole("navigation", {
+      name: "Projeto no rodapé",
+    })
+
+    expect(
+      within(project).getByRole("link", { name: "Artigos" }),
+    ).toHaveAttribute("href", "/artigos")
   })
 
   it("só aponta para fora com links do repositório, em primeira pessoa", () => {
