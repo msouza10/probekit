@@ -59,8 +59,9 @@ const sanitize = (tree: Root): Root => ({
   children: sanitizeChildren(tree.children),
 })
 
-// Texto corrido tem medida de leitura; figuras, código e tabelas usam a coluna.
-const measure = "max-w-[38rem]"
+// Texto corrido tem medida de leitura (44rem, a mesma dos formulários das
+// ferramentas); figuras, código e tabelas usam a coluna.
+const measure = "max-w-[44rem]"
 
 const Heading2 = (props: ComponentProps<"h2">) => (
   <h2
