@@ -152,6 +152,27 @@
 - Modify: `frontend/README.md`, `docs/architecture/arch.md`, `OVERVIEW.md` (decisão confirmada)
 
 - [ ] **Step 1: Escrever o runbook** para quem vai publicar: onde criar o arquivo, o front matter com um exemplo, como incluir `::diagram{name="…"}` e a lista de nomes, como ver no `npm run dev`, o que cada erro de build significa e o que fazer, e como conferir depois do deploy (`view-source` mostra título, canonical, `og:image` e JSON-LD).
-- [ ] **Step 2: Atualizar** a seção de estrutura do `frontend/README.md`, o fluxo em `docs/architecture/arch.md` e a lista de decisões do `OVERVIEW.md`.
+- [ ] **Step 2: Atualizar** a seção de estrutura do `frontend/README.md`, o fluxo em `docs/architecture/arch.md` e a lista de decisões do `OVERVIEW.md` (inclusive a Home apontando para o artigo mais recente, da Task 8, que se executa antes desta).
 - [ ] **Step 3: Conferir.** `python3 .claude/skills/probekit-docs/scripts/check_links.py` sem links quebrados; `cd frontend && npx prettier --check ../docs/runbook-artigos.md README.md`.
 - [ ] **Step 4: Commit (do criador)** — `docs: runbook de artigos e arquitetura atualizada`.
+
+### Task 8: A Home aponta para o artigo mais recente
+
+Acrescentada em 2026-10-26, a pedido do criador (ver a spec). Executar depois da Task 6 e antes da Task 7.
+
+**Files:**
+- Create: `frontend/src/components/LatestArticle.tsx`, `frontend/src/components/LatestArticle.test.tsx`
+- Modify: `frontend/src/pages/Home.tsx`, `frontend/src/pages/Home.test.tsx`
+
+**Interfaces:**
+- Consumes: `articles`, `articlePath`, `formatDate`, `ArticleMeta` (Task 2). O catálogo já vem do mais novo para o mais antigo, então o mais recente é `articles[0]`.
+- Produces:
+  - `LatestArticleLine({ article }: { article: ArticleMeta }): ReactNode` — uma linha no tom da `RepoPulse`: o rótulo "Último artigo" e o título como link para `articlePath(article.slug)`.
+  - `LatestArticleCard({ article }: { article: ArticleMeta }): ReactNode` — um `section` (região "Artigos") com o rótulo "Artigos", o título como link grande, a descrição, a data com o tempo de leitura e um link "Todos os artigos" para `/artigos`.
+  - `Home` usa `articles[0]` e, sem artigo, não renderiza nenhum dos dois; o fechamento vira uma grade de duas colunas (Arquitetura e o card) a partir de `sm`, e uma coluna no celular.
+
+- [ ] **Step 1: Testes que falham.** `LatestArticle.test.tsx`: (a) a linha mostra "Último artigo" e um link com o título para `/artigos/<slug>`; (b) o card tem o título como link, a descrição, a data por extenso num `time` e o link "Todos os artigos" para `/artigos`. `Home.test.tsx` (com `vi.mock("@/lib/articles")` e catálogo por teste): (c) sem artigos, a Home não tem "Último artigo", nem a região "Artigos", nem link para `/artigos` (o teste atual do fechamento continua valendo); (d) com dois artigos, só o mais novo aparece, no herói e no card; (e) a região "Arquitetura" continua com um único link; (f) a Home continua sem chamar a API do Probekit ao montar.
+- [ ] **Step 2: Rodar e ver falhar.** `cd frontend && npx vitest run src/components/LatestArticle.test.tsx src/pages/Home.test.tsx`.
+- [ ] **Step 3: Implementar** os dois componentes e a ligação na `Home`. A linha entra no herói logo abaixo de `RepoPulse`, num `Reveal` com atraso de `0.32`; o card segue o desenho do bloco "Arquitetura" (rótulo, título grande com seta, texto).
+- [ ] **Step 4: Rodar tudo.** `npx vitest run` → PASS nos dois estados (com e sem `content/artigos/*.md`); `npm run build` passa. Conferir no navegador, no tema claro, no escuro e no celular, com um artigo temporário (screenshots na resposta).
+- [ ] **Step 5: Commit (do criador)** — `feat(frontend): Home aponta para o artigo mais recente`.

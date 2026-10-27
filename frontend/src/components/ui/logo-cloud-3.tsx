@@ -1,11 +1,8 @@
 "use client"
 
-import { useState } from "react"
 import { logos } from "@/components/icons/techLogos"
 
 export default function LogoCloudBlock() {
-  const [paused, setPaused] = useState(false)
-
   return (
     <section
       aria-label="Tecnologias do Probekit"
@@ -19,8 +16,7 @@ export default function LogoCloudBlock() {
         .logo-cloud-track {
           animation: logo-cloud-marquee 32s linear infinite;
         }
-        .logo-cloud-mask:hover .logo-cloud-track,
-        .logo-cloud-track[data-paused="true"] {
+        .logo-cloud-mask:hover .logo-cloud-track {
           animation-play-state: paused;
         }
         @media (prefers-reduced-motion: reduce) {
@@ -36,10 +32,7 @@ export default function LogoCloudBlock() {
         </p>
 
         <div className="logo-cloud-mask relative mt-8 overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_12%,black_88%,transparent)] motion-reduce:[mask-image:none]">
-          <div
-            data-paused={paused}
-            className="logo-cloud-track flex w-max items-center motion-reduce:w-full motion-reduce:flex-wrap motion-reduce:justify-center motion-reduce:gap-y-4"
-          >
+          <div className="logo-cloud-track flex w-max items-center motion-reduce:w-full motion-reduce:flex-wrap motion-reduce:justify-center motion-reduce:gap-y-4">
             {[...logos, ...logos].map((logo, index) => (
               <div
                 key={`${logo.name}-${index}`}
@@ -61,14 +54,6 @@ export default function LogoCloudBlock() {
             ))}
           </div>
         </div>
-
-        <button
-          type="button"
-          onClick={() => setPaused((value) => !value)}
-          className="mt-2 inline-flex min-h-11 items-center px-3 font-sans text-caption text-muted-foreground underline underline-offset-4 transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring motion-reduce:hidden"
-        >
-          {paused ? "Retomar animação" : "Pausar animação"}
-        </button>
       </div>
     </section>
   )

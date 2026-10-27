@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "vitest"
 import { metaFor, usePageMeta } from "./pageMeta"
-import { canonicalUrl, notFound, pages, SITE_URL } from "./siteMeta"
+import { buildPages, canonicalUrl, notFound, pages, SITE_URL } from "./siteMeta"
 
 function Probe({ path }: { path: string }) {
   usePageMeta(path)
@@ -19,7 +19,8 @@ afterEach(() => {
 
 describe("metaFor", () => {
   it("dá título, descrição e caminho próprios a cada rota", () => {
-    const paths = Object.keys(pages)
+    // As páginas fixas: a lista real cresce a cada artigo publicado.
+    const paths = Object.keys(buildPages([]))
     expect(paths).toEqual([
       "/",
       "/ping",

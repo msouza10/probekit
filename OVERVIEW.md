@@ -31,6 +31,7 @@ O projeto também será um laboratório pessoal de DevOps, com infraestrutura co
 - TLS terminado no próprio binário Go, com certificado Origin CA e zona em Full (strict) ([ADR-0002](./docs/adr/0002-terminacao-tls-cloudflare-full-strict.md)); porta, entrega do certificado, CORS e atualização das VMs em [ADR-0003](./docs/adr/0003-porta-origem-e-entrega-do-certificado.md), [ADR-0004](./docs/adr/0004-chamada-frontend-api-com-cors.md) e [ADR-0005](./docs/adr/0005-atualizacao-das-vms-e-deploy-inicial.md).
 - Segredos: configurações e variáveis do Terraform no **Infisical** (por OIDC); as credenciais mais sensíveis em **secrets de ambiente do GitHub**, atrás da aprovação do `production` ([ADR-0007](./docs/adr/0007-gestao-de-segredos-com-infisical.md)).
 - O `GET /` da API devolve também a versão compilada (`{"message":"OK","version":"1.3.0"}`), para verificar deploys e rollbacks ([ADR-0009](./docs/adr/0009-versao-da-api-no-health-check.md)).
+- Artigos como **arquivos markdown no repositório** (`frontend/content/artigos/`), compilados no build e publicados pelo deploy do site, sem editor na web, login nem banco ([spec](./docs/superpowers/specs/2026-10-26-probekit-blog-artigos-design.md), [runbook](./docs/runbook-artigos.md)). A seção só existe com pelo menos um artigo; a Home aponta para o mais recente.
 - Gestão de tasks/backlog via **GitHub Issues e Projects** ([ADR-0006](./docs/adr/0006-gestao-de-tasks-no-github-projects.md)). O padrão de documentos e tarefas está em [`docs/README.md`](./docs/README.md).
 
 ## Responsabilidades

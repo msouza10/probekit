@@ -75,6 +75,12 @@ export function applyPageMeta(
   html = setMeta(html, "property", "og:title", meta.title)
   html = setMeta(html, "property", "og:description", meta.description)
   html = setMeta(html, "property", "og:url", canonicalUrl(meta))
+  // Sem tipo ou imagem próprios, ficam os do template (website e a og.jpg).
+  if (meta.type) html = setMeta(html, "property", "og:type", meta.type)
+  if (meta.image) {
+    html = setMeta(html, "property", "og:image", meta.image)
+    html = setMeta(html, "property", "og:image:alt", meta.title)
+  }
   html = setCanonical(html, canonicalUrl(meta))
 
   // O template não deve ter robots; se tiver, a página decide.

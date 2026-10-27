@@ -4,7 +4,12 @@ import { AsciiOwl } from "@/components/AsciiOwl"
 import { QuickPing } from "@/components/QuickPing"
 import { RepoPulse } from "@/components/RepoPulse"
 import { Reveal } from "@/components/Reveal"
+import {
+  LatestArticleCard,
+  LatestArticleLine,
+} from "@/components/LatestArticle"
 import LogoCloudBlock from "@/components/ui/logo-cloud-3"
+import { articles } from "@/lib/articles"
 import { tools } from "@/lib/tools"
 
 const repository = "https://github.com/msouza10/probekit"
@@ -22,6 +27,8 @@ function ExternalLink({ href, children }: { href: string; children: string }) {
 }
 
 export function Home() {
+  // O catálogo vem do mais novo para o mais antigo; sem artigo, nada aparece.
+  const latest = articles[0]
   return (
     <main className="flex flex-col gap-16 pt-8 pb-8 sm:gap-28 sm:pt-20 lg:pt-24">
       <section
@@ -51,6 +58,11 @@ export function Home() {
           <Reveal delay={0.24}>
             <RepoPulse />
           </Reveal>
+          {latest ? (
+            <Reveal delay={0.32}>
+              <LatestArticleLine article={latest} />
+            </Reveal>
+          ) : null}
         </div>
         <AsciiOwl />
       </section>
@@ -100,31 +112,34 @@ export function Home() {
         </p>
       </section>
 
-      <section aria-labelledby="fechamento-title">
-        <h2 id="fechamento-title" className="sr-only">
-          Arquitetura
-        </h2>
-        <Reveal className="border-b border-border">
-          <div className="group relative flex flex-col gap-3 border-t border-border py-8 sm:py-10">
-            <p className="type-eyebrow font-sans text-muted-foreground">
-              Como foi feito
-            </p>
-            <Link
-              to="/arquitetura"
-              className="flex w-fit items-center gap-3 text-heading-sm font-medium text-foreground underline-offset-4 group-hover:underline after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-ring sm:text-heading"
-            >
-              Arquitetura
-              <ArrowRight
-                aria-hidden="true"
-                className="h-[0.8em] w-[0.8em] text-highlight"
-              />
-            </Link>
-            <p className="max-w-[30ch] text-body text-muted-foreground">
-              Diagramas da API, da infraestrutura e do deploy.
-            </p>
-          </div>
-        </Reveal>
-      </section>
+      <div className={latest ? "grid sm:grid-cols-2 sm:gap-x-12" : undefined}>
+        <section aria-labelledby="fechamento-title" className="sm:h-full">
+          <h2 id="fechamento-title" className="sr-only">
+            Arquitetura
+          </h2>
+          <Reveal className="border-b border-border sm:h-full">
+            <div className="group relative flex flex-col gap-3 border-t border-border py-8 sm:h-full sm:py-10">
+              <p className="type-eyebrow font-sans text-muted-foreground">
+                Como foi feito
+              </p>
+              <Link
+                to="/arquitetura"
+                className="flex w-fit items-center gap-3 text-heading-sm font-medium text-foreground underline-offset-4 group-hover:underline after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-ring sm:text-heading"
+              >
+                Arquitetura
+                <ArrowRight
+                  aria-hidden="true"
+                  className="h-[0.8em] w-[0.8em] text-highlight"
+                />
+              </Link>
+              <p className="max-w-[30ch] text-body text-muted-foreground">
+                Diagramas da API, da infraestrutura e do deploy.
+              </p>
+            </div>
+          </Reveal>
+        </section>
+        {latest ? <LatestArticleCard article={latest} /> : null}
+      </div>
 
       <LogoCloudBlock />
     </main>

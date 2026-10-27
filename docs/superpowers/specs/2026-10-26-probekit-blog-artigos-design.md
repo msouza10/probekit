@@ -17,6 +17,7 @@ O motivo: os artigos são o veículo de conteúdo do site (ver o [plano de SEO](
   - **Diagrama por nome**: uma linha `::diagram{name="arquitetura"}` renderiza o componente registrado com esse nome.
 - **Imagem OG por artigo** (1200×630), gerada no build com o título do artigo.
 - A seção só existe com **pelo menos um artigo**: sem artigo não há rota `/artigos`, item de menu nem entrada no sitemap (o menu mostra só o que existe, como no [redesign](./2026-10-23-probekit-frontend-redesign-design.md)).
+- A Home aponta para o artigo mais recente, também só quando há artigo (decisão do criador em 2026-10-26): uma linha discreta no herói, abaixo da linha de atividade do repositório ("Último artigo" e o título), e um bloco "Artigos" ao lado de "Arquitetura" no fechamento, com título, descrição, data e um link para todos os artigos. Sem artigos, a Home fica como hoje. A linha diz "Último artigo", e não "Novo", para nunca ficar desatualizada.
 - Cada artigo entra sozinho no `siteMeta` (título, descrição, canonical, JSON-LD `BlogPosting`), no prerender, no sitemap e no cabeçalho do site ("Artigos").
 
 ## O que não entra (agora)

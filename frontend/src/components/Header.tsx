@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Link, NavLink, useNavigate } from "react-router-dom"
 import { Dialog, Popover } from "radix-ui"
 import { ChevronDown, Search, X } from "lucide-react"
+import { articles } from "@/lib/articles"
 import { tools } from "@/lib/tools"
 import { ThemeToggle } from "./ThemeToggle"
 import { GithubIcon } from "./icons/GithubIcon"
@@ -117,6 +118,16 @@ export function Header() {
           >
             Arquitetura
           </NavLink>
+          {articles.length > 0 ? (
+            <NavLink
+              to="/artigos"
+              className={({ isActive }) =>
+                `${navLink} ${isActive ? "bg-muted text-foreground" : ""}`
+              }
+            >
+              Artigos
+            </NavLink>
+          ) : null}
           <NavLink
             to="/sobre"
             className={({ isActive }) =>

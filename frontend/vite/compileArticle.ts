@@ -11,6 +11,7 @@ import GithubSlugger from "github-slugger"
 import matter from "gray-matter"
 import type { Element, Root } from "hast"
 import { toString as textOf } from "hast-util-to-string"
+import { CORE_SCHEMA, load } from "js-yaml"
 import remarkDirective from "remark-directive"
 import remarkGfm from "remark-gfm"
 import remarkParse from "remark-parse"
@@ -55,10 +56,6 @@ function isRealDate(value: string) {
   )
 }
 
-// O YAML lê `date: 2026-10-26` (sem aspas) como Date; volta para AAAA-MM-DD.
-const asText = (value: unknown) =>
-  value instanceof Date ? value.toISOString().slice(0, 10) : value
-
 function readMeta(slug: string, data: Record<string, unknown>, body: string) {
   if (!SLUG.test(slug)) fail(slug, "slug inválido")
 
@@ -71,7 +68,7 @@ function readMeta(slug: string, data: Record<string, unknown>, body: string) {
   if (description.length > DESCRIPTION_MAX)
     fail(slug, `description com mais de ${DESCRIPTION_MAX} caracteres`)
 
-  const date = String(asText(data.date) ?? "")
+  const date = String(data.date ?? "")
   if (!isRealDate(date)) fail(slug, `date inválida "${date}"`)
 
   const meta: ArticleMeta = {
@@ -85,7 +82,7 @@ function readMeta(slug: string, data: Record<string, unknown>, body: string) {
     ),
   }
   if (data.updated !== undefined) {
-    const updated = String(asText(data.updated))
+    const updated = String(data.updated)
     if (!isRealDate(updated)) fail(slug, `updated inválida "${updated}"`)
     if (updated < date) fail(slug, "updated anterior a date")
     meta.updated = updated
@@ -203,7 +200,14 @@ export async function compileArticle(
   try {
     parsed = matter(source, {
       // `---js` executaria código do arquivo; só YAML é aceito.
-      engines: { js: unsupported, javascript: unsupported, json: unsupported },
+      engines: {
+        // Sem o tipo "data" do YAML: `date: 2026-02-30` ficaria 2 de março,
+        // em silêncio. Como texto, a validação abaixo recusa a data impossível.
+        yaml: (text: string) => load(text, { schema: CORE_SCHEMA }) as object,
+        js: unsupported,
+        javascript: unsupported,
+        json: unsupported,
+      },
     })
   } catch (error) {
     return fail(slug, error instanceof Error ? error.message : String(error))

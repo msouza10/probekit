@@ -6,6 +6,8 @@
  * divergem. Só afirma o que o site faz.
  */
 
+import { articlePath, articles, type ArticleMeta } from "./articles"
+
 export const SITE_URL = "https://probekit.cc"
 export const SITE_NAME = "Probekit"
 export const OG_IMAGE = `${SITE_URL}/og.jpg`
@@ -19,6 +21,10 @@ export interface PageMeta {
   path: string
   // Páginas que não devem entrar no índice (a 404).
   noindex?: boolean
+  // `og:type` da página; sem ele vale o do template ("website").
+  type?: "website" | "article"
+  // Imagem de pré-visualização social (URL absoluta); sem ela vale a og.jpg.
+  image?: string
   // Dados estruturados (schema.org) da página, se houver.
   jsonLd?: Record<string, unknown>
 }
@@ -53,7 +59,7 @@ const pingDescription =
 const dnsDescription =
   "Consulta os registros DNS de um domínio (A, AAAA, CNAME, MX, TXT, NS e SRV), a partir de uma sonda na Oracle Cloud em São Paulo."
 
-export const pages: Record<string, PageMeta> = {
+const fixedPages: Record<string, PageMeta> = {
   "/": {
     title: `${SITE_NAME} · Ping e consulta DNS online`,
     description:
@@ -103,6 +109,52 @@ export const pages: Record<string, PageMeta> = {
     },
   },
 }
+
+const articleImage = (slug: string) => `${SITE_URL}/og/${slug}.png`
+
+function articlePage(article: ArticleMeta): PageMeta {
+  const path = articlePath(article.slug)
+  return {
+    title: `${article.title} · ${SITE_NAME}`,
+    description: article.description,
+    path,
+    type: "article",
+    image: articleImage(article.slug),
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: article.title,
+      description: article.description,
+      datePublished: article.date,
+      dateModified: article.updated ?? article.date,
+      image: articleImage(article.slug),
+      inLanguage: "pt-BR",
+      mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}${path}` },
+      author,
+    },
+  }
+}
+
+/**
+ * As páginas do site: as fixas e, só quando há artigos, a lista e uma página
+ * por artigo (a seção de artigos não existe sem artigo).
+ */
+export function buildPages(list: ArticleMeta[]): Record<string, PageMeta> {
+  if (list.length === 0) return { ...fixedPages }
+  return {
+    ...fixedPages,
+    "/artigos": {
+      title: `Artigos · ${SITE_NAME}`,
+      description: "Textos do Probekit, do mais novo para o mais antigo.",
+      path: "/artigos",
+    },
+    ...Object.fromEntries(
+      list.map((article) => [articlePath(article.slug), articlePage(article)]),
+    ),
+  }
+}
+
+export const pages = buildPages(articles)
 
 export const notFound: PageMeta = {
   title: `Página não encontrada · ${SITE_NAME}`,

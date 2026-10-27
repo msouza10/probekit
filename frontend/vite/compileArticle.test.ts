@@ -143,6 +143,38 @@ describe("compileArticle", () => {
     })
   })
 
+  describe("datas escritas sem aspas", () => {
+    // O YAML lê `2026-02-30` como data e a trocaria por 2 de março, em silêncio.
+    const raw = (extra: string) =>
+      `---\ntitle: T\ndescription: D\ndate: 2026-10-26\n${extra}---\n\nTexto.\n`
+
+    it("recusa um date impossível, em vez de publicar outro dia", async () => {
+      const source =
+        "---\ntitle: T\ndescription: D\ndate: 2026-02-30\n---\n\nTexto.\n"
+
+      await expect(compileArticle("x", source, options)).rejects.toThrow(
+        'x: date inválida "2026-02-30"',
+      )
+    })
+
+    it("recusa um updated impossível", async () => {
+      await expect(
+        compileArticle("x", raw("updated: 2026-11-31\n"), options),
+      ).rejects.toThrow('x: updated inválida "2026-11-31"')
+    })
+
+    it("aceita datas válidas sem aspas e as devolve como AAAA-MM-DD", async () => {
+      const { meta } = await compileArticle(
+        "x",
+        raw("updated: 2026-11-02\n"),
+        options,
+      )
+
+      expect(meta.date).toBe("2026-10-26")
+      expect(meta.updated).toBe("2026-11-02")
+    })
+  })
+
   describe("conteúdo perigoso", () => {
     it("recusa front matter que não seja YAML (sem executar código)", async () => {
       const source =

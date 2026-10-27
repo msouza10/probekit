@@ -17,9 +17,8 @@ const serverEntry = path.join(root, "node_modules/.prerender/entry-server.js")
 export const fileFor = (route) =>
   route === "/" ? "index.html" : `${route.replace(/^\//, "")}.html`
 
-const { routePaths, NOT_FOUND_PATH, renderPage } = await import(
-  pathToFileURL(serverEntry).href
-)
+const { routePaths, NOT_FOUND_PATH, renderPage, ogFiles, renderOgImage } =
+  await import(pathToFileURL(serverEntry).href)
 
 // Lido uma vez: index.html é sobrescrito pela Home pré-renderizada.
 const template = await readFile(path.join(dist, "index.html"), "utf8")
@@ -34,4 +33,12 @@ for (const [url, file] of targets) {
   await mkdir(path.dirname(path.join(dist, file)), { recursive: true })
   await writeFile(path.join(dist, file), html)
   console.log(`prerender: ${url} -> dist/${file} (${html.length} bytes)`)
+}
+
+// Imagem de pré-visualização social de cada artigo (og:image da página).
+for (const { file, title } of ogFiles) {
+  const png = await renderOgImage(title)
+  await mkdir(path.dirname(path.join(dist, file)), { recursive: true })
+  await writeFile(path.join(dist, file), png)
+  console.log(`prerender: og -> dist/${file} (${png.length} bytes)`)
 }

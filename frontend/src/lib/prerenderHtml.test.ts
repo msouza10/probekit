@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
+import type { ArticleMeta } from "./articles"
 import { applyPageMeta, serializeJsonLd } from "./prerenderHtml"
-import { metaFor, notFound, pages, type PageMeta } from "./siteMeta"
+import { buildPages, metaFor, notFound, pages, type PageMeta } from "./siteMeta"
 
 // Parecido com o index.html que o Vite gera (tags em várias linhas).
 const template = `<!doctype html>
@@ -19,6 +20,9 @@ const template = `<!doctype html>
       content="Descrição da Home."
     />
     <meta property="og:url" content="https://probekit.cc/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://probekit.cc/og.jpg" />
+    <meta property="og:image:alt" content="Alt da marca" />
     <script type="module" crossorigin src="/assets/index-abc.js"></script>
   </head>
   <body>
@@ -120,6 +124,70 @@ describe("applyPageMeta", () => {
   it("não cria script de JSON-LD em página sem dados estruturados", () => {
     const html = applyPageMeta(template, pages["/arquitetura"], body)
     expect(html).not.toContain("ld+json")
+  })
+
+  describe("imagem e tipo por página", () => {
+    const meta: PageMeta = {
+      title: "Um artigo",
+      description: "Descrição do artigo.",
+      path: "/artigos/um-artigo",
+      type: "article",
+      image: "https://probekit.cc/og/um-artigo.png",
+    }
+
+    it("troca og:type, og:image e og:image:alt quando a página os define", () => {
+      const html = applyPageMeta(template, meta, body)
+
+      expect(html).toContain('<meta property="og:type" content="article" />')
+      expect(html).toContain(
+        '<meta property="og:image" content="https://probekit.cc/og/um-artigo.png" />',
+      )
+      expect(html).toContain(
+        '<meta property="og:image:alt" content="Um artigo" />',
+      )
+      expect(html).not.toContain("og.jpg")
+      expect(html).not.toContain("Alt da marca")
+    })
+
+    it("mantém a imagem e o tipo do template quando a página não os define", () => {
+      const html = applyPageMeta(template, pages["/ping"], body)
+
+      expect(html).toContain('content="https://probekit.cc/og.jpg"')
+      expect(html).toContain('<meta property="og:type" content="website" />')
+      expect(html).toContain("Alt da marca")
+    })
+
+    it("mantém uma só ocorrência de og:type, og:image e og:image:alt", () => {
+      const html = applyPageMeta(template, meta, body)
+
+      for (const pattern of [
+        /property="og:type"/g,
+        /property="og:image"/g,
+        /property="og:image:alt"/g,
+      ])
+        expect(html.match(pattern)).toHaveLength(1)
+    })
+  })
+
+  it("título de artigo com </script> e & sai escapado no head e no JSON-LD", () => {
+    const evil: ArticleMeta = {
+      slug: "x",
+      title: 'A </script><script>alert(1)</script> & "b"',
+      description: "Descrição.",
+      date: "2026-10-26",
+      readingMinutes: 1,
+    }
+    const html = applyPageMeta(template, buildPages([evil])["/artigos/x"], body)
+    const blocks = [
+      ...html.matchAll(
+        /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
+      ),
+    ]
+
+    expect(html).not.toContain("<script>alert(1)")
+    expect(html).toContain("A &lt;/script&gt;&lt;script&gt;alert(1)")
+    expect(blocks).toHaveLength(1)
+    expect(JSON.parse(blocks[0][1])).toMatchObject({ headline: evil.title })
   })
 
   it("usa a meta da rota desconhecida (404) via metaFor", () => {
