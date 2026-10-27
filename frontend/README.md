@@ -14,6 +14,8 @@ npm run build          # type-check (tsc -b), build do Vite, build SSR e pré-re
 npm run lint           # lint (oxlint)
 npm run format         # formata o código (Prettier)
 npm run format:check   # verifica formatação sem alterar arquivos
+npm run check:articles # confere todos os artigos de content/articles (erros e avisos, com a linha)
+npm run new:article -- <slug> "<título>"   # cria content/articles/<slug>.md já no formato certo
 ```
 
 ## Cadeia de design tokens
@@ -26,7 +28,7 @@ Edite [`src/lib/tools.ts`](./src/lib/tools.ts) — tanto a lista da home page qu
 
 ## Páginas
 
-Rotas em [`src/AnimatedRoutes.tsx`](./src/AnimatedRoutes.tsx): `/` (Home), `/ping`, `/dns-lookup`, `/arquitetura`, `/sobre` e `*` (NotFound). Com pelo menos um artigo em `content/artigos/`, entram também `/artigos` e `/artigos/:slug` (ver [Artigos](#artigos)). Só a Home entra no pacote principal; as outras são carregadas quando a rota abre (`React.lazy`), com uma área reservada enquanto carregam para o rodapé não pular. Título e descrição de cada rota ficam em [`src/lib/pageMeta.ts`](./src/lib/pageMeta.ts). A Arquitetura reúne três diagramas em SVG (regras em [`DESIGN.md`](../DESIGN.md), seção Diagramas).
+Rotas em [`src/AnimatedRoutes.tsx`](./src/AnimatedRoutes.tsx): `/` (Home), `/ping`, `/dns-lookup`, `/arquitetura`, `/sobre` e `*` (NotFound). Com pelo menos um artigo em `content/articles/`, entram também `/artigos` e `/artigos/:slug` (ver [Artigos](#artigos)). Só a Home entra no pacote principal; as outras são carregadas quando a rota abre (`React.lazy`), com uma área reservada enquanto carregam para o rodapé não pular. Título e descrição de cada rota ficam em [`src/lib/pageMeta.ts`](./src/lib/pageMeta.ts). A Arquitetura reúne três diagramas em SVG (regras em [`DESIGN.md`](../DESIGN.md), seção Diagramas).
 
 ## Páginas `/ping` e `/dns-lookup`
 
@@ -43,12 +45,14 @@ Para um componente funcionar nos dois lados, não leia `window`, `localStorage` 
 
 ## Artigos
 
-Cada `content/artigos/<slug>.md` vira a página `/artigos/<slug>`. Um plugin do Vite ([`vite/articlesPlugin.ts`](./vite/articlesPlugin.ts), com a lógica em [`vite/compileArticle.ts`](./vite/compileArticle.ts)) compila o markdown no build: valida o cabeçalho, colore o código (shiki), descarta HTML cru e links perigosos e troca `::diagram{name="..."}` pelo componente do diagrama. Erro de conteúdo derruba o build com `<slug>: <problema>`.
+Cada `content/articles/<slug>.md` vira a página `/artigos/<slug>`. Um plugin do Vite ([`vite/articlesPlugin.ts`](./vite/articlesPlugin.ts), com a lógica em [`vite/compileArticle.ts`](./vite/compileArticle.ts)) compila o markdown no build: valida o cabeçalho, colore o código (shiki), descarta HTML cru e links perigosos e troca `::diagram{name="..."}` pelo componente do diagrama. Erro de conteúdo derruba o build com `<slug>: <problema>`.
 
 - [`src/lib/articles.ts`](./src/lib/articles.ts): o catálogo (do mais novo para o mais antigo). A lista usa só os metadados (`?meta`), para o texto dos artigos não ir no JavaScript principal; o corpo de cada artigo é carregado quando a página abre.
 - `src/components/article/`: o renderizador do corpo (`ArticleBody`) e os diagramas disponíveis por nome (`diagramNames.ts`, `articleDiagrams.tsx`).
 - `src/components/LatestArticle.tsx`: a linha "Último artigo" no herói da Home e o bloco "Artigos" no fechamento.
 - `src/lib/ogImage.ts`: a imagem social de cada artigo (código só de Node).
+- [`scripts/newArticle.mjs`](./scripts/newArticle.mjs) e [`vite/articleTemplate.ts`](./vite/articleTemplate.ts): o comando que cria o arquivo de um artigo (`npm run new:article`) e o modelo que ele grava.
+- [`scripts/checkArticles.mjs`](./scripts/checkArticles.mjs) e [`vite/articleChecks.ts`](./vite/articleChecks.ts): o conferidor (`npm run check:articles`), que lista todos os problemas de todos os artigos de uma vez.
 
 Sem artigos, a seção inteira some: sem rota, sem item no menu nem no rodapé, sem linha e sem bloco na Home. Como escrever, ver e publicar um artigo, e o que cada erro de build significa, está no [runbook de artigos](../docs/runbook-artigos.md).
 

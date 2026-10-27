@@ -6,7 +6,16 @@ Como escrever um artigo em markdown, ver como ficou, publicar e o que fazer quan
 
 ## 1. Escrever
 
-Crie `frontend/content/artigos/<slug>.md`. O nome do arquivo, sem `.md`, é o endereço do artigo: `meu-artigo.md` vira `/artigos/meu-artigo`. O slug usa só letras minúsculas, números e hífens (`^[a-z0-9]+(-[a-z0-9]+)*$`).
+Crie o arquivo com o comando, que já deixa o cabeçalho válido e um esqueleto a preencher:
+
+```bash
+cd frontend
+npm run new:article -- meu-artigo "Como o ping mede a latência"
+```
+
+Ele grava `frontend/content/articles/meu-artigo.md` com o título, a data de hoje e textos `TODO`. Recusa slug inválido, título ausente e data impossível, e não sobrescreve um arquivo que já existe (a menos que você passe `--force`). Opções: `--description "..."`, `--date AAAA-MM-DD` e `--dir <pasta>` (para um rascunho fora da pasta de publicação). O conferidor (seção 3) avisa de qualquer `TODO` que sobrar.
+
+O nome do arquivo, sem `.md`, é o endereço do artigo: `meu-artigo.md` vira `/artigos/meu-artigo`. O slug usa só letras minúsculas, números e hífens (`^[a-z0-9]+(-[a-z0-9]+)*$`). Se preferir, crie o arquivo à mão, em `frontend/content/articles/<slug>.md`.
 
 O arquivo começa com um cabeçalho (front matter) em YAML:
 
@@ -78,6 +87,48 @@ grep -o '<title>[^<]*</title>' dist/artigos/<slug>.html
 ```
 
 Esperado: `dist/artigos/<slug>.html` e `dist/og/<slug>.png` existem, e o título é `<título do artigo> · Probekit`.
+
+### Conferir todos os artigos antes do pull request
+
+```bash
+cd frontend
+npx prettier --write content/articles   # o CI reprova um .md sem formatação (verificado em 2026-10-26)
+npm run check:articles
+```
+
+O `npm run format:check` do CI cobre os `.md` de `content/articles` (tabelas desalinhadas, por exemplo, reprovam o job), por isso o primeiro comando acima vem antes.
+
+O comando confere cada `content/articles/*.md` e lista **todos** os problemas de uma vez, com a linha quando há (o build para no primeiro erro e não diz a linha). Sai com código 1 se houver erro, e com 0 se não houver, inclusive quando não há artigos. Com `-- --strict`, aviso também falha; com `-- --dir <pasta>`, confere outra pasta.
+
+```text
+content/articles/ruim.md
+  erro             description vazia
+  erro   linha 7   título # no corpo; use ##
+  aviso            campo "draft" não é usado pelo site: o artigo é publicado mesmo assim
+
+1 artigo conferido: 2 erros e 1 aviso.
+```
+
+| Nível | O que é | Exemplos |
+|---|---|---|
+| erro | o que o build recusa (seção 5), mais corpo vazio | cabeçalho inválido, `#` no corpo, diagrama desconhecido |
+| aviso | não derruba o build, mas piora o artigo ou o deixa diferente do que se imagina | ver a tabela abaixo |
+
+| Aviso | Por quê |
+|---|---|
+| `title` com mais de 60 caracteres | o buscador mostra cerca de 60 |
+| `description` com menos de 70 | curta para o resultado de busca |
+| corpo com menos de 150 palavras | artigo muito curto |
+| nenhuma seção `##` | o artigo fica sem o sumário "Nesta página" |
+| bloco de código sem linguagem | fica sem cor |
+| `“ ” ‘ ’ – —` num bloco de código | o comando copiado quebra; use aspas e hífens ASCII |
+| HTML cru no corpo | é descartado |
+| link ou imagem com destino não permitido | perde o destino |
+| `date` posterior a hoje | a data **não** agenda: o artigo aparece no site mesmo assim |
+| `draft`, `tags` e outros campos | o site os ignora; `draft: true` não impede a publicação |
+| mesmo `title` em dois artigos | confunde leitores e buscadores |
+
+Os limites (60, 70 e 150) são escolhas de edição, não regras do site: ficam como constantes no topo de [`frontend/vite/articleChecks.ts`](../frontend/vite/articleChecks.ts). O script é [`frontend/scripts/checkArticles.mjs`](../frontend/scripts/checkArticles.mjs). Colocar o comando no CI (`.github/workflows/ci.yml`) é decisão do criador; o `npm run build` do job NPM já derruba conteúdo inválido, então o comando acrescenta o relatório completo e os avisos, não uma barreira nova.
 
 ## 4. Publicar
 

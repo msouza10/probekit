@@ -38,17 +38,37 @@ export type CompiledArticle = {
   diagrams: string[]
 }
 
-export type CompileOptions = { diagramNames: readonly string[] }
+export type Problem = { message: string; line?: number }
+
+export type CompileOptions = {
+  diagramNames: readonly string[]
+  /**
+   * Sem ele, o primeiro problema de conteúdo lança `<slug>: <problema>` (o
+   * build para). Com ele, cada problema é entregue a quem chamou e a
+   * compilação continua, para um relatório mostrar todos de uma vez.
+   */
+  report?: (problem: Problem) => void
+}
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/
 const DESCRIPTION_MAX = 160
 const WORDS_PER_MINUTE = 200
 
-const fail = (slug: string, problem: string): never => {
-  throw new Error(`${slug}: ${problem}`)
-}
+type Raise = (message: string, line?: number) => void
 
-function isRealDate(value: string) {
+// Lança no primeiro problema, ou entrega cada um a `report` e segue.
+const raiser =
+  (slug: string, report?: CompileOptions["report"]): Raise =>
+  (message, line) => {
+    if (!report) throw new Error(`${slug}: ${message}`)
+    report(line === undefined ? { message } : { message, line })
+  }
+
+/** O nome do arquivo (sem `.md`) vira o endereço: minúsculas, números e hífens. */
+export const isValidSlug = (slug: string) => SLUG.test(slug)
+
+/** `AAAA-MM-DD` com uma data que existe (`2026-02-30` não). */
+export function isRealDate(value: string) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
   const parsed = new Date(`${value}T00:00:00Z`)
   return (
@@ -56,20 +76,23 @@ function isRealDate(value: string) {
   )
 }
 
+// O meta e todos os problemas do cabeçalho, na ordem das regras.
 function readMeta(slug: string, data: Record<string, unknown>, body: string) {
-  if (!SLUG.test(slug)) fail(slug, "slug inválido")
+  const problems: string[] = []
+  if (!isValidSlug(slug)) problems.push("slug inválido")
 
   const title = typeof data.title === "string" ? data.title.trim() : ""
-  if (!title) fail(slug, "title vazio")
+  if (!title) problems.push("title vazio")
 
   const description =
     typeof data.description === "string" ? data.description.trim() : ""
-  if (!description) fail(slug, "description vazia")
-  if (description.length > DESCRIPTION_MAX)
-    fail(slug, `description com mais de ${DESCRIPTION_MAX} caracteres`)
+  if (!description) problems.push("description vazia")
+  else if (description.length > DESCRIPTION_MAX)
+    problems.push(`description com mais de ${DESCRIPTION_MAX} caracteres`)
 
   const date = String(data.date ?? "")
-  if (!isRealDate(date)) fail(slug, `date inválida "${date}"`)
+  const dateOk = isRealDate(date)
+  if (!dateOk) problems.push(`date inválida "${date}"`)
 
   const meta: ArticleMeta = {
     slug,
@@ -83,11 +106,13 @@ function readMeta(slug: string, data: Record<string, unknown>, body: string) {
   }
   if (data.updated !== undefined) {
     const updated = String(data.updated)
-    if (!isRealDate(updated)) fail(slug, `updated inválida "${updated}"`)
-    if (updated < date) fail(slug, "updated anterior a date")
-    meta.updated = updated
+    if (!isRealDate(updated)) problems.push(`updated inválida "${updated}"`)
+    else {
+      if (dateOk && updated < date) problems.push("updated anterior a date")
+      meta.updated = updated
+    }
   }
-  return meta
+  return { meta, problems }
 }
 
 type DirectiveNode = {
@@ -95,15 +120,17 @@ type DirectiveNode = {
   name: string
   attributes?: Record<string, string | null | undefined> | null
   data?: Record<string, unknown>
+  position?: { start: { line: number } }
 }
 type Parent = { children: unknown[] }
 
 // `::diagram{name="..."}` vira o elemento `article-diagram`. Um `:palavra` solto
 // no texto (como em "Nota:importante") não é diretiva: volta a ser texto.
 function remarkDiagrams(
-  slug: string,
+  raise: Raise,
   options: CompileOptions,
   found: string[],
+  lineOffset: number,
 ) {
   return () => (tree: unknown) => {
     visit(
@@ -127,19 +154,20 @@ function remarkDiagrams(
           directive.type !== "containerDirective"
         )
           return
+        const line = lineOf(directive, lineOffset)
         if (
           directive.type === "containerDirective" ||
           directive.name !== "diagram"
         )
-          fail(slug, `diretiva desconhecida "${directive.name}"`)
+          return raise(`diretiva desconhecida "${directive.name}"`, line)
 
         const name = directive.attributes?.name
-        if (!name) fail(slug, "diagrama sem nome")
-        if (!options.diagramNames.includes(name as string))
-          fail(slug, `diagrama desconhecido "${name}"`)
-        if (found.includes(name as string))
-          fail(slug, `diagrama repetido "${name}"`)
-        found.push(name as string)
+        if (!name) return raise("diagrama sem nome", line)
+        if (!options.diagramNames.includes(name))
+          return raise(`diagrama desconhecido "${name}"`, line)
+        if (found.includes(name))
+          return raise(`diagrama repetido "${name}"`, line)
+        found.push(name)
         directive.data = {
           hName: "article-diagram",
           hProperties: { name },
@@ -163,12 +191,13 @@ function rehypeSafeUrls() {
 }
 
 // Ids dos títulos, sumário (só os ##) e recusa de `#` no corpo.
-function rehypeHeadings(slug: string, toc: TocEntry[]) {
+function rehypeHeadings(raise: Raise, toc: TocEntry[], lineOffset: number) {
   return () => (tree: Root) => {
     const slugger = new GithubSlugger()
     visit(tree, "element", (node: Element) => {
       if (!/^h[1-6]$/.test(node.tagName)) return
-      if (node.tagName === "h1") fail(slug, "título # no corpo; use ##")
+      if (node.tagName === "h1")
+        raise("título # no corpo; use ##", lineOf(node, lineOffset))
       const title = textOf(node)
       // Âncoras só em ASCII ("Títulos" -> "titulos"): URLs fáceis de digitar.
       const id = slugger.slug(title.normalize("NFD").replace(/\p{M}/gu, ""))
@@ -191,29 +220,60 @@ const unsupported = () => {
   throw new Error("front matter deve ser YAML")
 }
 
+// A linha do nó no arquivo inteiro (o corpo é lido sem o cabeçalho).
+const lineOf = (
+  node: { position?: { start: { line: number } } },
+  lineOffset: number,
+) => (node.position ? node.position.start.line + lineOffset : undefined)
+
+/**
+ * Separa o cabeçalho (YAML) do corpo. `lineOffset` é quantas linhas do arquivo
+ * vêm antes do corpo, para os problemas do corpo apontarem a linha certa.
+ * Lança se o cabeçalho não for YAML legível.
+ */
+export function splitArticle(source: string) {
+  const parsed = matter(source, {
+    // `---js` executaria código do arquivo; só YAML é aceito.
+    engines: {
+      // Sem o tipo "data" do YAML: `date: 2026-02-30` ficaria 2 de março,
+      // em silêncio. Como texto, a validação abaixo recusa a data impossível.
+      yaml: (text: string) => load(text, { schema: CORE_SCHEMA }) as object,
+      js: unsupported,
+      javascript: unsupported,
+      json: unsupported,
+    },
+  })
+  const before = source.slice(0, source.length - parsed.content.length)
+  return {
+    data: parsed.data as Record<string, unknown>,
+    content: parsed.content,
+    lineOffset: (before.match(/\n/g) ?? []).length,
+  }
+}
+
 export async function compileArticle(
   slug: string,
   source: string,
   options: CompileOptions,
 ): Promise<CompiledArticle> {
-  let parsed: matter.GrayMatterFile<string>
+  const raise = raiser(slug, options.report)
+
+  let split: ReturnType<typeof splitArticle>
   try {
-    parsed = matter(source, {
-      // `---js` executaria código do arquivo; só YAML é aceito.
-      engines: {
-        // Sem o tipo "data" do YAML: `date: 2026-02-30` ficaria 2 de março,
-        // em silêncio. Como texto, a validação abaixo recusa a data impossível.
-        yaml: (text: string) => load(text, { schema: CORE_SCHEMA }) as object,
-        js: unsupported,
-        javascript: unsupported,
-        json: unsupported,
-      },
-    })
+    split = splitArticle(source)
   } catch (error) {
-    return fail(slug, error instanceof Error ? error.message : String(error))
+    raise(error instanceof Error ? error.message : String(error))
+    // Só chega aqui com `report`: sem cabeçalho legível não há o que compilar.
+    return {
+      meta: { slug, title: "", description: "", date: "", readingMinutes: 1 },
+      tree: { type: "root", children: [] },
+      toc: [],
+      diagrams: [],
+    }
   }
 
-  const meta = readMeta(slug, parsed.data, parsed.content)
+  const { meta, problems } = readMeta(slug, split.data, split.content)
+  for (const problem of problems) raise(problem)
   const toc: TocEntry[] = []
   const diagrams: string[] = []
 
@@ -221,16 +281,16 @@ export async function compileArticle(
     .use(remarkParse)
     .use(remarkGfm)
     .use(remarkDirective)
-    .use(remarkDiagrams(slug, options, diagrams))
+    .use(remarkDiagrams(raise, options, diagrams, split.lineOffset))
     .use(remarkRehype)
     .use(rehypeSafeUrls)
-    .use(rehypeHeadings(slug, toc))
+    .use(rehypeHeadings(raise, toc, split.lineOffset))
     .use(rehypeShiki, {
       themes: { light: "github-light", dark: "github-dark" },
       defaultColor: false,
       fallbackLanguage: "text",
     })
 
-  const tree = (await processor.run(processor.parse(parsed.content))) as Root
+  const tree = (await processor.run(processor.parse(split.content))) as Root
   return { meta, tree: withoutPositions(tree), toc, diagrams }
 }

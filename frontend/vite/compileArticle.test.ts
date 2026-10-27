@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { compileArticle } from "./compileArticle.ts"
+import { compileArticle, type Problem } from "./compileArticle.ts"
 
 // A primeira compilação de cada worker inicializa o shiki (temas e motor), o
 // que passa dos 5 s padrão quando a suíte inteira roda em paralelo.
@@ -140,6 +140,76 @@ describe("compileArticle", () => {
       await expect(compileArticle(slug, source, options)).rejects.toThrow(
         message,
       )
+    })
+  })
+
+  describe("com report, entrega todos os problemas em vez de lançar o primeiro", () => {
+    const collect = async (source: string) => {
+      const problems: Problem[] = []
+      await compileArticle("x", source, {
+        ...options,
+        report: (problem) => problems.push(problem),
+      })
+      return problems
+    }
+
+    it("junta os problemas do corpo, com a linha no arquivo", async () => {
+      const source = [
+        "---", // 1
+        "title: T", // 2
+        "description: D", // 3
+        "date: 2026-10-26", // 4
+        "---", // 5
+        "", // 6
+        "# Título errado", // 7
+        "", // 8
+        '::diagram{name="nada"}', // 9
+        "", // 10
+        "::foo", // 11
+        "",
+      ].join("\n")
+      const problems = await collect(source)
+
+      expect(problems).toHaveLength(3)
+      expect(problems).toEqual(
+        expect.arrayContaining([
+          { message: "título # no corpo; use ##", line: 7 },
+          { message: 'diagrama desconhecido "nada"', line: 9 },
+          { message: 'diretiva desconhecida "foo"', line: 11 },
+        ]),
+      )
+    })
+
+    it("junta os problemas do cabeçalho, na ordem das regras", async () => {
+      const source = "---\ndescription: D\ndate: 2026-02-30\n---\n\nTexto.\n"
+      const problems = await collect(source)
+
+      expect(problems.map((problem) => problem.message)).toEqual([
+        "title vazio",
+        'date inválida "2026-02-30"',
+      ])
+    })
+
+    it("junta problemas do cabeçalho e do corpo no mesmo artigo", async () => {
+      const source = "---\ntitle: T\ndescription: D\n---\n\n# Errado\n"
+      const messages = (await collect(source)).map((problem) => problem.message)
+
+      expect(messages).toEqual(
+        expect.arrayContaining([
+          'date inválida ""',
+          "título # no corpo; use ##",
+        ]),
+      )
+    })
+
+    it("um artigo sem problemas não entrega nada", async () => {
+      expect(await collect(article("## Seção\n\nTexto."))).toEqual([])
+    })
+
+    it("um cabeçalho que não é YAML é entregue como problema, sem lançar", async () => {
+      const problems = await collect("---js\n{ title: 'x' }\n---\nTexto\n")
+
+      expect(problems).toEqual([{ message: "front matter deve ser YAML" }])
     })
   })
 

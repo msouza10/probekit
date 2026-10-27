@@ -1,12 +1,12 @@
 /*
- * Plugin do Vite: cada `content/artigos/<slug>.md` importado vira um módulo com
+ * Plugin do Vite: cada `content/articles/<slug>.md` importado vira um módulo com
  * `meta`, `tree`, `toc` e `diagrams` (ver `compileArticle`). O slug é o nome do
  * arquivo. Erro de conteúdo derruba o build (e aparece no overlay do dev).
  */
 import type { Plugin } from "vite"
 import { compileArticle, type CompileOptions } from "./compileArticle.ts"
 
-const ARTICLE = /\/content\/artigos\/([^/]+)\.md$/
+const ARTICLE = /\/content\/articles\/([^/]+)\.md$/
 
 export function articlesPlugin(options: CompileOptions): Plugin {
   return {

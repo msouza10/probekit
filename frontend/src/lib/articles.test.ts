@@ -19,9 +19,9 @@ const meta = (slug: string, date: string): ArticleMeta => ({
 describe("createCatalog", () => {
   it("ordena do mais novo para o mais antigo", () => {
     const catalog = createCatalog({
-      "/content/artigos/antigo.md": meta("antigo", "2026-01-10"),
-      "/content/artigos/novo.md": meta("novo", "2026-10-26"),
-      "/content/artigos/meio.md": meta("meio", "2026-05-02"),
+      "/content/articles/antigo.md": meta("antigo", "2026-01-10"),
+      "/content/articles/novo.md": meta("novo", "2026-10-26"),
+      "/content/articles/meio.md": meta("meio", "2026-05-02"),
     })
 
     expect(catalog.map((article) => article.slug)).toEqual([
@@ -33,8 +33,8 @@ describe("createCatalog", () => {
 
   it("desempata a mesma data pelo slug", () => {
     const catalog = createCatalog({
-      "/content/artigos/b.md": meta("b", "2026-10-26"),
-      "/content/artigos/a.md": meta("a", "2026-10-26"),
+      "/content/articles/b.md": meta("b", "2026-10-26"),
+      "/content/articles/a.md": meta("a", "2026-10-26"),
     })
 
     expect(catalog.map((article) => article.slug)).toEqual(["a", "b"])
@@ -83,7 +83,7 @@ describe("createLoader", () => {
     diagrams: [],
   }
   const load = createLoader({
-    "/content/artigos/novo.md": () => Promise.resolve(module),
+    "/content/articles/novo.md": () => Promise.resolve(module),
   })
 
   it("carrega meta, tree e toc do artigo pelo slug", async () => {

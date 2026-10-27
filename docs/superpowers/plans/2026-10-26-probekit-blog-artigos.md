@@ -2,7 +2,7 @@
 
 > **Para quem for executar:** use `superpowers:subagent-driven-development` (recomendado) ou `superpowers:executing-plans`, task por task. Os passos usam caixas (`- [ ]`) como roteiro de execução; o estado oficial de cada task está na issue e no GitHub Project. Commit, push e PR são do criador: os passos de commit trazem só a mensagem sugerida.
 
-**Goal:** o criador escreve `frontend/content/artigos/<slug>.md`, abre um PR e o deploy publica uma página pré-renderizada em `/artigos/<slug>`, com código colorido, sumário, diagramas por nome e imagem OG própria.
+**Goal:** o criador escreve `frontend/content/articles/<slug>.md`, abre um PR e o deploy publica uma página pré-renderizada em `/artigos/<slug>`, com código colorido, sumário, diagramas por nome e imagem OG própria.
 
 **Architecture:** um plugin do Vite compila cada `.md` no build para um módulo com `meta`, `tree` (hast, JSON) e `toc`; um catálogo reúne só os `meta` no bundle principal e carrega o corpo de um artigo sob demanda; um renderizador transforma a árvore em React com um mapa de componentes do site; as rotas, o `siteMeta` e o prerender passam a derivar do catálogo.
 
@@ -44,12 +44,12 @@
   - `type TocEntry = { id: string; title: string }`
   - `type CompiledArticle = { meta: ArticleMeta; tree: import("hast").Root; toc: TocEntry[]; diagrams: string[] }`
   - `compileArticle(slug: string, source: string, options: { diagramNames: readonly string[] }): Promise<CompiledArticle>` — lança `Error` com a mensagem `"<slug>: <problema>"`.
-  - `articlesPlugin(options: { diagramNames: readonly string[] }): import("vite").Plugin` — transforma `content/artigos/*.md` em `export const meta`, `export const tree`, `export const toc` e `export const diagrams` (JSON sem `position`).
+  - `articlesPlugin(options: { diagramNames: readonly string[] }): import("vite").Plugin` — transforma `content/articles/*.md` em `export const meta`, `export const tree`, `export const toc` e `export const diagrams` (JSON sem `position`).
 
 - [ ] **Step 1: Escrever os testes que falham.** Em `compileArticle.test.ts`: (a) artigo válido devolve `meta` com `readingMinutes` = palavras ÷ 200 arredondado para cima, mínimo 1; (b) `toc` lista só os `##`, com ids sem repetição (`dois-titulos-iguais` e `dois-titulos-iguais-1`); (c) bloco ` ```ts ` sai com spans que carregam as variáveis `--shiki-light` e `--shiki-dark`; (d) `::diagram{name="pipeline"}` vira o elemento `article-diagram` com `properties.name === "pipeline"` e `diagrams === ["pipeline"]`; (e) erros, um teste cada, com a mensagem exata: `"x: diagrama desconhecido \"nada\""`, diagrama repetido, `"Data-Ruim: slug inválido"`, `date` `2026-13-45`, descrição de 161 caracteres, `title` vazio, `updated` anterior a `date`, `#` no corpo; (f) `<script>alert(1)</script>` e `<img src=x onerror=alert(1)>` no corpo não aparecem em nenhum nó da árvore; um link cujo destino começa com `javascript:` sai sem `href`.
 - [ ] **Step 2: Rodar e ver falhar.** `cd frontend && npx vitest run vite/compileArticle.test.ts` → FAIL (módulo inexistente).
 - [ ] **Step 3: Instalar as dependências** (`unified remark-parse remark-gfm remark-directive remark-rehype @shikijs/rehype gray-matter github-slugger unist-util-visit hast-util-to-string @types/hast` em dev; `hast-util-to-jsx-runtime` em runtime) e **implementar `compileArticle`**: front matter com `gray-matter`, validação antes de processar, pipeline `remark-parse → remark-gfm → remark-directive → (plugin local: leaf `diagram` vira `article-diagram`) → remark-rehype (sem `allowDangerousHtml`) → @shikijs/rehype (`themes: { light: "github-light", dark: "github-dark" }`, `defaultColor: false`)`. Ids dos títulos com `github-slugger`.
-- [ ] **Step 4: Implementar `articlesPlugin`** (`enforce: "pre"`, `transform` só para ids em `content/artigos/*.md`, `addWatchFile` para recarregar no dev; o slug sai do nome do arquivo) e registrá-lo em `vite.config.ts` com `diagramNames` vindo de `src/components/article/diagramNames.ts` (criado na Task 3; até lá, `[]`).
+- [ ] **Step 4: Implementar `articlesPlugin`** (`enforce: "pre"`, `transform` só para ids em `content/articles/*.md`, `addWatchFile` para recarregar no dev; o slug sai do nome do arquivo) e registrá-lo em `vite.config.ts` com `diagramNames` vindo de `src/components/article/diagramNames.ts` (criado na Task 3; até lá, `[]`).
 - [ ] **Step 5: Rodar os testes.** `npx vitest run vite/compileArticle.test.ts` → PASS; `npx tsc -b` sem erros.
 - [ ] **Step 6: Commit (do criador)** — `feat(frontend): compila artigos em markdown no build`.
 
@@ -62,15 +62,15 @@
 - Consumes: `ArticleMeta`, `CompiledArticle` (Task 1).
 - Produces:
   - `createCatalog(metaModules: Record<string, ArticleMeta>): ArticleMeta[]` — ordena por `date` decrescente e, em empate, por `slug`.
-  - `articles: ArticleMeta[]` — `createCatalog(import.meta.glob("/content/artigos/*.md", { import: "meta", eager: true }))`.
+  - `articles: ArticleMeta[]` — `createCatalog(import.meta.glob("/content/articles/*.md", { import: "meta", eager: true }))`.
   - `articlePath(slug: string): string` → `"/artigos/<slug>"`.
   - `findArticle(slug: string): ArticleMeta | undefined`.
-  - `loadArticle(slug: string): Promise<Pick<CompiledArticle, "meta" | "tree" | "toc"> | undefined>` — `import.meta.glob("/content/artigos/*.md")` (lazy), `undefined` para slug que não existe.
+  - `loadArticle(slug: string): Promise<Pick<CompiledArticle, "meta" | "tree" | "toc"> | undefined>` — `import.meta.glob("/content/articles/*.md")` (lazy), `undefined` para slug que não existe.
 
 - [ ] **Step 1: Testes que falham** com módulos de teste escritos à mão: `createCatalog` ordena (mais novo primeiro; empate por slug); lista vazia devolve `[]`; `articlePath("a-b")` é `/artigos/a-b`.
 - [ ] **Step 2: Rodar e ver falhar** (`npx vitest run src/lib/articles.test.ts`).
 - [ ] **Step 3: Implementar** as assinaturas acima. O glob eager usa só o export `meta`.
-- [ ] **Step 4: Rodar.** PASS; `npx tsc -b` sem erros (com `content/artigos/` ainda vazio o glob devolve `{}`).
+- [ ] **Step 4: Rodar.** PASS; `npx tsc -b` sem erros (com `content/articles/` ainda vazio o glob devolve `{}`).
 - [ ] **Step 5: Commit (do criador)** — `feat(frontend): catálogo de artigos`.
 
 ### Task 3: Diagramas por nome
@@ -108,7 +108,7 @@
 - [ ] **Step 2: Rodar e ver falhar.**
 - [ ] **Step 3: Implementar** as páginas e o renderizador (`toJsxRuntime` de `hast-util-to-jsx-runtime`); o sumário vem de `toc` (não do DOM), então também aparece no HTML pré-renderizado. CSS: `.shiki span { color: var(--shiki-light) }` e `.dark .shiki span { color: var(--shiki-dark) }`.
 - [ ] **Step 4: Rodar os testes** (`npx vitest run`) → tudo PASS.
-- [ ] **Step 5: Conferir o bundle.** Com um `.md` temporário em `content/artigos/` contendo a frase `FRASE-UNICA-DE-TESTE`: `npm run build && grep -rl "FRASE-UNICA-DE-TESTE" dist/assets` deve listar **só** o chunk daquele artigo, nunca o `index-*.js`. Remover o arquivo temporário.
+- [ ] **Step 5: Conferir o bundle.** Com um `.md` temporário em `content/articles/` contendo a frase `FRASE-UNICA-DE-TESTE`: `npm run build && grep -rl "FRASE-UNICA-DE-TESTE" dist/assets` deve listar **só** o chunk daquele artigo, nunca o `index-*.js`. Remover o arquivo temporário.
 - [ ] **Step 6: Commit (do criador)** — `feat(frontend): páginas de lista e de leitura de artigos`.
 
 ### Task 5: Rotas, metadados, prerender e menu
@@ -174,5 +174,54 @@ Acrescentada em 2026-10-26, a pedido do criador (ver a spec). Executar depois da
 - [ ] **Step 1: Testes que falham.** `LatestArticle.test.tsx`: (a) a linha mostra "Último artigo" e um link com o título para `/artigos/<slug>`; (b) o card tem o título como link, a descrição, a data por extenso num `time` e o link "Todos os artigos" para `/artigos`. `Home.test.tsx` (com `vi.mock("@/lib/articles")` e catálogo por teste): (c) sem artigos, a Home não tem "Último artigo", nem a região "Artigos", nem link para `/artigos` (o teste atual do fechamento continua valendo); (d) com dois artigos, só o mais novo aparece, no herói e no card; (e) a região "Arquitetura" continua com um único link; (f) a Home continua sem chamar a API do Probekit ao montar.
 - [ ] **Step 2: Rodar e ver falhar.** `cd frontend && npx vitest run src/components/LatestArticle.test.tsx src/pages/Home.test.tsx`.
 - [ ] **Step 3: Implementar** os dois componentes e a ligação na `Home`. A linha entra no herói logo abaixo de `RepoPulse`, num `Reveal` com atraso de `0.32`; o card segue o desenho do bloco "Arquitetura" (rótulo, título grande com seta, texto).
-- [ ] **Step 4: Rodar tudo.** `npx vitest run` → PASS nos dois estados (com e sem `content/artigos/*.md`); `npm run build` passa. Conferir no navegador, no tema claro, no escuro e no celular, com um artigo temporário (screenshots na resposta).
+- [ ] **Step 4: Rodar tudo.** `npx vitest run` → PASS nos dois estados (com e sem `content/articles/*.md`); `npm run build` passa. Conferir no navegador, no tema claro, no escuro e no celular, com um artigo temporário (screenshots na resposta).
 - [ ] **Step 5: Commit (do criador)** — `feat(frontend): Home aponta para o artigo mais recente`.
+
+### Task 9: Comando que confere todos os artigos
+
+Acrescentada em 2026-10-26, a pedido do criador (ver a spec). O `npm run build` já recusa conteúdo inválido, mas para no primeiro erro e não diz a linha; este comando mostra tudo de uma vez e avisa do que não quebra mas piora o artigo.
+
+**Files:**
+- Create: `frontend/vite/articleChecks.ts`, `frontend/vite/articleChecks.test.ts`, `frontend/scripts/checkArticles.mjs`, `frontend/scripts/checkArticles.test.ts`
+- Modify: `frontend/vite/compileArticle.ts` (modo que entrega cada erro em vez de lançar o primeiro), `frontend/vite/compileArticle.test.ts`, `frontend/package.json` (script `"check:articles": "node scripts/checkArticles.mjs"`), `docs/runbook-artigos.md`, `frontend/README.md`
+
+**Interfaces:**
+- Consumes: `compileArticle`, `CompileOptions` (Task 1).
+- Produces:
+  - `type Problem = { message: string; line?: number }` e `CompileOptions` ganha `report?: (problem: Problem) => void`: com `report`, `compileArticle` entrega cada problema de conteúdo a quem chamou e continua; sem ele, lança `<slug>: <problema>` no primeiro, como hoje (as mensagens não mudam).
+  - `type Finding = { level: "error" | "warning"; message: string; line?: number }`
+  - `checkArticle(slug: string, source: string, options: { diagramNames: readonly string[]; today?: string }): Promise<Finding[]>` — erros: tudo o que o compilador recusa (todos de uma vez, com a linha do corpo) mais **corpo vazio**. Avisos: título com mais de 60 caracteres; descrição com menos de 70; menos de 150 palavras; nenhuma seção `##`; bloco de código sem linguagem; bloco de código com aspas ou travessões tipográficos (`“ ” ‘ ’ – —`, que quebram o comando copiado); HTML cru (será descartado); link ou imagem com destino perigoso (perde o destino); `date` posterior a `today` (padrão: hoje, em UTC); campo do cabeçalho que o site não usa, com mensagem própria para `draft` (o artigo é publicado mesmo assim).
+  - `type ArticleReport = { slug: string; file: string; findings: Finding[] }`
+  - `checkAll(articles: { slug: string; file: string; source: string }[], options): Promise<ArticleReport[]>` — acrescenta o aviso de **título repetido** nos dois artigos.
+  - `formatReport(reports: ArticleReport[]): { text: string; errors: number; warnings: number }`.
+  - CLI `node scripts/checkArticles.mjs [--dir <pasta>] [--strict]`: confere `content/articles/*.md` (ou a pasta dada), imprime o relatório, sai com 1 se houver erro (com `--strict`, também se houver aviso) e com 0 caso contrário; sem artigos, diz que não há o que conferir e sai com 0. Carrega o TypeScript pelo servidor do Vite, com a mesma configuração do build.
+
+- [ ] **Step 1: Testes que falham.** `articleChecks.test.ts`: (a) artigo completo e válido devolve `[]`; (b) vários problemas de uma vez (sem `title`, sem `date`, `#` no corpo, diagrama desconhecido) devolvem os 4 erros, os do corpo com a linha certa; (c) corpo vazio é erro; (d) um teste por aviso, com o limite exato (título de 60 passa, de 61 avisa; descrição de 69 avisa, de 70 passa; 149 palavras avisa, 150 passa) e `today` injetado para a data no futuro; (e) `checkAll` avisa o título repetido nos dois arquivos e em nenhum outro; (f) `formatReport` mostra arquivo, nível, linha e mensagem, e conta erros e avisos. `compileArticle.test.ts`: com `report`, um artigo com 3 problemas de conteúdo entrega os 3 e não lança. `checkArticles.test.ts`: o CLI sai com 0 numa pasta de artigo válido, com 1 numa pasta com um erro, com 0 numa pasta só com aviso e com 1 nela com `--strict`, e com 0 numa pasta vazia.
+- [ ] **Step 2: Rodar e ver falhar.** `cd frontend && npx vitest run vite/articleChecks.test.ts vite/compileArticle.test.ts scripts/checkArticles.test.ts`.
+- [ ] **Step 3: Implementar.** Em `compileArticle.ts`, trocar o `fail` dos plugins por um `raise(message, line)` que chama `options.report` quando existe e lança quando não (o `readMeta` passa a devolver todos os problemas do cabeçalho). Em `articleChecks.ts`, os avisos vêm de uma análise do markdown (mdast) com `remark-parse`, `remark-gfm` e `remark-directive`, que dá a linha de cada nó.
+- [ ] **Step 4: Rodar tudo.** `npx vitest run` → PASS; `npm run check:articles` num artigo temporário com problemas conhecidos lista todos, com a linha, e sai com 1; sem artigos, diz que não há o que conferir e sai com 0.
+- [ ] **Step 5: Documentar.** Seção "Conferir antes do pull request" no `docs/runbook-artigos.md` (o comando, erro × aviso, a tabela dos avisos) e a linha do script em `frontend/README.md`. O passo no CI é do criador (`.github/workflows/ci.yml`): o `npm run build` do job NPM já derruba conteúdo inválido, então o comando acrescenta o relatório completo e os avisos, não uma barreira nova.
+- [ ] **Step 6: Commit (do criador)** — `feat(frontend): comando que confere todos os artigos`.
+
+### Task 10: Comando que cria o arquivo de um artigo
+
+Acrescentada em 2026-10-26, a pedido do criador (ver a spec). A skill `probekit-articles` e o autor criam o arquivo por um comando, em vez de copiar um modelo à mão: o cabeçalho já sai válido e o título e a data já vêm preenchidos.
+
+**Files:**
+- Create: `frontend/vite/articleTemplate.ts`, `frontend/vite/articleTemplate.test.ts`, `frontend/scripts/newArticle.mjs`, `frontend/scripts/newArticle.test.ts`
+- Modify: `frontend/vite/compileArticle.ts` (exporta `isValidSlug`), `frontend/vite/articleChecks.ts` e `articleChecks.test.ts` (aviso de `TODO`), `frontend/package.json` (script `"new:article": "node scripts/newArticle.mjs"`), `.agents/skills/probekit-articles/SKILL.md`, `docs/runbook-artigos.md`, `frontend/README.md`
+
+**Interfaces:**
+- Consumes: `splitArticle` (Task 9), `checkArticle` (Task 9).
+- Produces:
+  - `isValidSlug(slug: string): boolean` — `^[a-z0-9]+(-[a-z0-9]+)*$`, a mesma regra do compilador.
+  - `articleTemplate(input: { title: string; description?: string; date: string }): string` — o arquivo inteiro: cabeçalho (título e descrição entre aspas, escapados; data sem aspas), uma abertura, duas seções `##` e uma `## Referências`, com textos `TODO` a preencher. Já sai formatado como o Prettier deixa. A descrição padrão é um `TODO` de até 160 caracteres.
+  - Aviso novo do conferidor: `title`, `description` ou corpo com a palavra `TODO` (`contém "TODO" (parte do modelo sem preencher)`), no corpo com a linha da primeira ocorrência.
+  - CLI `node scripts/newArticle.mjs <slug> "<título>" [--description "..."] [--date AAAA-MM-DD] [--dir <pasta>] [--force]`: grava `<pasta>/<slug>.md` (padrão `content/articles`), cria a pasta se faltar, imprime o caminho criado e os próximos passos. Sai com 1, sem gravar nada, se o slug for inválido, se faltar o título, se a data não existir ou se o arquivo já existir (sem `--force`).
+
+- [ ] **Step 1: Testes que falham.** `articleTemplate.test.ts`: (a) cabeçalho com `title`, `description` e `date`, e um título com `:`, aspas e `&` volta igual pelo `splitArticle`; (b) a descrição padrão começa com `TODO` e tem até 160 caracteres; (c) o modelo não tem **nenhum erro** no `checkArticle` e tem os avisos de `TODO`; (d) o texto já é o que o Prettier produziria (`format` devolve o mesmo texto); (e) `isValidSlug` aceita `meu-artigo` e recusa `Meu`, `a_b`, `-a`, `a--b`, vazio. `articleChecks.test.ts`: o aviso de `TODO` em título, descrição e corpo (com a linha), e nenhum aviso quando não há `TODO`. `newArticle.test.ts`: cria o arquivo com o título dado e a data de hoje; recusa slug inválido, título ausente, data impossível e arquivo existente (conteúdo intacto), e com `--force` sobrescreve.
+- [ ] **Step 2: Rodar e ver falhar.** `cd frontend && npx vitest run vite/articleTemplate.test.ts vite/articleChecks.test.ts scripts/newArticle.test.ts`.
+- [ ] **Step 3: Implementar.** `articleTemplate` com `JSON.stringify` nos textos do cabeçalho (JSON é YAML válido); o CLI carrega o TypeScript pelo servidor do Vite, como o `checkArticles.mjs`.
+- [ ] **Step 4: Rodar tudo.** `npx vitest run` → PASS; `npm run new:article -- teste-modelo "Título de teste"` num diretório temporário (`--dir`) cria o arquivo, e `npm run check:articles -- --dir <pasta>` o aceita sem erro e avisa dos `TODO`; `prettier --check` no arquivo gerado passa.
+- [ ] **Step 5: Documentar.** A skill passa a criar o arquivo pelo comando; runbook (seção 1) e `frontend/README.md` citam o comando.
+- [ ] **Step 6: Commit (do criador)** — `feat(frontend): comando que cria o arquivo de um artigo`.
