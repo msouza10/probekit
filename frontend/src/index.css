@@ -490,3 +490,15 @@ code {
     transform: scale(1.3);
   }
 }
+
+/*
+ * Código dos artigos. O compilador (vite/compileArticle.ts) deixa em cada
+ * trecho as variáveis --shiki-light e --shiki-dark; o fundo do bloco vem dos
+ * tokens do site (bg-card), então só a cor do texto é escolhida aqui.
+ */
+.shiki span {
+  color: var(--shiki-light);
+}
+.dark .shiki span {
+  color: var(--shiki-dark);
+}
