@@ -67,6 +67,8 @@ Verificado em produção em 2026-10-17, contra `api.probekit.cc`:
 | `GET /` com `Origin` permitida | 200, `allow-origin` e `vary` presentes |
 | `GET /` sem `Origin` | 200, sem cabeçalhos CORS |
 
+Verificado também no navegador em 2026-10-27 (Chrome, site em produção): em `https://probekit.cc/ping` e em `https://www.probekit.cc/ping`, a chamada `GET api.probekit.cc/api/ping` respondeu 200 com `access-control-allow-origin` igual à origem e `vary: Origin`, e o resultado apareceu na página sem erro no console; em `/dns-lookup`, `GET /api/dns-lookup` também respondeu 200. Não houve preflight (`OPTIONS`), como esperado: são `GET` simples, sem cabeçalho personalizado.
+
 Testes automatizados em `backend/api-service-golang/tests/cors_test.go`: leitura das origens, o middleware isolado (origem permitida, sufixo, esquema e porta errados, `null`, preflight) e o binário real respondendo preflight em `/`, `/api/ping` e `/api/dns-lookup`. No frontend, `src/lib/api.test.ts` cobre o prefixo da URL.
 
 ## Referências

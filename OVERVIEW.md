@@ -82,7 +82,7 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 - ✅ Release automática do binário (`probekit-linux-amd64-api-go-X.Y.Z`, na 1.3.0 em 2026-10-26) e atualização das VMs por timer de 5 minutos ([ADR-0005](./docs/adr/0005-atualizacao-das-vms-e-deploy-inicial.md)).
 - ✅ Workflow *Deploy* (manual): `terraform apply`, espera do cloud-init, entrega do certificado e execução do `deploy-api-go.sh` por SSH nas duas VMs. Rodou com sucesso mais de uma vez.
 - ✅ O *Deploy* tem dois jobs: `Plan deploy` (ambiente `plan`, sem pausa) e `Deploy` (ambiente `production`, que espera a aprovação e aplica o plano salvo e cifrado). O primeiro run nesse formato passou em 2026-10-20 ([ADR-0005](./docs/adr/0005-atualizacao-das-vms-e-deploy-inicial.md), [ADR-0007](./docs/adr/0007-gestao-de-segredos-com-infisical.md)). O workflow usa `concurrency` (grupo `deploy`, `cancel-in-progress: false`), então um segundo deploy espera o primeiro; conferido no arquivo em 2026-10-27, ainda sem teste com duas execuções simultâneas.
-- ✅ Smoke test em produção (2026-10-17): `/`, `/api/ping` e `/api/dns-lookup` respondem 200, ping para IP privado responde 400, e o preflight de CORS responde 204 só para as origens permitidas.
+- ✅ Smoke test em produção (2026-10-17): `/`, `/api/ping` e `/api/dns-lookup` respondem 200, ping para IP privado responde 400, e o preflight de CORS responde 204 só para as origens permitidas. Conferido também no navegador em 2026-10-27: `/ping` (em `probekit.cc` e em `www`) e `/dns-lookup` chamam a API e mostram o resultado na página.
 - ⏳ Teste de derrubar uma VM e confirmar que o NLB continua respondendo.
 
 **Limitações conhecidas:**
