@@ -37,3 +37,7 @@ skills-lock.json
 # Cloudflare
 frontend/.wrangler/
 .claude/skills/humanizer
+
+# draft
+draft.md
+

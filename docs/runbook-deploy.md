@@ -169,7 +169,7 @@ bash infra/shellscript/verify-sites.sh        # o site: os quatro endereços res
 bash infra/shellscript/verify-api-routes.sh   # a API: saúde, preflight de CORS (204) e origem bloqueada (403)
 ```
 
-No navegador, abra `/ping` e `/dns-lookup`, execute uma consulta e confirme o resultado vindo da API (aba Rede: a chamada vai para `api.probekit.cc` e a resposta traz `access-control-allow-origin`).
+No navegador, abra `/ping` e `/dns-lookup`, execute uma consulta e confirme o resultado vindo da API (aba Rede: a chamada vai para `api.probekit.cc` e a resposta traz `access-control-allow-origin`). Verificado no navegador em 2026-10-27: em `https://probekit.cc/ping` e em `https://www.probekit.cc/ping`, o atalho "Cloudflare (1.1.1.1)" chamou `api.probekit.cc/api/ping`, a API respondeu 200 com `access-control-allow-origin` igual à origem (`https://probekit.cc` ou `https://www.probekit.cc`) e `vary: Origin`, o resultado apareceu na página e o console ficou sem erros; em `/dns-lookup`, a consulta de `cloudflare.com` chamou `api.probekit.cc/api/dns-lookup` (200) e mostrou os registros. O atalho dispara a consulta sozinho, sem precisar clicar no botão.
 
 Uma rota inexistente responde **404** com a página de "não encontrado" (`404.html`), e as cinco rotas do site respondem 200. Confira com `curl -s -o /dev/null -w '%{http_code}\n' https://probekit.cc/nao-existe` (404) e o mesmo em `/ping` (200). Se `/ping` acessado direto der 404, o build não gerou o `ping.html`: rode `npm run build` e confira o `ls dist`.
 
