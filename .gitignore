@@ -8,6 +8,8 @@
 node_modules/
 frontend/dist/
 frontend/build/
+# gerado pelo CI (npm run stats); para ver a faixa local: npm run stats -- --out public/stats.json
+frontend/public/stats.json
 frontend/.env
 frontend/.env.local
 

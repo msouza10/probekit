@@ -16,7 +16,12 @@ npm run format         # formata o código (Prettier)
 npm run format:check   # verifica formatação sem alterar arquivos
 npm run check:articles # confere todos os artigos de content/articles (erros e avisos, com a linha)
 npm run new:article -- <slug> "<título>"   # cria content/articles/<slug>.md já no formato certo
+npm run stats          # gera dist/stats.json com os números do repositório (API do GitHub)
+npm run stats -- --out public/stats.json   # grava onde o `npm run dev` enxerga (arquivo ignorado pelo git)
+npm run stats:changed -- --live https://probekit.cc/stats.json   # diz se os números mudaram em relação ao site no ar
 ```
+
+O `stats.json` não fica no git: o workflow de deploy o gera a cada publicação. Veja o [runbook](../docs/runbook-deploy.md#56-números-do-site-statsjson).
 
 ## Cadeia de design tokens
 
@@ -84,7 +89,7 @@ O proxy do Vite (`vite.config.ts`) encaminha `/api` para `https://localhost:8443
 
 O site é um **Cloudflare Worker com assets estáticos**, definido em [`wrangler.toml`](./wrangler.toml): o Worker `probekit` serve o conteúdo de `dist/`, devolve o `index.html` para rotas desconhecidas (o React Router assume, inclusive para `/ping` e `/dns-lookup` acessados direto) e liga os domínios `probekit.cc` e `www.probekit.cc`, para os quais a Cloudflare cria o DNS e o certificado.
 
-O deploy é **automático**: o workflow _Deploy Frontend_ roda a cada push na `main` que mude algo em `frontend/**` (ou à mão, em Actions), faz o build com `VITE_API_BASE_URL=https://api.probekit.cc`, espera a aprovação do ambiente `production` e publica com o Wrangler, verificando o site e a API depois. O passo a passo, o rollback e o diagnóstico estão no [runbook](../docs/runbook-deploy.md#5-publicar-o-site).
+O deploy é **automático**: o workflow _Deploy Frontend_ roda a cada push na `main` que mude algo em `frontend/**`, seis vezes ao dia só para atualizar os números do `stats.json` (publica apenas se eles mudaram, no ambiente `stats`, sem aprovação) ou à mão, em Actions. Faz o build com `VITE_API_BASE_URL=https://api.probekit.cc`, espera a aprovação do ambiente `production` e publica com o Wrangler, verificando o site e a API depois. O passo a passo, o rollback e o diagnóstico estão no [runbook](../docs/runbook-deploy.md#5-publicar-o-site).
 
 Como plano B, o deploy manual:
 

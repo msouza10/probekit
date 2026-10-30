@@ -14,7 +14,8 @@
     "format:check": "prettier --check .",
     "check:articles": "node scripts/checkArticles.mjs",
     "new:article": "node scripts/newArticle.mjs",
-    "stats": "node scripts/generateStats.mjs"
+    "stats": "node scripts/generateStats.mjs",
+    "stats:changed": "node scripts/statsChanged.mjs"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",

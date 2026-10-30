@@ -2,7 +2,8 @@ import { useEffect, useState } from "react"
 
 /*
  * Números do repositório, lidos de /stats.json (servido pelo próprio site).
- * Quem gera o arquivo é o workflow de deploy; o site só lê. Formato:
+ * Quem gera o arquivo é o workflow de deploy (`npm run stats` no build, a cada
+ * publicação e no agendamento); ele não fica no git. O site só lê. Formato:
  *
  *   {
  *     "generated_at": "2026-10-26T12:00:00Z",

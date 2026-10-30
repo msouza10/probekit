@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
     paths:
       - "frontend/**"
+  schedule:
+    - cron: "17 12,15,18,21,00,03 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -15,8 +17,37 @@ permissions:
   contents: read
 
 jobs:
+  decide:
+    name: Decide
+    runs-on: ubuntu-latest
+    outputs:
+      publish: ${{ github.event_name != 'schedule' || steps.stats.outputs.changed == 'true' }}
+    timeout-minutes: 10
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
+      - name: Check if the stats changed
+        id: stats
+        if: github.event_name == 'schedule'
+        working-directory: ./frontend
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm run stats:changed -- --live https://probekit.cc/stats.json
+
   build:
     name: Build Frontend
+    needs: decide
+    if: needs.decide.outputs.publish == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -58,6 +89,21 @@ jobs:
         run: |
           npm run build
 
+      - name: Generate stats.json
+        working-directory: ./frontend
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm run stats
+
+      - name: Keep the live stats.json if generation failed
+        working-directory: ./frontend
+        run: |
+          if [ ! -f dist/stats.json ]; then
+            curl -fsS https://probekit.cc/stats.json -o dist/stats.json \
+              || echo "aviso: sem stats.json novo e sem o do ar"
+          fi
+
       - name: Check API URL in the build
         working-directory: ./frontend
         run: |
@@ -77,7 +123,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment:
-      name: production
+      name: ${{ github.event_name == 'schedule' && 'stats' || 'production' }}
     timeout-minutes: 10
 
     steps:
