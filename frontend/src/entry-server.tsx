@@ -6,15 +6,18 @@ import { StrictMode } from "react"
 import { prerender } from "react-dom/static"
 import { MemoryRouter } from "react-router-dom"
 import App from "./App.tsx"
-import { articles } from "./lib/articles"
 import { ogTargets } from "./lib/ogImage"
 import { applyPageMeta } from "./lib/prerenderHtml"
+import { buildSitemap, sitemapEntries } from "./lib/sitemap"
 import { metaFor, pages } from "./lib/siteMeta"
 
 export { renderOgImage } from "./lib/ogImage"
 
-/** Imagens sociais que o prerender grava em `dist/`: uma por artigo. */
-export const ogFiles = ogTargets(articles)
+/** Imagens sociais que o prerender grava em `dist/`: uma por página com imagem própria. */
+export const ogFiles = ogTargets(pages)
+
+/** O `sitemap.xml`, com as páginas indexáveis (a 404 fica de fora). */
+export const sitemapXml = buildSitemap(sitemapEntries(pages))
 
 /** Rotas que viram arquivo próprio no build (a 404 é tratada à parte). */
 export const routePaths = Object.keys(pages)

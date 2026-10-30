@@ -27,6 +27,11 @@ export interface PageMeta {
   image?: string
   // Dados estruturados (schema.org) da página, se houver.
   jsonLd?: Record<string, unknown>
+  // `BreadcrumbList` da página (schema.org); a Home não tem.
+  breadcrumb?: Record<string, unknown>
+  // Data da última mudança (AAAA-MM-DD), no sitemap. Só os artigos a têm: das
+  // páginas fixas não há data honesta (o checkout raso do CI não dá o histórico).
+  lastmod?: string
 }
 
 const author = {
@@ -54,6 +59,9 @@ const tool = (name: string, path: string, description: string) => ({
   author,
 })
 
+// A imagem social de uma página (`dist/og/<nome>.png`, gerada no build).
+const pageImage = (name: string) => `${SITE_URL}/og/${name}.png`
+
 const pingDescription =
   "Testa se um destino responde e mede a latência, a partir de uma sonda na Oracle Cloud em São Paulo."
 const dnsDescription =
@@ -80,12 +88,14 @@ const fixedPages: Record<string, PageMeta> = {
     title: `Ping online a partir de São Paulo · ${SITE_NAME}`,
     description: pingDescription,
     path: "/ping",
+    image: pageImage("ping"),
     jsonLd: tool("Ping", "/ping", pingDescription),
   },
   "/dns-lookup": {
     title: `Consulta DNS (DNS Lookup) online · ${SITE_NAME}`,
     description: dnsDescription,
     path: "/dns-lookup",
+    image: pageImage("dns-lookup"),
     jsonLd: tool("DNS Lookup", "/dns-lookup", dnsDescription),
   },
   "/arquitetura": {
@@ -93,12 +103,14 @@ const fixedPages: Record<string, PageMeta> = {
     description:
       "Do navegador à API, o pipeline de entrega e a infraestrutura do Probekit, explicados com diagramas.",
     path: "/arquitetura",
+    image: pageImage("arquitetura"),
   },
   "/sobre": {
     title: `Sobre · ${SITE_NAME}`,
     description:
       "Um laboratório para aprender fazendo: do que o Probekit é feito, o que os resultados dizem, quem faz e como as decisões ficam registradas.",
     path: "/sobre",
+    image: pageImage("sobre"),
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "AboutPage",
@@ -110,7 +122,7 @@ const fixedPages: Record<string, PageMeta> = {
   },
 }
 
-const articleImage = (slug: string) => `${SITE_URL}/og/${slug}.png`
+const articleImage = pageImage
 
 function articlePage(article: ArticleMeta): PageMeta {
   const path = articlePath(article.slug)
@@ -120,6 +132,7 @@ function articlePage(article: ArticleMeta): PageMeta {
     path,
     type: "article",
     image: articleImage(article.slug),
+    lastmod: article.updated ?? article.date,
     jsonLd: {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
@@ -135,23 +148,64 @@ function articlePage(article: ArticleMeta): PageMeta {
   }
 }
 
+const TITLE_SUFFIX = ` · ${SITE_NAME}`
+
+/** O título da página sem o sufixo do site (o nome curto dela). */
+export const pageName = (meta: PageMeta) =>
+  meta.title.endsWith(TITLE_SUFFIX)
+    ? meta.title.slice(0, -TITLE_SUFFIX.length)
+    : meta.title
+
+/**
+ * `BreadcrumbList` da página: Probekit, "Artigos" (só nos artigos) e a própria
+ * página, que usa o título sem o sufixo do site. Todo `item` é um canonical.
+ */
+export function breadcrumb(meta: PageMeta): Record<string, unknown> {
+  const trail = [{ name: SITE_NAME, url: `${SITE_URL}/` }]
+  if (meta.type === "article")
+    trail.push({ name: "Artigos", url: `${SITE_URL}/artigos` })
+  trail.push({ name: pageName(meta), url: canonicalUrl(meta) })
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: trail.map(({ name, url }, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name,
+      item: url,
+    })),
+  }
+}
+
+// A Home é a raiz do site: não tem trilha.
+const withBreadcrumb = (meta: PageMeta): PageMeta =>
+  meta.path === "/" ? meta : { ...meta, breadcrumb: breadcrumb(meta) }
+
 /**
  * As páginas do site: as fixas e, só quando há artigos, a lista e uma página
  * por artigo (a seção de artigos não existe sem artigo).
  */
 export function buildPages(list: ArticleMeta[]): Record<string, PageMeta> {
-  if (list.length === 0) return { ...fixedPages }
-  return {
-    ...fixedPages,
-    "/artigos": {
-      title: `Artigos · ${SITE_NAME}`,
-      description: "Textos do Probekit, do mais novo para o mais antigo.",
-      path: "/artigos",
-    },
-    ...Object.fromEntries(
-      list.map((article) => [articlePath(article.slug), articlePage(article)]),
-    ),
-  }
+  const all: Record<string, PageMeta> =
+    list.length === 0
+      ? { ...fixedPages }
+      : {
+          ...fixedPages,
+          "/artigos": {
+            title: `Artigos · ${SITE_NAME}`,
+            description: "Textos do Probekit, do mais novo para o mais antigo.",
+            path: "/artigos",
+          },
+          ...Object.fromEntries(
+            list.map((article) => [
+              articlePath(article.slug),
+              articlePage(article),
+            ]),
+          ),
+        }
+  return Object.fromEntries(
+    Object.entries(all).map(([path, meta]) => [path, withBreadcrumb(meta)]),
+  )
 }
 
 export const pages = buildPages(articles)
@@ -169,5 +223,8 @@ export function metaFor(pathname: string): PageMeta {
   return pages[clean] ?? notFound
 }
 
-export const canonicalUrl = (meta: PageMeta) =>
-  meta.path === "/" ? `${SITE_URL}/` : `${SITE_URL}${meta.path}`
+// Declaração de função (sobe no escopo): `pages` é calculado acima, no topo do
+// módulo, e o breadcrumb já precisa dela.
+export function canonicalUrl(meta: Pick<PageMeta, "path">) {
+  return meta.path === "/" ? `${SITE_URL}/` : `${SITE_URL}${meta.path}`
+}

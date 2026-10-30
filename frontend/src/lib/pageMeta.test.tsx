@@ -1,7 +1,14 @@
 import { render } from "@testing-library/react"
 import { afterEach, describe, expect, it } from "vitest"
 import { metaFor, usePageMeta } from "./pageMeta"
-import { buildPages, canonicalUrl, notFound, pages, SITE_URL } from "./siteMeta"
+import {
+  buildPages,
+  canonicalUrl,
+  notFound,
+  OG_IMAGE,
+  pages,
+  SITE_URL,
+} from "./siteMeta"
 
 function Probe({ path }: { path: string }) {
   usePageMeta(path)
@@ -12,7 +19,7 @@ const head = (selector: string) => document.head.querySelector(selector)
 
 afterEach(() => {
   for (const tag of document.head.querySelectorAll(
-    'meta[name="description"], meta[name="robots"], meta[property^="og:"], link[rel="canonical"]',
+    'meta[name="description"], meta[name="robots"], meta[property^="og:"], meta[name^="twitter:"], link[rel="canonical"]',
   ))
     tag.remove()
 })
@@ -95,6 +102,27 @@ describe("usePageMeta", () => {
       `${SITE_URL}/ping`,
     )
     expect(head('meta[name="robots"]')).toBeNull()
+  })
+
+  it("mantém twitter:title, twitter:description e twitter:image iguais aos og:, trocando ao navegar", () => {
+    const content = (name: string) =>
+      head(`meta[name="${name}"]`)?.getAttribute("content")
+    const ogContent = (name: string) =>
+      head(`meta[property="${name}"]`)?.getAttribute("content")
+
+    const { rerender } = render(<Probe path="/ping" />)
+    const ping = metaFor("/ping")
+    expect(content("twitter:card")).toBe("summary_large_image")
+    expect(content("twitter:title")).toBe(ping.title)
+    expect(content("twitter:description")).toBe(ping.description)
+    expect(content("twitter:image")).toBe(ping.image)
+    expect(content("twitter:image")).toBe(ogContent("og:image"))
+
+    // A Home não tem imagem própria: volta a da marca.
+    rerender(<Probe path="/" />)
+    expect(content("twitter:title")).toBe(metaFor("/").title)
+    expect(content("twitter:image")).toBe(OG_IMAGE)
+    expect(content("twitter:image")).toBe(ogContent("og:image"))
   })
 
   it("marca a rota inexistente como noindex e tira a marca ao voltar", () => {

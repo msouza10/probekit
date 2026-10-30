@@ -110,19 +110,47 @@ describe("applyPageMeta", () => {
     expect(html).toContain(`<title>${notFound.title}</title>`)
   })
 
-  it("inclui o JSON-LD da página quando existe, e só ele", () => {
+  it("inclui o JSON-LD da página e o breadcrumb, cada um no seu script", () => {
     const html = applyPageMeta(template, pages["/ping"], body)
     const blocks = [
       ...html.matchAll(
         /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g,
       ),
     ]
-    expect(blocks).toHaveLength(1)
+    expect(blocks).toHaveLength(2)
     expect(JSON.parse(blocks[0][1])).toEqual(pages["/ping"].jsonLd)
+    expect(JSON.parse(blocks[1][1])).toEqual(pages["/ping"].breadcrumb)
   })
 
-  it("não cria script de JSON-LD em página sem dados estruturados", () => {
+  it("toda página, a 404 inclusive, tem twitter:card e twitter:* iguais aos og:*", () => {
+    const content = (html: string, attr: string, key: string) =>
+      new RegExp(`<meta\\s+${attr}="${key}"\\s+content="([^"]*)"`).exec(
+        html,
+      )?.[1]
+    for (const meta of [...Object.values(pages), notFound]) {
+      const html = applyPageMeta(template, meta, body)
+      expect(content(html, "name", "twitter:card")).toBe("summary_large_image")
+      for (const key of ["title", "description", "image"])
+        expect(content(html, "name", `twitter:${key}`)).toBe(
+          content(html, "property", `og:${key}`),
+        )
+    }
+  })
+
+  it("a Home leva só o JSON-LD dela, sem breadcrumb", () => {
+    const html = applyPageMeta(template, pages["/"], body)
+    expect(html.match(/application\/ld\+json/g)).toHaveLength(1)
+    expect(html).not.toContain("BreadcrumbList")
+  })
+
+  it("página sem JSON-LD próprio leva só o breadcrumb", () => {
     const html = applyPageMeta(template, pages["/arquitetura"], body)
+    expect(html.match(/application\/ld\+json/g)).toHaveLength(1)
+    expect(html).toContain("BreadcrumbList")
+  })
+
+  it("não cria script de JSON-LD na 404, que não tem dados estruturados", () => {
+    const html = applyPageMeta(template, notFound, body)
     expect(html).not.toContain("ld+json")
   })
 
@@ -150,7 +178,8 @@ describe("applyPageMeta", () => {
     })
 
     it("mantém a imagem e o tipo do template quando a página não os define", () => {
-      const html = applyPageMeta(template, pages["/ping"], body)
+      // A Home não define imagem própria; as outras páginas fixas já definem.
+      const html = applyPageMeta(template, pages["/"], body)
 
       expect(html).toContain('content="https://probekit.cc/og.jpg"')
       expect(html).toContain('<meta property="og:type" content="website" />')
@@ -186,8 +215,13 @@ describe("applyPageMeta", () => {
 
     expect(html).not.toContain("<script>alert(1)")
     expect(html).toContain("A &lt;/script&gt;&lt;script&gt;alert(1)")
-    expect(blocks).toHaveLength(1)
+    expect(blocks).toHaveLength(2)
     expect(JSON.parse(blocks[0][1])).toMatchObject({ headline: evil.title })
+    // O título perigoso também vai no nome do breadcrumb e volta igual.
+    expect(JSON.parse(blocks[1][1])).toMatchObject({
+      "@type": "BreadcrumbList",
+      itemListElement: [{}, {}, { name: evil.title }],
+    })
   })
 
   it("usa a meta da rota desconhecida (404) via metaFor", () => {
