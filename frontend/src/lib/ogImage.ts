@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import { Resvg } from "@resvg/resvg-js"
 import satori from "satori"
-import type { ArticleMeta } from "./articles"
+import { pageName, SITE_URL, type PageMeta } from "./siteMeta"
 
 const WIDTH = 1200
 const HEIGHT = 630
@@ -92,14 +92,23 @@ const layout = (title: string) => ({
 })
 
 /**
- * As imagens a gravar em `dist/`: uma por artigo, em `og/<slug>.png`, o mesmo
- * caminho que `siteMeta.ts` usa no `og:image` da página do artigo.
+ * As imagens a gravar em `dist/`: uma por página que tem imagem própria, em
+ * `og/<nome>.png`, o mesmo caminho que `siteMeta.ts` usa no `og:image` dela. O
+ * título é o da página sem o sufixo do site. Falha se duas páginas gerariam o
+ * mesmo arquivo (um artigo com o slug de uma página fixa, por exemplo), em vez
+ * de uma imagem sobrescrever a outra.
  */
-export const ogTargets = (list: ArticleMeta[]) =>
-  list.map((article) => ({
-    file: `og/${article.slug}.png`,
-    title: article.title,
-  }))
+export function ogTargets(pages: Record<string, PageMeta>) {
+  const targets: { file: string; title: string }[] = []
+  for (const page of Object.values(pages)) {
+    if (!page.image?.startsWith(`${SITE_URL}/`)) continue
+    const file = page.image.slice(SITE_URL.length + 1)
+    if (targets.some((target) => target.file === file))
+      throw new Error(`duas páginas gerariam a mesma imagem social: ${file}`)
+    targets.push({ file, title: pageName(page) })
+  }
+  return targets
+}
 
 /** O SVG da imagem; separado do PNG para os testes olharem o layout. */
 export function ogSvg(title: string): Promise<string> {

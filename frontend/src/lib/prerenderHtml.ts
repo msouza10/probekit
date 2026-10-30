@@ -5,7 +5,7 @@
  * disco, para poder ser testada; quem a chama no build é `scripts/prerender.mjs`
  * (via `src/entry-server.tsx`).
  */
-import { canonicalUrl, type PageMeta } from "./siteMeta"
+import { canonicalUrl, OG_IMAGE, type PageMeta } from "./siteMeta"
 
 const escapeText = (value: string) =>
   value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
@@ -75,6 +75,11 @@ export function applyPageMeta(
   html = setMeta(html, "property", "og:title", meta.title)
   html = setMeta(html, "property", "og:description", meta.description)
   html = setMeta(html, "property", "og:url", canonicalUrl(meta))
+  // O cartão do Twitter/X repete os og: da página; sem imagem própria vale a da marca.
+  html = setMeta(html, "name", "twitter:card", "summary_large_image")
+  html = setMeta(html, "name", "twitter:title", meta.title)
+  html = setMeta(html, "name", "twitter:description", meta.description)
+  html = setMeta(html, "name", "twitter:image", meta.image ?? OG_IMAGE)
   // Sem tipo ou imagem próprios, ficam os do template (website e a og.jpg).
   if (meta.type) html = setMeta(html, "property", "og:type", meta.type)
   if (meta.image) {
@@ -88,11 +93,13 @@ export function applyPageMeta(
   if (meta.noindex)
     html = insertInHead(html, '<meta name="robots" content="noindex" />')
 
-  if (meta.jsonLd)
-    html = insertInHead(
-      html,
-      `<script type="application/ld+json">${serializeJsonLd(meta.jsonLd)}</script>`,
-    )
+  // Um script por objeto: o da página e, depois, o breadcrumb.
+  for (const data of [meta.jsonLd, meta.breadcrumb])
+    if (data)
+      html = insertInHead(
+        html,
+        `<script type="application/ld+json">${serializeJsonLd(data)}</script>`,
+      )
 
   return replaceOnce(
     html,

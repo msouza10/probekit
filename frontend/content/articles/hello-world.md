@@ -4,7 +4,7 @@ description: "Por que criar uma ferramenta de ping se o terminal já tem o coman
 date: 2026-10-27
 ---
 
-![Meme de um código HelloWorld("print") e, abaixo, uma figura de capuz com raios de luz saindo dos olhos](/articles/hello-world.png)
+![Meme de um código HelloWorld("print") e, abaixo, uma figura de capuz com raios de luz saindo dos olhos](/articles/hello-world.webp)
 
 Se você já está pensando "para que um site de ping, se existe o comando `ping`?", pode ficar tranquilo: eu também pensei. Sei o quanto a ideia parece estúpida e redundante. Mas vamos por partes, porque o ping nunca foi o ponto.
 

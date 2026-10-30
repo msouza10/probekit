@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { canonicalUrl, metaFor } from "./siteMeta"
+import { canonicalUrl, metaFor, OG_IMAGE } from "./siteMeta"
 
 export { metaFor } from "./siteMeta"
 export type { PageMeta } from "./siteMeta"
@@ -28,7 +28,7 @@ const meta = (name: string, attr: "name" | "property" = "name") => ({
   },
 })
 
-/** Atualiza título, descrição, canonical, og: e robots conforme a rota. */
+/** Atualiza título, descrição, canonical, og:, twitter: e robots conforme a rota. */
 export function usePageMeta(pathname: string) {
   useEffect(() => {
     const page = metaFor(pathname)
@@ -47,6 +47,22 @@ export function usePageMeta(pathname: string) {
     })
     const ogUrl = meta("og:url", "property")
     upsert(ogUrl.selector, ogUrl.create, { content: url })
+    // Sem imagem própria vale a da marca. og:image e twitter:image andam juntos.
+    const image = page.image ?? OG_IMAGE
+    const ogImage = meta("og:image", "property")
+    upsert(ogImage.selector, ogImage.create, { content: image })
+
+    // O cartão do Twitter/X repete os og: da página.
+    const twitter = {
+      "twitter:card": "summary_large_image",
+      "twitter:title": page.title,
+      "twitter:description": page.description,
+      "twitter:image": image,
+    }
+    for (const [name, content] of Object.entries(twitter)) {
+      const tag = meta(name)
+      upsert(tag.selector, tag.create, { content })
+    }
 
     upsert(
       'link[rel="canonical"]',

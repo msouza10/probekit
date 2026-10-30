@@ -25,26 +25,39 @@ describe("ogTargets", () => {
     readingMinutes: 1,
   })
 
-  it("lista um arquivo og/<slug>.png por artigo, com o título do artigo", () => {
-    expect(ogTargets([article("um"), article("dois")])).toEqual([
+  it("lista um og/<nome>.png por página com imagem própria, com o título sem o sufixo do site", () => {
+    expect(ogTargets(buildPages([article("um"), article("dois")]))).toEqual([
+      { file: "og/ping.png", title: "Ping online a partir de São Paulo" },
+      { file: "og/dns-lookup.png", title: "Consulta DNS (DNS Lookup) online" },
+      { file: "og/arquitetura.png", title: "Arquitetura" },
+      { file: "og/sobre.png", title: "Sobre" },
       { file: "og/um.png", title: "Título de um" },
       { file: "og/dois.png", title: "Título de dois" },
     ])
   })
 
-  it("sem artigos não há imagem a gerar", () => {
-    expect(ogTargets([])).toEqual([])
+  it("sem artigos só as páginas fixas têm imagem a gerar", () => {
+    expect(ogTargets(buildPages([])).map((t) => t.file)).toEqual([
+      "og/ping.png",
+      "og/dns-lookup.png",
+      "og/arquitetura.png",
+      "og/sobre.png",
+    ])
   })
 
   it("o arquivo gerado é o que o og:image da página aponta", () => {
-    const list = [article("um"), article("dois")]
-    const pages = buildPages(list)
+    const pages = buildPages([article("um"), article("dois")])
+    const files = new Set(ogTargets(pages).map((t) => `/${t.file}`))
 
-    for (const { file } of ogTargets(list)) {
-      const slug = file.replace(/^og\/|\.png$/g, "")
-      const image = pages[`/artigos/${slug}`].image!
-      expect(new URL(image).pathname).toBe(`/${file}`)
-    }
+    for (const page of Object.values(pages))
+      if (page.image) expect(files.has(new URL(page.image).pathname)).toBe(true)
+  })
+
+  it("falha em vez de sobrescrever quando duas páginas gerariam o mesmo arquivo", () => {
+    // Um artigo com o slug de uma página fixa colide com a imagem dela.
+    expect(() => ogTargets(buildPages([article("ping")]))).toThrow(
+      /og\/ping\.png/,
+    )
   })
 })
 

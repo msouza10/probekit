@@ -17,8 +17,14 @@ const serverEntry = path.join(root, "node_modules/.prerender/entry-server.js")
 export const fileFor = (route) =>
   route === "/" ? "index.html" : `${route.replace(/^\//, "")}.html`
 
-const { routePaths, NOT_FOUND_PATH, renderPage, ogFiles, renderOgImage } =
-  await import(pathToFileURL(serverEntry).href)
+const {
+  routePaths,
+  NOT_FOUND_PATH,
+  renderPage,
+  ogFiles,
+  renderOgImage,
+  sitemapXml,
+} = await import(pathToFileURL(serverEntry).href)
 
 // Lido uma vez: index.html é sobrescrito pela Home pré-renderizada.
 const template = await readFile(path.join(dist, "index.html"), "utf8")
@@ -35,7 +41,13 @@ for (const [url, file] of targets) {
   console.log(`prerender: ${url} -> dist/${file} (${html.length} bytes)`)
 }
 
-// Imagem de pré-visualização social de cada artigo (og:image da página).
+// O sitemap sai do mesmo conjunto de páginas, então não diverge dos canonicals.
+await writeFile(path.join(dist, "sitemap.xml"), sitemapXml)
+console.log(
+  `prerender: sitemap -> dist/sitemap.xml (${sitemapXml.length} bytes)`,
+)
+
+// Imagem de pré-visualização social de cada página (og:image dela).
 for (const { file, title } of ogFiles) {
   const png = await renderOgImage(title)
   await mkdir(path.dirname(path.join(dist, file)), { recursive: true })
