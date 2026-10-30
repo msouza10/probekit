@@ -2,9 +2,9 @@
 
 > **Para quem for executar:** use `superpowers:subagent-driven-development` (recomendado) ou `superpowers:executing-plans`, task por task. Os passos usam caixas (`- [ ]`) como roteiro de execução; o estado oficial de cada task está na issue e no GitHub Project. Commit, push e PR são do criador: os passos de commit trazem só a mensagem sugerida.
 
-**Goal:** o `/stats.json` que a Home lê (commits, PRs, issues e linguagens do repositório) passa a ser gerado a cada deploy e atualizado todo dia, sem ninguém aprovar nada à mão.
+**Goal:** o `/stats.json` que a Home lê (commits, PRs, issues e linguagens do repositório) passa a ser gerado a cada deploy e atualizado seis vezes ao dia (09:17, 12:17, 15:17, 18:17, 21:17 e 00:17 em Brasília), sem ninguém aprovar nada à mão.
 
-**Architecture:** um script Node chama a API pública do GitHub e grava `dist/stats.json` depois do build (sem commit, porque a `main` só aceita PR). O workflow de deploy chama o script. Um segundo workflow, agendado, compara os números com os do site no ar e só publica quando mudaram, num ambiente do GitHub **sem revisor** ([ADR-0010](../../adr/0010-deploy-agendado-em-ambiente-proprio.md)), porque o `production` exige 1 aprovação ([ADR-0008](../../adr/0008-deploy-do-site-pelo-github-actions.md)).
+**Architecture:** um script Node chama a API pública do GitHub e grava `dist/stats.json` depois do build (sem commit, porque a `main` só aceita PR). O próprio `deploy-frontend.yml` chama o script e ganha um gatilho agendado: nele, compara os números com os do site no ar e só publica quando mudaram, num ambiente do GitHub (`stats`) **sem revisor**, escolhido por expressão só para o evento agendado ([ADR-0010](../../adr/0010-deploy-agendado-em-ambiente-proprio.md)), porque o `production` exige 1 aprovação e também gate a API ([ADR-0008](../../adr/0008-deploy-do-site-pelo-github-actions.md)). Não há workflow separado nem token novo (o GitHub é lido com o `GITHUB_TOKEN` do job).
 
 **Tech Stack:** Node 22 (o do workflow), API REST do GitHub, GitHub Actions, Wrangler, Vitest.
 
@@ -24,8 +24,10 @@
 1. **Limite de requisições / falha da API:** com `403`/`429`/rede fora, o script não derruba o deploy normal e não sobrescreve `dist/stats.json` com lixo. Task 1.
 2. **Contagem de commits com um commit só** (a API não manda o cabeçalho `Link`): devolve 1, não 0. Task 1.
 3. **PR contado como issue** (a busca de issues inclui PRs se faltar `type:issue`): os totais batem com `gh issue list` e `gh pr list`. Task 1.
-4. **Deploy agendado atropelando um deploy normal:** os dois usam o mesmo grupo de `concurrency` e não cancelam um ao outro. Task 5.
-5. **Deploy diário sem necessidade:** sem mudança nos números, o job agendado termina sem publicar. Task 2 e Task 5.
+4. **Deploy agendado atropelando um deploy normal:** os dois estão no mesmo workflow e usam o mesmo grupo de `concurrency`, sem cancelar um ao outro. Task 5.
+5. **Deploy agendado sem necessidade:** sem mudança nos números, o job agendado termina sem publicar. Task 2 e Task 5.
+6. **Ambiente errado:** o agendado usa o `stats` e todo o resto usa o `production`; um run de cada tipo confirma qual foi usado. Task 5.
+7. **Deploy de código sem números:** se a API do GitHub falhar num push, o `dist` recebe o `/stats.json` que está no ar, em vez de sair sem o arquivo. Task 4.
 
 ---
 
@@ -66,24 +68,25 @@
 
 ### Task 3: Ambiente do deploy agendado (criador)
 
-**Resultado esperado:** existe um ambiente do GitHub para o deploy agendado, **sem revisor**, que só aceita a branch `main`, com o token e o id da conta da Cloudflare do site guardados como secrets desse ambiente (mesmos nomes do `production`, valores nunca no repositório). Depende do [ADR-0010](../../adr/0010-deploy-agendado-em-ambiente-proprio.md) estar **Aceita**. Criar o ambiente e copiar os secrets é do criador (credenciais).
+**Resultado esperado:** existe o ambiente `stats` do GitHub, **sem revisor**, que só aceita a branch `main`, com o token e o id da conta da Cloudflare do site guardados como secrets desse ambiente (mesmos nomes do `production`, valores nunca no repositório). Nenhum token novo. Depende do [ADR-0010](../../adr/0010-deploy-agendado-em-ambiente-proprio.md) estar **Aceita**. Criar o ambiente e copiar os secrets é do criador (credenciais).
 
-- [ ] **Step 1 (criador):** criar o ambiente e os secrets e anotar o nome escolhido no ADR-0010.
-- [ ] **Step 2 (assistente):** conferir com `gh api repos/msouza10/probekit/environments/<nome> --jq '{rules: [.protection_rules[].type], branches: .deployment_branch_policy}'` que não há `required_reviewers` e que a política de branches é só a `main`.
+- [ ] **Step 1 (criador):** criar o ambiente `stats` e os dois secrets e mudar o *Status* do ADR-0010 para Aceita, com a data.
+- [ ] **Step 2 (assistente):** conferir com `gh api repos/msouza10/probekit/environments/stats --jq '{rules: [.protection_rules[].type], branches: .deployment_branch_policy}'` que não há `required_reviewers` e que a política de branches é só a `main`.
 
 ### Task 4: Gerar os números em todo deploy (criador)
 
-**Resultado esperado:** o `deploy-frontend.yml` roda `npm run stats` no job de build, depois do `npm run build` e antes de arquivar o `dist`, com `GITHUB_TOKEN` do job. O token do job continua com `permissions: contents: read`. Depois do deploy, `https://probekit.cc/stats.json` tem `generated_at` do dia do run.
+**Resultado esperado:** o `deploy-frontend.yml` roda `npm run stats` no job de build, depois do `npm run build` e antes de arquivar o `dist`, com `GITHUB_TOKEN` do job. O token do job continua com `permissions: contents: read`. Se o passo não gravar o `dist/stats.json` (API do GitHub fora), um passo seguinte baixa o `/stats.json` do ar para o `dist` (`curl -f`, sem derrubar o deploy). Depois do deploy, `https://probekit.cc/stats.json` tem `generated_at` do dia do run.
 
-- [ ] **Step 1 (criador):** adicionar o passo ao workflow.
-- [ ] **Step 2 (assistente):** revisar com `github-actions-hardening` e conferir, depois do primeiro deploy, `curl -s https://probekit.cc/stats.json | head -3` (a data é a do run e os números batem com o repositório).
+- [ ] **Step 1 (criador):** adicionar o passo e o `curl` de reserva ao workflow.
+- [ ] **Step 2 (criador):** na mesma mudança, remover `frontend/public/stats.json` do git (`git rm`). O `.gitignore` já ignora o caminho. **Não remover antes** de o passo existir, porque um deploy sem ele publicaria o site sem números.
+- [ ] **Step 3 (assistente):** revisar com `github-actions-hardening` e conferir, depois do primeiro deploy, `curl -s https://probekit.cc/stats.json | head -3` (a data é a do run e os números batem com o repositório).
 
-### Task 5: Workflow agendado (criador)
+### Task 5: Gatilho agendado no `deploy-frontend.yml` (criador)
 
-**Resultado esperado:** um workflow roda **uma vez por dia** (horário à escolha do criador) e também por `workflow_dispatch`. Um job calcula `changed` com `npm run stats:changed`; só se for `true`, outro job faz build e deploy no ambiente da Task 3. Usa o **mesmo grupo de `concurrency`** do `deploy-frontend` (`deploy-frontend`, sem cancelar o que está rodando), `permissions` mínimas, e roda só na `main`. Termina verde sem publicar quando nada mudou.
+**Resultado esperado:** o `deploy-frontend.yml` ganha `schedule` com `17 12,15,18,21,00,03 * * *` (UTC: 09:17, 12:17, 15:17, 18:17, 21:17 e 00:17 em Brasília). Quando o evento é o agendado, um passo calcula `changed` com `npm run stats:changed -- --live https://probekit.cc/stats.json`; só com `true` o build e o deploy seguem. O job de deploy escolhe o ambiente por expressão: `stats` no agendado, `production` nos demais. Mantém o **mesmo grupo de `concurrency`** (`deploy-frontend`, sem cancelar o que está rodando) e `permissions` mínimas. Termina verde sem publicar quando nada mudou.
 
-- [ ] **Step 1 (criador):** escrever o workflow.
-- [ ] **Step 2 (criador):** rodar por `workflow_dispatch` duas vezes seguidas: a primeira publica (ou não, se nada mudou); a segunda, logo depois, termina sem publicar. Anotar os links dos runs no ADR-0010 (*Validação*).
+- [ ] **Step 1 (criador):** editar o workflow (gatilho, `changed`, `if` dos passos de build e deploy e o ambiente por expressão).
+- [ ] **Step 2 (criador):** rodar por `workflow_dispatch` (usa o `production` e pede aprovação) e esperar um run agendado (usa o `stats` e não pede). Depois, dois runs agendados seguidos: o primeiro publica (ou não, se nada mudou); o segundo termina sem publicar. Anotar os links dos runs no ADR-0010 (*Validação*).
 - [ ] **Step 3 (assistente):** revisar o workflow e conferir que um deploy normal e um agendado disparados juntos não rodam em paralelo.
 
 ### Task 6: Documentação e fechamento

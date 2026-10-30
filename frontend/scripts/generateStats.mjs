@@ -81,7 +81,7 @@ export async function collectStats(getJson, now = new Date()) {
   }
 }
 
-function githubGetJson(token) {
+export function githubGetJson(token) {
   return async (requestPath) => {
     const response = await fetch(`${API}${requestPath}`, {
       headers: {

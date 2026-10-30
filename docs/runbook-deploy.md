@@ -27,6 +27,8 @@ Este documento descreve como publicar o Probekit, como conferir que deu certo e 
 
 O nome `TLS_*_FILE` engana: o secret guarda o texto do PEM, e o workflow o grava em arquivo. As demais configurações da OCI (ids, região, etc.) vêm do **Infisical**, por OIDC.
 
+**GitHub, ambiente `stats`** (sem revisor, só a branch `main`): `CF_API_TOKEN` e `CF_ACCOUNT_ID`, com os mesmos nomes do `production`. É o ambiente que o deploy **agendado** do site usa (seção 5.6). O GitHub guarda secrets por ambiente e não os mostra depois de salvos: para trocar um valor, crie o token novo na Cloudflare e cadastre-o nos dois ambientes que precisarem dele.
+
 **GitHub, ambiente `plan`** (sem aprovação, só a branch `main`): apenas `OCI_PRIVATE_KEY`, que o `terraform plan` exige. A chave SSH e o certificado ficam só no `production`.
 
 **Infisical:** além das configurações da OCI e das variáveis do Terraform, guarda a `TFPLAN_PASSPHRASE`, a senha que cifra o plano do Terraform entre o job `plan` e o job `deploy`. Por que dois lugares: [ADR-0007](./adr/0007-gestao-de-segredos-com-infisical.md).
@@ -135,14 +137,15 @@ openssl pkey -in origin-ca-key.pem -pubout | openssl sha256     # os dois hashes
 
 ### 5.1 Automático (padrão)
 
-O workflow *Deploy Frontend* (`.github/workflows/deploy-frontend.yml`) dispara a cada push na `main` que mude algo em `frontend/**`, e também à mão: Actions → **Deploy Frontend** → *Run workflow*. Tem dois jobs:
+O workflow *Deploy Frontend* (`.github/workflows/deploy-frontend.yml`) dispara a cada push na `main` que mude algo em `frontend/**`, de tempos em tempos pelo agendamento (seção 5.6) e também à mão: Actions → **Deploy Frontend** → *Run workflow*. Tem três jobs:
 
-1. **`Build Frontend`** (sem token): `npm ci`, lint, formatação, testes e build com `VITE_API_BASE_URL=https://api.probekit.cc`; confere que o `dist/` contém essa URL e sobe o `dist` como artefato de 1 dia.
-2. **`Deploy Frontend`** (ambiente `production`): **espera a sua aprovação**, que só é pedida depois de o build passar. Baixa o `dist`, publica com `npx wrangler deploy` e roda `verify-sites.sh` e `verify-api-routes.sh`. Qualquer falha deixa o job vermelho.
+1. **`Decide`**: diz se o resto roda. No push e na execução manual a resposta é sempre "sim". No agendado, compara os números do GitHub com o `stats.json` do ar e só deixa seguir se mudaram.
+2. **`Build Frontend`** (sem token da Cloudflare): `npm ci`, lint, formatação, testes e build com `VITE_API_BASE_URL=https://api.probekit.cc`; gera o `dist/stats.json`; confere que o `dist/` contém a URL da API e sobe o `dist` como artefato de 1 dia.
+3. **`Deploy Frontend`**: usa o ambiente `production` (push e execução manual), que **espera a sua aprovação** depois de o build passar, ou o ambiente `stats` (agendado), que não pede aprovação. Baixa o `dist`, publica com `npx wrangler deploy` e roda `verify-sites.sh` e `verify-api-routes.sh`. Qualquer falha deixa o job vermelho.
 
 Dois deploys do site não rodam juntos: o segundo espera na fila.
 
-Verificado em 2026-10-21 (run manual) e em 2026-10-22 (disparo por push em `frontend/**`): os dois jobs passaram, com a aprovação do `production` entre eles.
+Verificado em 2026-10-21 (run manual) e em 2026-10-22 (disparo por push em `frontend/**`): o build e o deploy passaram, com a aprovação do `production` entre eles. Isso foi antes do job `Decide`, do agendamento e do ambiente `stats`; o que mudou ainda não foi verificado em run real (a validação está no [ADR-0010](./adr/0010-deploy-agendado-em-ambiente-proprio.md)).
 
 ### 5.2 Manual (plano B)
 
@@ -208,10 +211,37 @@ Verificado em 2026-10-22, em dois runs do workflow: `previous` (de `782d862d` pa
 |---|---|---|
 | Ping e DNS dão erro "Não foi possível conectar à API" | build feito sem `VITE_API_BASE_URL`, ou CORS bloqueando | refazer o build com a variável; ver a seção 4 para o CORS |
 | O job `Build Frontend` falha em `Check API URL in the build` | `VITE_API_BASE_URL` errada ou vazia no passo de build do workflow | corrigir o valor no workflow |
-| O passo `Deploy Frontend` falha por autenticação | token da Cloudflare vencido, revogado ou sem permissão | criar outro token e atualizar `CF_API_TOKEN` no ambiente `production` |
+| O passo `Deploy Frontend` falha por autenticação | token da Cloudflare vencido, revogado ou sem permissão | criar outro token e atualizar `CF_API_TOKEN` no ambiente `production` e no `stats` |
+| O deploy agendado falha logo no início, sem achar o ambiente ou os secrets | ambiente `stats` apagado, renomeado ou sem os dois secrets | conferir com `gh secret list --env stats` e recriar (seção 2) |
+| O agendado fica esperando aprovação | o ambiente `stats` ganhou um revisor | tirar o revisor em Settings → Environments → `stats` |
+| Os números do site não mudam | o job `Decide` deu `changed=false`, ou a API do GitHub falhou | ver a seção 5.6 |
 | `Verify the site is up` falha depois de publicar | propagação lenta ou o site realmente fora | rodar `verify-sites.sh`; se persistir, voltar a versão (5.4) |
 | Falha de `wrangler deploy` por domínio já existente | registro DNS manual no mesmo nome | remover o registro e repetir |
 | `wrangler login` não autentica | conta ou navegador errado | `npx wrangler whoami` mostra a conta atual |
+
+### 5.6 Números do site (`stats.json`)
+
+A faixa de números da Home (commits, PRs, issues e linguagens) lê `/stats.json`. O arquivo **não está no git**: o job `Build Frontend` o gera em `dist/stats.json` com `npm run stats`, a partir da API pública do GitHub e do `GITHUB_TOKEN` do próprio job (só leitura). Decisão e alternativas: [ADR-0010](./adr/0010-deploy-agendado-em-ambiente-proprio.md).
+
+**Quando atualiza:**
+
+- a cada deploy normal (push em `frontend/**` ou execução manual);
+- pelo agendamento `17 12,15,18,21,00,03 * * *` (UTC), ou seja, 09:17, 12:17, 15:17, 18:17, 21:17 e 00:17 em Brasília. Nele o job `Decide` roda `npm run stats:changed` e **só publica se os números mudaram**; sem mudança, o workflow termina verde com o build e o deploy marcados como *Skipped*. O deploy agendado usa o ambiente `stats` e não pede aprovação.
+
+**Disparar à mão:** Actions → **Deploy Frontend** → *Run workflow*. Usa o `production`, pede aprovação e sempre publica.
+
+**Ver a decisão de um run agendado:** no log do passo *Check if the stats changed* aparecem o motivo e a linha `changed=true` ou `changed=false`.
+
+**Se a API do GitHub falhar:**
+
+- no agendado, o `Decide` dá `changed=false` com um aviso no log, e nada é publicado (os números do ar ficam como estão);
+- no deploy normal, o passo *Keep the live stats.json if generation failed* baixa o `/stats.json` que está no ar para o `dist`, e o deploy segue com os números antigos.
+
+**Ver a faixa no desenvolvimento local:** o arquivo não vem no repositório. Rode `cd frontend && npm run stats -- --out public/stats.json` (o caminho está no `.gitignore`). Com `STATS_STRICT=1` o script falha de verdade em vez de só avisar.
+
+**Limites do agendamento:** o GitHub pode atrasar uma execução agendada e desativa os agendamentos de repositório público depois de 60 dias sem atividade. Se os números pararem, veja a aba Actions e reative o workflow.
+
+Nada disto foi verificado em run real ainda: a validação (ambiente certo em cada tipo de run, segundo run sem publicar, números do ar batendo com o repositório) está pendente no ADR-0010.
 
 ## 6. Trocar o certificado
 
