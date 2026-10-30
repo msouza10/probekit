@@ -48,6 +48,13 @@ export type CompileOptions = {
    * compilação continua, para um relatório mostrar todos de uma vez.
    */
   report?: (problem: Problem) => void
+  /**
+   * Largura e altura de uma imagem pelo destino escrito no markdown, ou `null`
+   * se não houver (destino externo, arquivo que não existe). Com o tamanho no
+   * `<img>`, o navegador reserva o espaço antes de baixar a imagem e o texto
+   * abaixo dela não é empurrado. Sem a opção, as imagens ficam como estão.
+   */
+  imageSize?: (src: string) => { width: number; height: number } | null
 }
 
 const SLUG = /^[a-z0-9]+(-[a-z0-9]+)*$/
@@ -190,6 +197,19 @@ function rehypeSafeUrls() {
   }
 }
 
+// Acrescenta `width` e `height` às imagens cujo tamanho `imageSize` conhece.
+function rehypeImageSizes(imageSize: CompileOptions["imageSize"]) {
+  return () => (tree: Root) => {
+    if (!imageSize) return
+    visit(tree, "element", (node: Element) => {
+      const src = node.tagName === "img" ? node.properties?.src : undefined
+      if (typeof src !== "string") return
+      const size = imageSize(src)
+      if (size) Object.assign(node.properties, size)
+    })
+  }
+}
+
 // Ids dos títulos, sumário (só os ##) e recusa de `#` no corpo.
 function rehypeHeadings(raise: Raise, toc: TocEntry[], lineOffset: number) {
   return () => (tree: Root) => {
@@ -284,6 +304,7 @@ export async function compileArticle(
     .use(remarkDiagrams(raise, options, diagrams, split.lineOffset))
     .use(remarkRehype)
     .use(rehypeSafeUrls)
+    .use(rehypeImageSizes(options.imageSize))
     .use(rehypeHeadings(raise, toc, split.lineOffset))
     .use(rehypeShiki, {
       themes: { light: "github-light", dark: "github-dark" },

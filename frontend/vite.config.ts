@@ -5,14 +5,20 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vitest/config"
 import { diagramNames } from "./src/components/article/diagramNames.ts"
 import { articlesPlugin } from "./vite/articlesPlugin.ts"
+import { publicImageSize } from "./vite/publicImageSize.ts"
 
-const srcDir = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  "./src",
-)
+const rootDir = path.dirname(fileURLToPath(import.meta.url))
+const srcDir = path.resolve(rootDir, "./src")
 
 export default defineConfig(({ isSsrBuild }) => ({
-  plugins: [react(), tailwindcss(), articlesPlugin({ diagramNames })],
+  plugins: [
+    react(),
+    tailwindcss(),
+    articlesPlugin({
+      diagramNames,
+      imageSize: publicImageSize(path.resolve(rootDir, "./public")),
+    }),
+  ],
   resolve: {
     alias: {
       "@": srcDir,

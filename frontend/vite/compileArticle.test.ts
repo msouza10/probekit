@@ -91,6 +91,54 @@ describe("compileArticle", () => {
     expect(diagrams).toEqual(["pipeline"])
   })
 
+  describe("tamanho das imagens", () => {
+    const imageOf = async (
+      body: string,
+      imageSize?: (src: string) => { width: number; height: number } | null,
+    ) => {
+      const { tree } = await compileArticle("a-b", article(body), {
+        ...options,
+        imageSize,
+      })
+      return elements(tree as Node).find((node) => node.tagName === "img")
+    }
+
+    it("põe width e height na imagem local, para o navegador reservar o espaço", async () => {
+      const img = await imageOf("![meme](/articles/a.png)", () => ({
+        width: 736,
+        height: 824,
+      }))
+      expect(img?.properties?.width).toBe(736)
+      expect(img?.properties?.height).toBe(824)
+    })
+
+    it("pergunta o tamanho pelo destino da imagem", async () => {
+      const imageSize = vi.fn(() => ({ width: 10, height: 20 }))
+      await imageOf("![x](/articles/a.png)", imageSize)
+      expect(imageSize).toHaveBeenCalledWith("/articles/a.png")
+    })
+
+    it("deixa a imagem como está quando não há tamanho (destino externo ou ausente)", async () => {
+      const img = await imageOf("![x](https://exemplo.com/a.png)", () => null)
+      expect(img?.properties?.src).toBe("https://exemplo.com/a.png")
+      expect(img?.properties).not.toHaveProperty("width")
+      expect(img?.properties).not.toHaveProperty("height")
+    })
+
+    it("não muda nada sem a opção imageSize", async () => {
+      const img = await imageOf("![x](/articles/a.png)")
+      expect(img?.properties?.src).toBe("/articles/a.png")
+      expect(img?.properties).not.toHaveProperty("width")
+    })
+
+    it("não pergunta o tamanho de imagem com destino não permitido", async () => {
+      const imageSize = vi.fn(() => ({ width: 10, height: 20 }))
+      const img = await imageOf("![x](javascript:alert(1))", imageSize)
+      expect(imageSize).not.toHaveBeenCalled()
+      expect(img?.properties).not.toHaveProperty("width")
+    })
+  })
+
   describe("erros de conteúdo", () => {
     it.each([
       [
