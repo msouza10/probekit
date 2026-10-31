@@ -12,7 +12,7 @@ Gerar o arquivo no deploy resolve só quando há deploy, e o site só é publica
 
 Três restrições impedem o caminho óbvio:
 
-- A `main` só aceita pull request ([`docs/README.md`](../README.md), *Proteção da `main`*), então um robô não pode commitar o `stats.json` nela.
+- A `main` só aceita pull request ([`docs/README.md`](../README.md), _Proteção da `main`_), então um robô não pode commitar o `stats.json` nela.
 - O job `Deploy Frontend` roda no ambiente `production`, que tem **1 revisor obrigatório** ([ADR-0008](./0008-deploy-do-site-pelo-github-actions.md)). Um deploy agendado ficaria parado esperando a aprovação do criador.
 - O `production` não protege só o site: o `deploy-api-golang.yml` e os dois workflows de rollback (`rollback-api-golang.yml` e `rollback-frontend.yml`) também rodam nele. Tirar o revisor dele para o cron funcionar tiraria a aprovação do deploy da API.
 
@@ -37,7 +37,7 @@ O deploy agendado usaria o `production` como está.
 
 Um só ambiente, sem aprovação, e o cron entraria nele.
 
-**Motivo da não escolha:** o `production` também gate o deploy da API e os rollbacks (ver *Contexto*). Simplificar o site tiraria a aprovação de operações sobre a infraestrutura.
+**Motivo da não escolha:** o `production` também gate o deploy da API e os rollbacks (ver _Contexto_). Simplificar o site tiraria a aprovação de operações sobre a infraestrutura.
 
 ### Workflow agendado separado, em outro arquivo
 
@@ -59,7 +59,7 @@ Os números mudam em todo deploy normal, e um agendamento semanal dispara o depl
 
 ### Worker agendado com KV, sem deploy
 
-Um Worker com *Cron Trigger* leria a API do GitHub e guardaria os números no KV da Cloudflare, e o site serviria `/stats.json` a partir dele.
+Um Worker com _Cron Trigger_ leria a API do GitHub e guardaria os números no KV da Cloudflare, e o site serviria `/stats.json` a partir dele.
 
 **Motivo da não escolha:** o site deixa de ser só arquivos estáticos (hoje é "Worker só de arquivos estáticos", ver `frontend/wrangler.toml`), ganha código de servidor, um recurso novo para manter e outra superfície de falha, e o dado deixa de ir no HTML pré-renderizado. É mais peça do que o problema pede.
 
@@ -87,7 +87,7 @@ A Home buscaria os números em `api.github.com` a cada visita, sem `stats.json`.
 ### Negativas
 
 - O token do site passa a existir em **dois** ambientes (`production` e `stats`), e o do `stats` é usado sem revisor. Mitigação: o token já é de uso exclusivo do site, com o mínimo de permissões (ADR-0008), o ambiente só aceita a `main`, e a `main` só recebe código por PR com CI verde.
-- O ambiente escolhido por expressão (`environment` dependente do evento) é um ponto fácil de errar. Por isso a *Validação* abaixo confere, em um run de cada tipo, qual ambiente foi usado.
+- O ambiente escolhido por expressão (`environment` dependente do evento) é um ponto fácil de errar. Por isso a _Validação_ abaixo confere, em um run de cada tipo, qual ambiente foi usado.
 - O GitHub pode atrasar execuções agendadas e as desativa em repositório público depois de 60 dias sem atividade. Como os números só mudam com atividade no repositório, o efeito é inofensivo, mas o criador precisa saber que isso pode acontecer.
 - O `frontend/public/stats.json` deixa de existir no git: quem quiser a faixa de números no desenvolvimento local roda `npm run stats -- --out public/stats.json`.
 
@@ -97,7 +97,7 @@ Em andamento. Serão avaliados, com a data de cada verificação:
 
 - ✅ (2026-10-30) o ambiente `stats` não tem revisor e só aceita a `main`: `gh api repos/msouza10/probekit/environments/stats` mostrou só a regra `branch_policy` (sem `required_reviewers`), e `.../deployment-branch-policies` listou apenas `main`. `gh secret list --env stats` mostrou `CF_API_TOKEN` e `CF_ACCOUNT_ID`;
 - um run por `workflow_dispatch` usa o `production` (pede aprovação) e um run agendado usa o `stats` (não pede);
-- duas execuções seguidas do agendado: a primeira publica quando há mudança, a segunda termina sem publicar;
+- ✅ parcial (2026-10-31) o caminho "sem mudança": as execuções agendadas de 2026-10-30 22:26 UTC e de 2026-10-31 05:39 UTC terminaram em `success`, com o job `Decide` rodando e os jobs `Build Frontend` e `Deploy Frontend` pulados (`skipped`). O log do `Decide` da segunda mostra `números iguais aos do ar` e `changed=false`. **Falta** ver uma execução agendada que publica quando os números mudam, e com isso o ambiente `stats` em uso (nas duas observadas o deploy foi pulado);
 - `https://probekit.cc/stats.json` com `generated_at` do dia do deploy e números iguais aos do repositório;
 - um deploy normal e um agendado disparados juntos não rodam em paralelo;
 - um push em `frontend/**` com a API do GitHub indisponível (simulado) mantém no ar os números anteriores.
