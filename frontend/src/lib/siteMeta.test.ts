@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest"
 import type { ArticleMeta } from "./articles"
 import { serializeJsonLd } from "./prerenderHtml"
-import { buildPages, canonicalUrl } from "./siteMeta"
+import {
+  buildPages,
+  canonicalUrl,
+  notFound,
+  pages as realPages,
+} from "./siteMeta"
 
 const article = (extra: Partial<ArticleMeta> = {}): ArticleMeta => ({
   slug: "latencia-do-ping",
@@ -78,6 +83,42 @@ describe("buildPages", () => {
         },
         author: { "@type": "Person", name: "Marcos Souza" },
       })
+    })
+  })
+
+  describe("títulos e descrições", () => {
+    const real = buildPages([
+      article(),
+      article({ slug: "com-seo", seoTitle: "Título curto para a busca" }),
+    ])
+
+    it("o <title> do artigo usa o seoTitle quando existe, e o título quando não", () => {
+      expect(real["/artigos/com-seo"].title).toBe(
+        "Título curto para a busca · Probekit",
+      )
+      expect(real["/artigos/latencia-do-ping"].title).toBe(
+        "Como o ping mede a latência · Probekit",
+      )
+    })
+
+    it("toda página do site tem título até 60 caracteres e descrição até 160, únicos entre si", () => {
+      // Confere as páginas de verdade, inclusive os artigos publicados.
+      const all = [...Object.values(realPages), notFound]
+      for (const page of all) {
+        expect([...page.title].length).toBeLessThanOrEqual(60)
+        expect([...page.description].length).toBeLessThanOrEqual(160)
+      }
+      expect(new Set(all.map((page) => page.title)).size).toBe(all.length)
+      expect(new Set(all.map((page) => page.description)).size).toBe(all.length)
+    })
+
+    it("o nome do breadcrumb e o título da imagem social seguem o seoTitle", () => {
+      const items = (
+        real["/artigos/com-seo"].breadcrumb as {
+          itemListElement: { name: string }[]
+        }
+      ).itemListElement
+      expect(items.at(-1)?.name).toBe("Título curto para a busca")
     })
   })
 

@@ -56,6 +56,29 @@ describe("compileArticle", () => {
     expect(medio.meta.readingMinutes).toBe(3)
   })
 
+  describe("seoTitle", () => {
+    it("devolve o seoTitle no meta quando o artigo o define", async () => {
+      const { meta } = await compileArticle(
+        "a-b",
+        article("Texto.", { seoTitle: "Ping e latência" }),
+        options,
+      )
+      expect(meta.seoTitle).toBe("Ping e latência")
+      expect(meta.title).toBe("Como o ping mede a latência")
+    })
+
+    it("sem seoTitle o meta não tem a chave", async () => {
+      const { meta } = await compileArticle("a-b", article("Texto."), options)
+      expect(meta).not.toHaveProperty("seoTitle")
+    })
+
+    it("seoTitle vazio é erro de conteúdo", async () => {
+      await expect(
+        compileArticle("a-b", article("Texto.", { seoTitle: "  " }), options),
+      ).rejects.toThrow(/seoTitle vazio/)
+    })
+  })
+
   it("monta o sumário só com os ## e ids sem repetição", async () => {
     const body =
       "## Dois títulos iguais\n\n### Subtítulo\n\n## Dois títulos iguais\n"

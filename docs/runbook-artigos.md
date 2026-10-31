@@ -34,12 +34,13 @@ Texto do artigo, em markdown.
 Mais texto.
 ```
 
-| Campo | Regra |
-|---|---|
-| `title` | obrigatório, não vazio |
-| `description` | obrigatória, até 160 caracteres (é o texto que os buscadores mostram) |
-| `date` | obrigatória, `AAAA-MM-DD`, uma data que existe (com ou sem aspas) |
-| `updated` | opcional, `AAAA-MM-DD`, não anterior a `date` |
+| Campo         | Regra                                                                                                                                                                                               |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `title`       | obrigatório, não vazio                                                                                                                                                                              |
+| `description` | obrigatória, até 160 caracteres (é o texto que os buscadores mostram)                                                                                                                               |
+| `date`        | obrigatória, `AAAA-MM-DD`, uma data que existe (com ou sem aspas)                                                                                                                                   |
+| `updated`     | opcional, `AAAA-MM-DD`, não anterior a `date`                                                                                                                                                       |
+| `seoTitle`    | opcional, não vazio. Título só da aba e do resultado de busca, para quando `title` mais o sufixo do site passa de 60 caracteres (o `siteMeta.test.ts` falha). A página continua mostrando o `title` |
 
 No corpo:
 
@@ -57,11 +58,11 @@ Uma linha sozinha, com uma linha em branco antes e depois, inclui um diagrama da
 ::diagram{name="pipeline"}
 ```
 
-| Nome | Diagrama |
-|---|---|
-| `arquitetura` | do cliente à API |
-| `pipeline` | o caminho de uma mudança |
-| `infraestrutura` | o que o Terraform cria |
+| Nome             | Diagrama                 |
+| ---------------- | ------------------------ |
+| `arquitetura`    | do cliente à API         |
+| `pipeline`       | o caminho de uma mudança |
+| `infraestrutura` | o que o Terraform cria   |
 
 Cada diagrama entra **uma vez por artigo** (os ids do SVG são fixos). Um nome que não está na tabela derruba o build.
 
@@ -109,30 +110,30 @@ content/articles/ruim.md
 1 artigo conferido: 2 erros e 1 aviso.
 ```
 
-| Nível | O que é | Exemplos |
-|---|---|---|
-| erro | o que o build recusa (seção 5), mais corpo vazio | cabeçalho inválido, `#` no corpo, diagrama desconhecido |
-| aviso | não derruba o build, mas piora o artigo ou o deixa diferente do que se imagina | ver a tabela abaixo |
+| Nível | O que é                                                                        | Exemplos                                                |
+| ----- | ------------------------------------------------------------------------------ | ------------------------------------------------------- |
+| erro  | o que o build recusa (seção 5), mais corpo vazio                               | cabeçalho inválido, `#` no corpo, diagrama desconhecido |
+| aviso | não derruba o build, mas piora o artigo ou o deixa diferente do que se imagina | ver a tabela abaixo                                     |
 
-| Aviso | Por quê |
-|---|---|
-| `title` com mais de 60 caracteres | o buscador mostra cerca de 60 |
-| `description` com menos de 70 | curta para o resultado de busca |
-| corpo com menos de 150 palavras | artigo muito curto |
-| nenhuma seção `##` | o artigo fica sem o sumário "Nesta página" |
-| bloco de código sem linguagem | fica sem cor |
-| `“ ” ‘ ’ – —` num bloco de código | o comando copiado quebra; use aspas e hífens ASCII |
-| HTML cru no corpo | é descartado |
-| link ou imagem com destino não permitido | perde o destino |
-| `date` posterior a hoje | a data **não** agenda: o artigo aparece no site mesmo assim |
-| `draft`, `tags` e outros campos | o site os ignora; `draft: true` não impede a publicação |
-| mesmo `title` em dois artigos | confunde leitores e buscadores |
+| Aviso                                    | Por quê                                                     |
+| ---------------------------------------- | ----------------------------------------------------------- |
+| `title` com mais de 60 caracteres        | o buscador mostra cerca de 60                               |
+| `description` com menos de 70            | curta para o resultado de busca                             |
+| corpo com menos de 150 palavras          | artigo muito curto                                          |
+| nenhuma seção `##`                       | o artigo fica sem o sumário "Nesta página"                  |
+| bloco de código sem linguagem            | fica sem cor                                                |
+| `“ ” ‘ ’ – —` num bloco de código        | o comando copiado quebra; use aspas e hífens ASCII          |
+| HTML cru no corpo                        | é descartado                                                |
+| link ou imagem com destino não permitido | perde o destino                                             |
+| `date` posterior a hoje                  | a data **não** agenda: o artigo aparece no site mesmo assim |
+| `draft`, `tags` e outros campos          | o site os ignora; `draft: true` não impede a publicação     |
+| mesmo `title` em dois artigos            | confunde leitores e buscadores                              |
 
 Os limites (60, 70 e 150) são escolhas de edição, não regras do site: ficam como constantes no topo de [`frontend/vite/articleChecks.ts`](../frontend/vite/articleChecks.ts). O script é [`frontend/scripts/checkArticles.mjs`](../frontend/scripts/checkArticles.mjs). Colocar o comando no CI (`.github/workflows/ci.yml`) é decisão do criador; o `npm run build` do job NPM já derruba conteúdo inválido, então o comando acrescenta o relatório completo e os avisos, não uma barreira nova.
 
 ## 4. Publicar
 
-Mesmo fluxo de qualquer mudança no site ([`docs/README.md`](./README.md)): branch, commit (por exemplo `feat(frontend): artigo "<título>"`), pull request e merge. Como a mudança só toca `frontend/`, ela dispara o workflow *Deploy Frontend* (com a aprovação do ambiente `production`) e não gera release da API.
+Mesmo fluxo de qualquer mudança no site ([`docs/README.md`](./README.md)): branch, commit (por exemplo `feat(frontend): artigo "<título>"`), pull request e merge. Como a mudança só toca `frontend/`, ela dispara o workflow _Deploy Frontend_ (com a aprovação do ambiente `production`) e não gera release da API.
 
 A seção de artigos só existe quando há pelo menos um artigo. Com o primeiro, passam a existir `/artigos`, o item "Artigos" no menu e no rodapé, a linha "Último artigo" e o bloco "Artigos" na Home. Apagar o último artigo faz tudo isso sumir.
 
@@ -142,20 +143,20 @@ A seção de artigos só existe quando há pelo menos um artigo. Com o primeiro,
 
 Todo erro de conteúdo derruba o `npm run build` e o `npm test`, com a mensagem `<slug>: <problema>`. Nenhuma página parcial é publicada.
 
-| Mensagem | Causa e o que fazer |
-|---|---|
-| `<slug>: slug inválido` | o nome do arquivo tem maiúscula, espaço, acento ou `_`; renomeie para minúsculas e hífens |
-| `title vazio` / `description vazia` | falta o campo no cabeçalho, ou está vazio |
-| `description com mais de 160 caracteres` | encurte a descrição |
-| `date inválida "<valor>"` | use `AAAA-MM-DD` com uma data que exista (`2026-13-45` não existe) |
-| `updated inválida "<valor>"` | idem para `updated` |
-| `updated anterior a date` | `updated` tem de ser igual ou posterior a `date` |
-| `título # no corpo; use ##` | troque o `#` por `##` |
-| `diagrama desconhecido "<nome>"` | o nome não está na tabela da seção 2 |
-| `diagrama repetido "<nome>"` | o mesmo diagrama aparece duas vezes; mantenha uma |
-| `diagrama sem nome` | falta o `name="..."` em `::diagram{...}` |
-| `diretiva desconhecida "<nome>"` | só `::diagram` existe; para escrever `::` literalmente, ponha entre acentos graves |
-| `front matter deve ser YAML` | o cabeçalho começa com `---js` ou outro formato; use `---` e YAML |
+| Mensagem                                 | Causa e o que fazer                                                                       |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `<slug>: slug inválido`                  | o nome do arquivo tem maiúscula, espaço, acento ou `_`; renomeie para minúsculas e hífens |
+| `title vazio` / `description vazia`      | falta o campo no cabeçalho, ou está vazio                                                 |
+| `description com mais de 160 caracteres` | encurte a descrição                                                                       |
+| `date inválida "<valor>"`                | use `AAAA-MM-DD` com uma data que exista (`2026-13-45` não existe)                        |
+| `updated inválida "<valor>"`             | idem para `updated`                                                                       |
+| `updated anterior a date`                | `updated` tem de ser igual ou posterior a `date`                                          |
+| `título # no corpo; use ##`              | troque o `#` por `##`                                                                     |
+| `diagrama desconhecido "<nome>"`         | o nome não está na tabela da seção 2                                                      |
+| `diagrama repetido "<nome>"`             | o mesmo diagrama aparece duas vezes; mantenha uma                                         |
+| `diagrama sem nome`                      | falta o `name="..."` em `::diagram{...}`                                                  |
+| `diretiva desconhecida "<nome>"`         | só `::diagram` existe; para escrever `::` literalmente, ponha entre acentos graves        |
+| `front matter deve ser YAML`             | o cabeçalho começa com `---js` ou outro formato; use `---` e YAML                         |
 
 ## 6. Conferir depois do deploy
 

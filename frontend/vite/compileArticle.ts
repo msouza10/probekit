@@ -26,6 +26,9 @@ export type ArticleMeta = {
   description: string
   date: string
   updated?: string
+  // Título só para a aba do navegador e o resultado de busca (até 60 caracteres
+  // com o sufixo do site); o `title` continua sendo o título do artigo na página.
+  seoTitle?: string
   readingMinutes: number
 }
 
@@ -110,6 +113,12 @@ function readMeta(slug: string, data: Record<string, unknown>, body: string) {
       1,
       Math.ceil(body.split(/\s+/).filter(Boolean).length / WORDS_PER_MINUTE),
     ),
+  }
+  if (data.seoTitle !== undefined) {
+    const seoTitle =
+      typeof data.seoTitle === "string" ? data.seoTitle.trim() : ""
+    if (!seoTitle) problems.push("seoTitle vazio")
+    else meta.seoTitle = seoTitle
   }
   if (data.updated !== undefined) {
     const updated = String(data.updated)

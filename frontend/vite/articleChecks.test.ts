@@ -218,6 +218,15 @@ describe("checkArticle", () => {
       ])
     })
 
+    it("seoTitle é um campo que o site usa: não avisa", async () => {
+      expect(
+        await messages(
+          article({ extra: 'seoTitle: "Título curto"' }),
+          "warning",
+        ),
+      ).toEqual([])
+    })
+
     it("avisa de um campo que o site não usa", async () => {
       expect(
         await messages(article({ extra: "tags: [ping]" }), "warning"),
