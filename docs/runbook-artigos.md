@@ -137,7 +137,7 @@ Mesmo fluxo de qualquer mudança no site ([`docs/README.md`](./README.md)): bran
 
 A seção de artigos só existe quando há pelo menos um artigo. Com o primeiro, passam a existir `/artigos`, o item "Artigos" no menu e no rodapé, a linha "Último artigo" e o bloco "Artigos" na Home. Apagar o último artigo faz tudo isso sumir.
 
-> **Pendente:** o `sitemap.xml` ainda é escrito à mão (`frontend/public/sitemap.xml`) e não lista os artigos. Até o epic de SEO gerar o sitemap a partir das rotas, acrescente a URL do artigo nele.
+O `sitemap.xml` é gerado no build a partir das rotas (`frontend/src/lib/sitemap.ts`): o artigo entra sozinho, com `lastmod` igual a `updated` (ou `date`). Não há o que editar à mão.
 
 ## 5. O que o build recusa
 
