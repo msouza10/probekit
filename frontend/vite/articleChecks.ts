@@ -29,7 +29,13 @@ export type CheckOptions = {
 const TITLE_MAX = 60
 const DESCRIPTION_MIN = 70
 const BODY_MIN_WORDS = 150
-const USED_FIELDS = new Set(["title", "description", "date", "updated"])
+const USED_FIELDS = new Set([
+  "title",
+  "description",
+  "date",
+  "updated",
+  "seoTitle",
+])
 // Aspas e travessões "inteligentes" quebram um comando copiado do bloco.
 const TYPOGRAPHIC = /[“”‘’–—]/
 // O marcador do modelo; "todos" e "TODOS" no texto não contam.

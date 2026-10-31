@@ -127,7 +127,7 @@ const articleImage = pageImage
 function articlePage(article: ArticleMeta): PageMeta {
   const path = articlePath(article.slug)
   return {
-    title: `${article.title} · ${SITE_NAME}`,
+    title: `${article.seoTitle ?? article.title} · ${SITE_NAME}`,
     description: article.description,
     path,
     type: "article",

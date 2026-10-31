@@ -1,5 +1,6 @@
 ---
 title: "Olá, mundo: um ping, duas VMs e um laboratório DevOps"
+seoTitle: "Um ping, duas VMs e um laboratório DevOps"
 description: "Por que criar uma ferramenta de ping se o terminal já tem o comando? A história do Probekit, um laboratório de DevOps feito com Go, Terraform e Cloudflare."
 date: 2026-10-27
 ---
