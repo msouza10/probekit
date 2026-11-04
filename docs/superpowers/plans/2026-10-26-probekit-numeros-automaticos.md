@@ -34,10 +34,12 @@
 ### Task 1: Script que gera o `stats.json`
 
 **Files:**
+
 - Create: `frontend/scripts/generateStats.mjs`, `frontend/scripts/generateStats.test.mjs`
 - Modify: `frontend/package.json` (script `"stats": "node scripts/generateStats.mjs"`)
 
 **Interfaces:**
+
 - Produces:
   - `collectStats(getJson: (path: string) => Promise<{ body: unknown; headers: Record<string, string> }>, now?: Date): Promise<RepoStats>` — usa `getJson` para `/commits?sha=main&per_page=1` (conta pelo `Link` `rel="last"`; sem `Link`, conta os itens da resposta), `/search/issues?q=repo:msouza10/probekit+type:pr` (e `+state:open`), o mesmo com `type:issue`, e `/repos/msouza10/probekit/languages` (ordenado por bytes, decrescente). `generated_at = now.toISOString()` sem milissegundos.
   - CLI `node scripts/generateStats.mjs [--out dist/stats.json]`: grava com `JSON.stringify(stats, null, 2)`. Em erro, escreve o motivo em `stderr`, **não toca no arquivo** e sai com código 0 — a menos que `STATS_STRICT=1`, quando sai com 1.
@@ -51,10 +53,12 @@
 ### Task 2: Decisão de publicar ou não
 
 **Files:**
+
 - Create: `frontend/scripts/statsChanged.mjs`, `frontend/scripts/statsChanged.test.mjs`
 - Modify: `frontend/package.json` (script `"stats:changed": "node scripts/statsChanged.mjs"`)
 
 **Interfaces:**
+
 - Consumes: `collectStats` (Task 1), `parseStats`.
 - Produces:
   - `sameNumbers(a: RepoStats, b: RepoStats): boolean` — igual em tudo menos `generated_at`.
@@ -70,7 +74,7 @@
 
 **Resultado esperado:** existe o ambiente `stats` do GitHub, **sem revisor**, que só aceita a branch `main`, com o token e o id da conta da Cloudflare do site guardados como secrets desse ambiente (mesmos nomes do `production`, valores nunca no repositório). Nenhum token novo. Depende do [ADR-0010](../../adr/0010-deploy-agendado-em-ambiente-proprio.md) estar **Aceita**. Criar o ambiente e copiar os secrets é do criador (credenciais).
 
-- [ ] **Step 1 (criador):** criar o ambiente `stats` e os dois secrets e mudar o *Status* do ADR-0010 para Aceita, com a data.
+- [ ] **Step 1 (criador):** criar o ambiente `stats` e os dois secrets e mudar o _Status_ do ADR-0010 para Aceita, com a data.
 - [ ] **Step 2 (assistente):** conferir com `gh api repos/msouza10/probekit/environments/stats --jq '{rules: [.protection_rules[].type], branches: .deployment_branch_policy}'` que não há `required_reviewers` e que a política de branches é só a `main`.
 
 ### Task 4: Gerar os números em todo deploy (criador)
@@ -86,15 +90,47 @@
 **Resultado esperado:** o `deploy-frontend.yml` ganha `schedule` com `17 12,15,18,21,00,03 * * *` (UTC: 09:17, 12:17, 15:17, 18:17, 21:17 e 00:17 em Brasília). Quando o evento é o agendado, um passo calcula `changed` com `npm run stats:changed -- --live https://probekit.cc/stats.json`; só com `true` o build e o deploy seguem. O job de deploy escolhe o ambiente por expressão: `stats` no agendado, `production` nos demais. Mantém o **mesmo grupo de `concurrency`** (`deploy-frontend`, sem cancelar o que está rodando) e `permissions` mínimas. Termina verde sem publicar quando nada mudou.
 
 - [ ] **Step 1 (criador):** editar o workflow (gatilho, `changed`, `if` dos passos de build e deploy e o ambiente por expressão).
-- [ ] **Step 2 (criador):** rodar por `workflow_dispatch` (usa o `production` e pede aprovação) e esperar um run agendado (usa o `stats` e não pede). Depois, dois runs agendados seguidos: o primeiro publica (ou não, se nada mudou); o segundo termina sem publicar. Anotar os links dos runs no ADR-0010 (*Validação*).
+- [ ] **Step 2 (criador):** rodar por `workflow_dispatch` (usa o `production` e pede aprovação) e esperar um run agendado (usa o `stats` e não pede). Depois, dois runs agendados seguidos: o primeiro publica (ou não, se nada mudou); o segundo termina sem publicar. Anotar os links dos runs no ADR-0010 (_Validação_).
 - [ ] **Step 3 (assistente):** revisar o workflow e conferir que um deploy normal e um agendado disparados juntos não rodam em paralelo.
 
 ### Task 6: Documentação e fechamento
 
 **Files:**
-- Modify: `docs/runbook-deploy.md` (seção "Números do site": o que gera, quando roda, como disparar à mão, o que fazer se a API do GitHub falhar), `frontend/README.md`, `frontend/src/lib/stats.ts` (o comentário passa a descrever o fluxo real), `docs/adr/0010-deploy-agendado-em-ambiente-proprio.md` (*Status* e *Validação*, com a data)
+
+- Modify: `docs/runbook-deploy.md` (seção "Números do site": o que gera, quando roda, como disparar à mão, o que fazer se a API do GitHub falhar), `frontend/README.md`, `frontend/src/lib/stats.ts` (o comentário passa a descrever o fluxo real), `docs/adr/0010-deploy-agendado-em-ambiente-proprio.md` (_Status_ e _Validação_, com a data)
 - Depois do último task: banner de concluído neste plano.
 
 - [ ] **Step 1: Atualizar os documentos** acima; só marcar como validado o que o criador de fato verificou, com a data.
 - [ ] **Step 2: Conferir.** `python3 .claude/skills/probekit-docs/scripts/check_links.py`; `cd frontend && npx prettier --check README.md src/lib/stats.ts ../docs/runbook-deploy.md`; `npx vitest run` → tudo PASS.
 - [ ] **Step 3: Commit (do criador)** — `docs: números do site no runbook de deploy`.
+
+### Task 7: Decisão sobre o último commit e os últimos deploys
+
+A Home ainda mostra o último commit e os últimos deploys chamando `api.github.com` direto do navegador de cada visitante (`frontend/src/lib/github.ts`), sem token. O limite de acesso é por IP e, quando estoura ou a API cai, o bloco some sem aviso. A pergunta é como servir isso sem depender da API no navegador.
+
+**Resultado esperado:** uma Decision que compara as alternativas (arquivo estático gerado no build e no cron, como o `stats.json`; ou manter a chamada no navegador com um aviso quando falhar) e termina em um ADR aceito. O custo a pesar é o frescor: um arquivo gerado no cron fica atrás do repositório até o próximo horário (seis por dia, com intervalo de até 9 horas de madrugada).
+
+- [ ] **Step 1 (criador):** escolher a alternativa e aceitar o ADR (`docs/adr/`).
+
+### Task 8: Último commit e deploys em arquivo estático (assistente)
+
+**Depende da Task 7.** Só vale se o ADR escolher o arquivo estático.
+
+**Resultado esperado:** a Repo Pulse lê um arquivo gerado junto do `stats.json`, mostra a hora em que o dado foi gerado e não chama `api.github.com` do navegador. Sem o arquivo, o bloco some como hoje, e há teste para isso.
+
+- [ ] **Step 1 (assistente):** teste primeiro (arquivo ausente, formato inválido, hora de geração), depois o script e a Repo Pulse.
+- [ ] **Step 2 (assistente):** atualizar `docs/runbook-deploy.md` (seção "Números do site") e o ADR escolhido, com a data da verificação.
+
+### Task 9: Validar o deploy agendado de verdade (criador)
+
+O ADR-0010 tem dois itens da _Validação_ sem prova completa: um agendado coincidindo com um deploy normal, e um run real com a API do GitHub indisponível. Esta Task fecha os passos 2 e 3 da Task 5.
+
+- [ ] **Step 1 (criador):** disparar um deploy normal perto de um horário do cron e anotar os links dos runs: o segundo deve esperar o primeiro terminar.
+- [ ] **Step 2 (criador):** simular a API indisponível num run real (por exemplo com um token inválido, em branch de teste) e confirmar que o `stats.json` do ar fica como estava.
+- [ ] **Step 3 (assistente):** registrar o resultado, com a data e os links, na _Validação_ do ADR-0010.
+
+### Task 10: Tratar a edição da decisão do ADR-0010 (criador)
+
+O cron e os secrets da seção _Decisão_ do ADR-0010 foram reescritos em 2026-10-30, depois de o ADR ser aceito. A regra do projeto é que a decisão de um ADR aceito não se edita; se muda, entra um ADR novo.
+
+- [ ] **Step 1 (criador):** escolher entre um ADR novo que substitui o trecho do cron e dos secrets, ou uma nota explícita no ADR-0010 dizendo o que mudou e quando.
