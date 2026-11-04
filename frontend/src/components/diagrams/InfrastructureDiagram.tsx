@@ -16,16 +16,22 @@ import {
  * `fill-card stroke-border`, zonas tracejadas `stroke-input`, ligações
  * ortogonais com cantos de raio 12 e setas abertas.
  * Aqui as linhas se desenham uma vez e os recursos entram em sequência: o
- * código, o plan → apply e, por fim, o que ele cria em cada nuvem. Só as
+ * código, o plan, a aprovação, o apply e, por fim, o que ele cria em cada
+ * nuvem. Só as
  * ligações são contínuas e cinza, porque saem do apply (Terraform), que não é
  * uma cloud; a cor fica nas zonas dos provedores.
  * O bloco do estado remoto é tracejado e fica parado.
  */
 
-// Linha de cima: código -> plan -> apply, e o estado remoto à direita.
-const code: Box = { x: 4, y: 8, w: 136 }
-const apply: Box = { x: 190, y: 8, w: 176 }
-const state = { x: 456, y: 8, w: 140, h: 64 }
+// Linha de cima: código -> plan -> aprovação -> apply, e o estado remoto à
+// direita. Plan, aprovação e apply são blocos separados porque o plano salvo e
+// a aprovação entre os dois são o que o apply tem de diferente de um `apply`
+// solto.
+const code: Box = { x: 4, y: 8, w: 72 }
+const plan: Box = { x: 104, y: 8, w: 72 }
+const approval: Box = { x: 204, y: 8, w: 112 }
+const apply: Box = { x: 344, y: 8, w: 92 }
+const state = { x: 464, y: 8, w: 132, h: 64 }
 // Zonas e recursos (centro do bloco em y=196).
 const oracle = { x: 4, y: 120, w: 372, h: 120 }
 const cloudflare = { x: 396, y: 120, w: 200, h: 120 }
@@ -36,12 +42,14 @@ const dns: Box = { x: 412, y: 164, w: 168 }
 
 // Trechos visíveis das ligações (de borda a borda).
 const lines = {
-  codeApply: "M140 40 H190",
-  applyOracle: "M240 72 V120",
-  applyCloudflare: "M320 72 V96 Q320 108 332 108 H484 Q496 108 496 120",
+  codePlan: "M76 40 H104",
+  planApproval: "M176 40 H204",
+  approvalApply: "M316 40 H344",
+  applyOracle: "M374 72 V96 Q374 108 362 108 H252 Q240 108 240 120",
+  applyCloudflare: "M406 72 V96 Q406 108 418 108 H484 Q496 108 496 120",
 }
 // Apply -> estado remoto: tracejado e parado.
-const stateLine = "M366 40 H456"
+const stateLine = "M436 40 H464"
 
 function ProviderZone({
   zone,
@@ -78,13 +86,25 @@ const steps: DiagramStep[] = [
       "A infraestrutura é descrita em arquivos do Terraform, na pasta infra/terraform do repositório.",
   },
   {
-    // deploy-api-golang.yml (workflow_dispatch; job plan-deploy, depois job
-    // deploy no ambiente production com `terraform apply` do plano salvo);
-    // ADR-0005 (apply não roda sem ordem explícita)
-    title: "Plan e apply",
-    tag: "plan → apply",
+    // deploy-api-golang.yml (workflow_dispatch; job plan-deploy: terraform
+    // plan -out=tfplan, openssl enc -aes-256-cbc, upload-artifact com
+    // retention-days: 1); ADR-0005 (apply não roda sem ordem explícita)
+    title: "Plan",
     detail:
-      "O plan e o apply rodam no workflow Deploy API, que é disparado à mão. O plan fica salvo, e o apply só segue depois da aprovação do ambiente production e aplica exatamente esse plano.",
+      "O workflow Deploy API, disparado à mão, roda o terraform plan e guarda o plano como artefato cifrado, que expira em um dia.",
+  },
+  {
+    // deploy-api-golang.yml (job deploy, needs: plan-deploy, environment:
+    // production); o ambiente tem um revisor obrigatório (ADR-0008)
+    title: "Aprovação",
+    detail:
+      "O job do apply roda no ambiente production, que exige a aprovação de um revisor antes de começar.",
+  },
+  {
+    // deploy-api-golang.yml (openssl enc -d; terraform apply do tfplan)
+    title: "Apply",
+    detail:
+      "O apply decifra e aplica exatamente esse plano salvo, sem calcular outro.",
   },
   {
     // infra/terraform/oci/network.tf (VCN, sub-rede, gateway, rota, security
@@ -111,7 +131,7 @@ const steps: DiagramStep[] = [
 
 const title = "A infraestrutura criada pelo Terraform"
 const summary =
-  "A infraestrutura do Probekit em Terraform: o código em arquivos .tf passa por plan e apply, que criam na Oracle Cloud a rede, as duas VMs e o balanceador de carga e, na Cloudflare, o registro DNS da API. O estado fica num bucket remoto da Oracle Cloud. O Worker do site é publicado pelo pipeline, não pelo Terraform."
+  "A infraestrutura do Probekit em Terraform: o código em arquivos .tf passa por plan, aprovação e apply, no workflow Deploy API disparado à mão. O apply cria na Oracle Cloud a rede, as duas VMs e o balanceador de carga e, na Cloudflare, o registro DNS da API. O estado fica num bucket remoto da Oracle Cloud. O Worker do site é publicado pelo pipeline, não pelo Terraform."
 
 export function InfrastructureDiagram() {
   return (
@@ -131,13 +151,13 @@ export function InfrastructureDiagram() {
             zone={oracle}
             label="Oracle Cloud"
             cloud="oracle"
-            enter={0.5}
+            enter={0.9}
           />
           <ProviderZone
             zone={cloudflare}
             label="Cloudflare"
             cloud="cloudflare"
-            enter={0.5}
+            enter={0.9}
           />
 
           {/* Ligações: linhas contínuas, desenhadas uma vez. */}
@@ -167,8 +187,10 @@ export function InfrastructureDiagram() {
             strokeLinecap="round"
             strokeLinejoin="round"
           >
-            <path d={arrow("right", 190, 40)} className="stroke-input" />
-            <path d={arrow("right", 456, 40)} className="stroke-input" />
+            <path d={arrow("right", 104, 40)} className="stroke-input" />
+            <path d={arrow("right", 204, 40)} className="stroke-input" />
+            <path d={arrow("right", 344, 40)} className="stroke-input" />
+            <path d={arrow("right", 464, 40)} className="stroke-input" />
             <path d={arrow("down", 240, 120)} className={"stroke-input"} />
             <path d={arrow("down", 496, 120)} className={"stroke-input"} />
           </g>
@@ -181,22 +203,37 @@ export function InfrastructureDiagram() {
             lines={[{ text: "o código" }]}
             enter={0}
           />
-          {/* plan → apply: deploy-api-golang.yml (job plan-deploy, job deploy) */}
+          {/* plan: deploy-api-golang.yml (job plan-deploy; plano cifrado e salvo) */}
+          <Node
+            box={plan}
+            name="plan"
+            monoName
+            lines={[{ text: "salvo" }]}
+            enter={0.2}
+          />
+          {/* aprovação: deploy-api-golang.yml (job deploy, environment production) */}
+          <Node
+            box={approval}
+            name="aprovação"
+            lines={[{ text: "production" }]}
+            enter={0.4}
+          />
+          {/* apply: deploy-api-golang.yml (job deploy; terraform apply do plano salvo) */}
           <Node
             box={apply}
-            name="plan → apply"
+            name="apply"
             monoName
-            lines={[{ text: "terraform" }]}
-            enter={0.3}
+            lines={[{ text: "mesmo plano" }]}
+            enter={0.6}
           />
           {/* Rede: oci/network.tf (VCN, sub-rede, gateway, rota, security list) */}
-          <Node box={rede} name="Rede" enter={0.7} />
+          <Node box={rede} name="Rede" enter={1.1} />
           {/* 2 VMs: oci/instance.tf (oci_core_instance, count = 2) */}
-          <Node box={vms} name="2 VMs" enter={0.8} />
+          <Node box={vms} name="2 VMs" enter={1.2} />
           {/* Balanceador: oci/loadbalacers.tf (network load balancer) */}
-          <Node box={balanceador} name="Balanceador" enter={0.9} />
+          <Node box={balanceador} name="Balanceador" enter={1.3} />
           {/* DNS api (proxied): cloudflare/dns.tf (name api.*, proxied = true) */}
-          <Node box={dns} name="DNS api (proxied)" monoName enter={0.8} />
+          <Node box={dns} name="DNS api (proxied)" monoName enter={1.2} />
 
           {/* Estado remoto: backend.tf (backend "oci", bucket). Parado. */}
           <g data-state>
