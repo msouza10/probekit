@@ -4,6 +4,8 @@
 
 Aceita (2026-10-30). Proposta em 2026-10-26 e reescrita em 2026-10-29 depois de conversa com o criador; aceita quando o criador criou o ambiente `stats`. A implementação é o [plano dos números automáticos](../superpowers/plans/2026-10-26-probekit-numeros-automaticos.md).
 
+> **Nota de 2026-11-04 ([#74](https://github.com/msouza10/probekit/issues/74)).** Entre a proposta (2026-10-26, PR #42) e a aceitação, a seção _Decisão_ foi reescrita: o agendamento deixou de ser diário e passou a seis horários por dia, o ambiente passou a ser escolhido por expressão e os secrets do `stats` ganharam item próprio. Essa reescrita entrou num único commit do PR #50 (mergeado em 2026-10-30), o mesmo que marca o ADR como _Aceita_; a `main` nunca teve outro texto aceito. Durante o PR, os itens 2 (cron) e 3 (secrets) ainda foram ajustados depois de o _Status_ já dizer _Aceita_ e antes do merge, o que a regra de ADR não prevê. Daqui em diante a _Decisão_ não se edita: mudança vira ADR novo (só _Status_ e _Validação_ se atualizam, com a data).
+
 ## Contexto
 
 A Home mostra números do repositório (commits, PRs, issues e linguagens) lidos de `/stats.json`. Hoje o arquivo é fixo: `frontend/public/stats.json` tem uma data escrita à mão, e o comentário de `frontend/src/lib/stats.ts` diz que "quem gera o arquivo é o workflow de deploy", o que não é verdade, porque o `deploy-frontend.yml` não tem esse passo.
