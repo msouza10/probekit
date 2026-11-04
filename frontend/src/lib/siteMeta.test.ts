@@ -73,8 +73,8 @@ describe("buildPages", () => {
         "@type": "BlogPosting",
         headline: "Como o ping mede a latência",
         description: "O que o tempo de ida e volta diz sobre a rede.",
-        datePublished: "2026-10-26",
-        dateModified: "2026-10-26",
+        datePublished: "2026-10-26T00:00:00-03:00",
+        dateModified: "2026-10-26T00:00:00-03:00",
         image: "https://probekit.cc/og/latencia-do-ping.png",
         inLanguage: "pt-BR",
         mainEntityOfPage: {
@@ -243,8 +243,8 @@ describe("buildPages", () => {
     ]
 
     expect(page.jsonLd).toMatchObject({
-      datePublished: "2026-10-26",
-      dateModified: "2026-11-02",
+      datePublished: "2026-10-26T00:00:00-03:00",
+      dateModified: "2026-11-02T00:00:00-03:00",
     })
   })
 })
