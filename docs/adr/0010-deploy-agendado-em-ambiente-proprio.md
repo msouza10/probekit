@@ -97,8 +97,9 @@ Em andamento. Serão avaliados, com a data de cada verificação:
 
 - ✅ (2026-10-30) o ambiente `stats` não tem revisor e só aceita a `main`: `gh api repos/msouza10/probekit/environments/stats` mostrou só a regra `branch_policy` (sem `required_reviewers`), e `.../deployment-branch-policies` listou apenas `main`. `gh secret list --env stats` mostrou `CF_API_TOKEN` e `CF_ACCOUNT_ID`;
 - um run por `workflow_dispatch` usa o `production` (pede aprovação) e um run agendado usa o `stats` (não pede);
-- ✅ parcial (2026-10-31) o caminho "sem mudança": as execuções agendadas de 2026-10-30 22:26 UTC e de 2026-10-31 05:39 UTC terminaram em `success`, com o job `Decide` rodando e os jobs `Build Frontend` e `Deploy Frontend` pulados (`skipped`). O log do `Decide` da segunda mostra `números iguais aos do ar` e `changed=false`. **Falta** ver uma execução agendada que publica quando os números mudam, e com isso o ambiente `stats` em uso (nas duas observadas o deploy foi pulado);
-- `https://probekit.cc/stats.json` com `generated_at` do dia do deploy e números iguais aos do repositório;
+- ✅ parcial (2026-10-31) o caminho "sem mudança": as execuções agendadas de 2026-10-30 22:26 UTC e de 2026-10-31 05:39 UTC terminaram em `success`, com o job `Decide` rodando e os jobs `Build Frontend` e `Deploy Frontend` pulados (`skipped`). O log do `Decide` da segunda mostra `números iguais aos do ar` e `changed=false`. Das 11 execuções agendadas entre 2026-10-31 e 2026-11-04 10:54 UTC, 10 terminaram sem publicar;
+- ✅ (2026-11-04) o caminho "com mudança": a execução agendada de 2026-10-31 17:14 UTC (run 41223593155) publicou, com `Build Frontend` e `Deploy Frontend` em `success`. A API de deployments registrou o ambiente `stats` (criado às 17:17:07 UTC) e `pending_deployments` voltou vazio, ou seja, não pediu aprovação. A metade "um run por `workflow_dispatch` usa o `production`" do item anterior **não** foi observada;
+- ✅ (2026-11-04) `https://probekit.cc/stats.json` tem `generated_at` `2026-10-31T17:17:01Z`, a hora desse deploy, e os números batem com o repositório na mesma consulta: 174 commits em `origin/main`, 42 PRs e 24 issues (5 abertas) pela API do GitHub;
 - um deploy normal e um agendado disparados juntos não rodam em paralelo;
 - um push em `frontend/**` com a API do GitHub indisponível (simulado) mantém no ar os números anteriores.
 
