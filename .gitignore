@@ -43,4 +43,6 @@ frontend/.wrangler/
 # draft
 draft.md
 
-.vscode/settings.json
+# local do criador (script de estudo e configuração do editor)
+infra/python/
+.vscode/
