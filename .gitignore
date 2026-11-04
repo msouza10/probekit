@@ -43,3 +43,4 @@ frontend/.wrangler/
 # draft
 draft.md
 
+.vscode/settings.json

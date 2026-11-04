@@ -124,6 +124,10 @@ const fixedPages: Record<string, PageMeta> = {
 
 const articleImage = pageImage
 
+// O artigo só tem a data, sem hora. O Google quer datetime com fuso no
+// BlogPosting; meia-noite em São Paulo (-03:00, sem horário de verão desde 2019).
+const asDateTime = (date: string) => `${date}T00:00:00-03:00`
+
 function articlePage(article: ArticleMeta): PageMeta {
   const path = articlePath(article.slug)
   return {
@@ -138,8 +142,8 @@ function articlePage(article: ArticleMeta): PageMeta {
       "@type": "BlogPosting",
       headline: article.title,
       description: article.description,
-      datePublished: article.date,
-      dateModified: article.updated ?? article.date,
+      datePublished: asDateTime(article.date),
+      dateModified: asDateTime(article.updated ?? article.date),
       image: articleImage(article.slug),
       inLanguage: "pt-BR",
       mainEntityOfPage: { "@type": "WebPage", "@id": `${SITE_URL}${path}` },
