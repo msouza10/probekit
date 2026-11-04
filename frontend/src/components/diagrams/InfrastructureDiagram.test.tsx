@@ -8,8 +8,12 @@ import { injectDiagramCss } from "./testUtils"
 const allowedLabels = [
   "*.tf",
   "o código",
-  "plan → apply",
-  "terraform",
+  "plan",
+  "salvo",
+  "aprovação",
+  "production",
+  "apply",
+  "mesmo plano",
   "Oracle Cloud",
   "Rede",
   "2 VMs",
@@ -22,7 +26,9 @@ const allowedLabels = [
 
 const stages = [
   /escrever o código/i,
-  /plan e apply/i,
+  /^plan$/i,
+  /aprovação/i,
+  /^apply$/i,
   /rede, as duas VMs e o balanceador.*OCI/i,
   /registro DNS da API.*Cloudflare/i,
   /estado.*bucket remoto/i,
@@ -51,17 +57,33 @@ describe("InfrastructureDiagram", () => {
     expect(texts).toHaveLength(allowedLabels.length)
   })
 
-  it("usa mono só em *.tf, plan → apply e DNS api (proxied)", () => {
+  it("usa mono só em *.tf, plan, apply e DNS api (proxied)", () => {
     const { container } = render(<InfrastructureDiagram />)
     const mono = [...container.querySelectorAll("svg .font-mono")].map(
       (node) => node.textContent,
     )
     expect(mono.sort()).toEqual(
-      ["*.tf", "plan → apply", "DNS api (proxied)"].sort(),
+      ["*.tf", "plan", "apply", "DNS api (proxied)"].sort(),
     )
   })
 
-  it("descreve a infraestrutura em cinco passos, na ordem", () => {
+  it("mostra a aprovação entre o plan e o apply", () => {
+    const { container } = render(<InfrastructureDiagram />)
+    const texts = svgTexts(container)
+    const order = ["plan", "aprovação", "apply"].map((name) =>
+      texts.indexOf(name),
+    )
+    expect(order.every((index) => index >= 0)).toBe(true)
+    expect(order).toEqual([...order].sort((a, b) => a - b))
+  })
+
+  it("o apply aplica o plano que foi salvo e aprovado", () => {
+    const { container } = render(<InfrastructureDiagram />)
+    expect(container.textContent).toMatch(/exatamente (esse|o mesmo) plano/i)
+    expect(container.textContent).toMatch(/ambiente production/i)
+  })
+
+  it("descreve a infraestrutura em sete passos, na ordem", () => {
     render(<InfrastructureDiagram />)
     const items = within(screen.getByRole("list")).getAllByRole("listitem")
     expect(items).toHaveLength(stages.length)
