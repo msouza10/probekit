@@ -13,21 +13,21 @@ Se você já está pensando "para que um site de ping, se existe o comando `ping
 
 Eu precisava de uma motivação para colocar em prática conhecimentos de provisionamento de infraestrutura. Não queria subir um Jellyfin ou outro sistema open source qualquer, e também não tinha uma grande ideia de produto. Então procurei algo que eu mesmo usaria e que não levasse meses para ficar de pé.
 
-A faísca veio de um lugar improvável: stories do Instagram. Alguém postou uma senha gerada pelo [gerador de senhas do iponline](https://iponline.com.br/gerador-de-senhas/), um site feito por outra pessoa de tecnologia que eu sigo. Achei a ideia legal. Sabia que não era algo vendável, mas fazia tempo que eu carregava uma pergunta: como desenvolver habilidades em coisas que eu uso pouco, ou nada, no trabalho?
+A faísca veio de um lugar improvável: stories do Instagram. Alguém postou uma senha gerada pelo [gerador de senhas do iponline](https://iponline.com.br/gerador-de-senhas/), um site feito por outra pessoa de tecnologia que eu sigo. Achei a ideia legal. Sabia que não era algo vendável, mas fazia tempo que eu carregava uma pergunta: como aprender de verdade aquilo que minha rotina não me obriga a usar?
 
-Daí nasceu o Probekit: um laboratório meu, vivo, onde posso testar e implementar ferramentas novas. Hoje não tenho ideia de grandes features. O que eu tinha era vontade de usar mais Terraform, de usar GitHub Actions e de manter um lugar online onde as decisões ficam documentadas: como eu fiz e por que fiz assim.
+Daí nasceu o Probekit: um laboratório meu, vivo, onde posso testar e implementar ferramentas novas. Não precisava de grandes features. Precisava de um lugar para colocar em prática o que eu só conhecia na teoria, ou nem isso, e deixar registrado como fiz e por que fiz assim.
 
 ## Por que Go
 
 Comecei pelo básico: teste de ping e consulta de DNS. Havia uma razão técnica para não fazer isso só no front-end: um navegador não consegue enviar ICMP (o protocolo do ping), então a ferramenta precisa de um servidor de qualquer jeito. E havia uma razão pessoal: desenvolvimento frontend não é meu foco. Meu objetivo é evoluir em DevOps e engenharia de plataforma, então decidi concentrar meus esforços no backend e na infraestrutura.
 
-Preferi algo mais próximo do que eu poderia usar em outros momentos. Já escrevi coisas em Python, mas queria algo diferente, e fui para o Go: o [Kubernetes](https://github.com/kubernetes/kubernetes) é escrito nele, o [Caddy](https://caddyserver.com/) também, e o backend do [Grafana](https://github.com/grafana/grafana) idem. Pareceu um bom lugar para começar a brincar.
+Queria algo mais próximo do dia a dia de DevOps. Já escrevi coisas em Python, mas desta vez quis algo diferente e fui para o Go, a linguagem por trás do Kubernetes, do Terraform e do Prometheus. Aprender Go abre a porta para entender como a infraestrutura moderna é construída por dentro e, quem sabe, contribuir com essas ferramentas no futuro. Pareceu um bom lugar para começar a brincar.
 
 As primeiras linhas foram de quebrar a cabeça: entender como funcionam as bibliotecas, as funções, tudo, até a API básica funcionar.
 
 ## Colocar no ar sem gastar dinheiro
 
-Com a API funcionando veio a pergunta seguinte: beleza, e agora preciso colocar isso para rodar. Só que eu sou pobre e não quero gastar dinheiro. Foi assim, passo a passo, até o que existe hoje: um laboratório completo, quase todo gratuito, rodando com Terraform, GitHub Actions, Go, TypeScript e mais um monte de coisa. O frontend foi desenvolvido com ajuda de IA, e eu fiquei com o foco em infraestrutura e backend.
+Com a API funcionando veio a pergunta seguinte: beleza, agora preciso colocar isso para rodar. Só que eu tinha ambição de engenheiro de plataforma e orçamento de estagiário (sem a bolsa). Foi assim, passo a passo, até o que existe hoje: um laboratório completo, quase todo gratuito, rodando com Terraform, GitHub Actions, Go, TypeScript e mais um monte de coisa. O frontend foi desenvolvido com ajuda de IA, e eu fiquei com o foco em infraestrutura e backend.
 
 O primeiro passo foi entender melhor o que cada cloud oferece de graça. E acredite: todas oferecem alguma coisa, você só precisa ficar ligado nos limites e até quando é grátis. Pesquisando, lembrei que eu já tinha uma conta na Oracle Cloud com uma VM [Always Free](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm) rodando.
 
