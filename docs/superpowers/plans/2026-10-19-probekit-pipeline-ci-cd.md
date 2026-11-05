@@ -182,10 +182,25 @@ Tasks 1, 3, 4 e 5 não dependem entre si. A 8 depende da 7 (o ambiente e os secr
 - [ ] **Verificar:** marcar uma release anterior como `latest` e ver as VMs instalarem; marcar a mais nova de volta; tag malformada ou inexistente falha antes de editar a release.
 - O efeito dura até a próxima release (ela vira `latest` sozinha). Para uma correção permanente, reverter o commit e publicar.
 
+### Task 10: Revisão automática de pull requests pelo Codex **[Criador ativa; assistente escreve as regras]**
+
+**Issue:** `ci(pipeline): revisão automática de pull requests pelo Codex`
+
+**Files:** Modify `AGENTS.md` (seção `## Code Review Rules`); Modify `docs/README.md` (seção 5).
+
+**Interfaces:**
+- Consumes: a seção `## Code Review Rules` do `AGENTS.md`, que o Codex lê no GitHub e aplica junto com os `AGENTS.md` mais específicos de cada arquivo alterado.
+- Produces: um comentário de revisão em cada PR, só para P0 e P1, citando a regra.
+
+- [ ] **Assistente:** a seção, com o contexto do projeto, a definição de P0 e P1, o formato do comentário (efeito, porquê, correção) e regras curtas por área, cada uma com o comportamento arriscado, o caminho seguro e o porquê. Sem formatação, lint nem o que o CI já confere.
+- [ ] **Criador:** conectar o repositório ao Codex e ativar a revisão automática nas configurações da conta. Nada disso entra no repositório.
+- [ ] **Verificar:** abrir um PR descartável com um problema plantado (por exemplo, `permissions` mais largas num workflow) e outro sem problema. O primeiro deve receber um comentário que cita a regra e a prioridade; o segundo, nenhum comentário de estilo. A documentação da OpenAI não diz como o Codex atribui P0 e P1, então só esse teste mostra se ele segue o texto; se não seguir, ajustar a seção e repetir.
+- A revisão do Codex orienta, não substitui: o CI, a proteção da `main` e a aprovação do `production` continuam obrigatórios.
+
 ---
 
 ## Self-Review
 
-- **Cobertura:** as sete issues iniciais do epic têm as Tasks 1 a 7, e as Tasks 8 e 9 acrescentam o rollback do site e o manual da API por workflow; o objetivo (testes antes do merge, `main` protegida, rollback, site pelo CI) está coberto pelas Tasks 1, 2, 3 e 7; fila, aprovação e fumaça (4 e 6) endurecem o deploy; a 5 destrava a verificação por versão.
+- **Cobertura:** as sete issues iniciais do epic têm as Tasks 1 a 7, e as Tasks 8, 9 e 10 acrescentam o rollback do site, o manual da API por workflow e a revisão automática de PRs; o objetivo (testes antes do merge, `main` protegida, rollback, site pelo CI) está coberto pelas Tasks 1, 2, 3 e 7; fila, aprovação e fumaça (4 e 6) endurecem o deploy; a 5 destrava a verificação por versão.
 - **Nomes:** `Go`, `NPM` e `Terraform` aparecem iguais nas Tasks 1 e 2.
 - **Sem estado:** nenhum "pendente" ou "feito" neste arquivo; o andamento está nas issues. Ao fechar a última sub-issue, este plano ganha o banner de concluído.
