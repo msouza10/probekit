@@ -23,6 +23,27 @@ const base = () => ({
   ],
 })
 
+const withPulse = () => ({
+  ...base(),
+  pulse: {
+    commit: {
+      label: "a1b2c3d",
+      at: "2026-10-28T11:30:00Z",
+      href: "https://github.com/msouza10/probekit/commit/a1b2c3d",
+    },
+    site: {
+      label: "",
+      at: "2026-10-28T09:00:00Z",
+      href: "https://github.com/msouza10/probekit/actions/runs/1",
+    },
+    api: {
+      label: "",
+      at: "2026-10-27T18:00:00Z",
+      href: "https://github.com/msouza10/probekit/actions/runs/2",
+    },
+  },
+})
+
 const tmp = mkdtempSync(path.join(tmpdir(), "stats-changed-"))
 afterAll(() => rmSync(tmp, { recursive: true, force: true }))
 
@@ -115,6 +136,112 @@ describe("decideChanged", () => {
     })
     expect(result.changed).toBe(false)
     expect(result.reason).toMatch(/403/)
+  })
+})
+
+describe("sameNumbers (pulse)", () => {
+  it("pulse igual, só com outro generated_at: não mudou", () => {
+    const later = { ...withPulse(), generated_at: "2026-10-29T09:17:00Z" }
+    expect(sameNumbers(withPulse(), later)).toBe(true)
+  })
+
+  it("um commit novo, sem mudar nenhum número, já é mudança", () => {
+    const novo = withPulse()
+    novo.pulse.commit = {
+      ...novo.pulse.commit,
+      label: "f00ba44",
+      at: "2026-10-28T13:00:00Z",
+    }
+    expect(sameNumbers(withPulse(), novo)).toBe(false)
+  })
+
+  it("um deploy novo da API é mudança", () => {
+    const novo = withPulse()
+    novo.pulse.api = { ...novo.pulse.api, at: "2026-10-28T10:00:00Z" }
+    expect(sameNumbers(withPulse(), novo)).toBe(false)
+  })
+
+  it("a API que passa a ter um deploy (era null) é mudança", () => {
+    const antes = withPulse()
+    antes.pulse.api = null
+    expect(sameNumbers(antes, withPulse())).toBe(false)
+  })
+
+  it("um deploy novo do próprio site NÃO é mudança, senão cada publicação pediria outra", () => {
+    const novo = withPulse()
+    novo.pulse.site = { ...novo.pulse.site, at: "2026-10-28T15:17:00Z" }
+    expect(sameNumbers(withPulse(), novo)).toBe(true)
+  })
+
+  it("arquivo no ar no formato antigo (sem pulse) difere do novo", () => {
+    expect(sameNumbers(base(), withPulse())).toBe(false)
+  })
+})
+
+describe("readStats (pulse)", () => {
+  it("aceita um pulse completo e devolve o arquivo", () => {
+    expect(readStats(withPulse())).toEqual(withPulse())
+  })
+
+  it("aceita partes null (nunca houve deploy)", () => {
+    const parcial = withPulse()
+    parcial.pulse.api = null
+    parcial.pulse.commit = null
+    expect(readStats(parcial)).not.toBeNull()
+  })
+
+  it.each([
+    ["pulse que não é objeto", { ...withPulse(), pulse: "oi" }],
+    [
+      "commit sem data",
+      (() => {
+        const v = withPulse()
+        delete v.pulse.commit.at
+        return v
+      })(),
+    ],
+    [
+      "site sem link",
+      (() => {
+        const v = withPulse()
+        v.pulse.site.href = 3
+        return v
+      })(),
+    ],
+    [
+      "api faltando",
+      (() => {
+        const v = withPulse()
+        delete v.pulse.api
+        return v
+      })(),
+    ],
+  ])("recusa %s", (_, value) => {
+    expect(readStats(value)).toBeNull()
+  })
+})
+
+describe("decideChanged (pulse)", () => {
+  it("só um commit novo no GitHub: publica, mesmo com os números iguais", async () => {
+    const fresh = withPulse()
+    fresh.pulse.commit = {
+      ...fresh.pulse.commit,
+      label: "f00ba44",
+      at: "2026-10-28T13:00:00Z",
+    }
+    const result = await decideChanged({
+      fetchLive: () => Promise.resolve(withPulse()),
+      collectFresh: () => Promise.resolve(fresh),
+    })
+    expect(result.changed).toBe(true)
+  })
+
+  it("o ar ainda no formato antigo: publica uma vez para ganhar o pulse", async () => {
+    const result = await decideChanged({
+      fetchLive: () => Promise.resolve(base()),
+      collectFresh: () => Promise.resolve(withPulse()),
+    })
+    expect(result.changed).toBe(true)
   })
 })
 
