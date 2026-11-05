@@ -12,7 +12,8 @@
  *     números bons por nada nem publicar às cegas.
  *
  * Não importa `src/lib/stats.ts`: o `node` puro não garante ler TypeScript.
- * `readStats` repete a validação e o teste confere que as duas concordam.
+ * `readStats` repete a validação e o teste confere que as duas concordam
+ * (o `pulse`, opcional aqui, ainda não é lido por `src/lib/stats.ts`).
  */
 import { appendFile } from "node:fs/promises"
 import { pathToFileURL } from "node:url"
@@ -26,6 +27,21 @@ const isObject = (value) => typeof value === "object" && value !== null
 const isTotals = (value) =>
   isObject(value) && isCount(value.total) && isCount(value.open)
 
+const isText = (value) => typeof value === "string"
+
+const isPulseItem = (value) =>
+  isObject(value) &&
+  isText(value.label) &&
+  isText(value.at) &&
+  isText(value.href)
+
+// Cada parte do `pulse` é um item ou `null` (nunca houve deploy ou commit).
+const isPulse = (value) =>
+  isObject(value) &&
+  ["commit", "site", "api"].every(
+    (key) => value[key] === null || isPulseItem(value[key]),
+  )
+
 const isLanguage = (value) =>
   isObject(value) && typeof value.name === "string" && isCount(value.bytes)
 
@@ -38,7 +54,9 @@ export function readStats(value) {
     !isTotals(value.pull_requests) ||
     !isTotals(value.issues) ||
     !Array.isArray(value.languages) ||
-    !value.languages.every(isLanguage)
+    !value.languages.every(isLanguage) ||
+    // `pulse` é opcional: o arquivo no ar pode ser do formato antigo.
+    (value.pulse !== undefined && !isPulse(value.pulse))
   )
     return null
   return value
@@ -53,10 +71,14 @@ function comparable(stats) {
     stats.issues.total,
     stats.issues.open,
     stats.languages.map(({ name, bytes }) => `${name}:${bytes}`).sort(),
+    // Último commit e último deploy da API. O deploy do próprio site fica de
+    // fora: cada publicação o mudaria, e o agendado publicaria de novo, sem fim.
+    stats.pulse?.commit ?? null,
+    stats.pulse?.api ?? null,
   ])
 }
 
-/** Igual em tudo menos `generated_at`. */
+/** Igual em tudo menos `generated_at` e o deploy do próprio site. */
 export function sameNumbers(a, b) {
   return comparable(a) === comparable(b)
 }

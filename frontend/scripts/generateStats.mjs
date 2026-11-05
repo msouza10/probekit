@@ -1,6 +1,7 @@
 /*
  * Gera o `stats.json` que a Home lê (formato em `src/lib/stats.ts`) a partir da
- * API pública do GitHub. Uso:
+ * API pública do GitHub, com o `pulse` (último commit e últimos deploys do site
+ * e da API) que a Repo Pulse mostra. Uso:
  *
  *   npm run stats                              # grava dist/stats.json
  *   npm run stats -- --out outro/stats.json
@@ -22,6 +23,15 @@ const API = "https://api.github.com"
 const isCount = (value) =>
   typeof value === "number" && Number.isFinite(value) && value >= 0
 
+const isText = (value) => typeof value === "string" && value !== ""
+
+// Os links do `pulse` viram `href` no site: só aceita endereço do GitHub.
+function ensureGithubLink(value, what) {
+  if (!isText(value) || !value.startsWith("https://github.com/"))
+    throw new Error(`${what} sem link do GitHub válido`)
+  return value
+}
+
 function ensureCount(value, what) {
   if (!isCount(value)) throw new Error(`resposta sem ${what} válido`)
   return value
@@ -35,6 +45,39 @@ function countCommits({ body, headers }) {
   if (!Array.isArray(body))
     throw new Error("resposta de commits fora do formato")
   return body.length
+}
+
+// Último commit, da mesma resposta que conta os commits (`per_page=1`).
+function parseLastCommit(body) {
+  if (!Array.isArray(body))
+    throw new Error("resposta de commits fora do formato")
+  const [latest] = body
+  if (!latest) return null
+  const at = latest.commit?.committer?.date
+  if (!isText(latest.sha) || !isText(at))
+    throw new Error("último commit fora do formato")
+  return {
+    label: latest.sha.slice(0, 7),
+    at,
+    href: ensureGithubLink(latest.html_url, "último commit"),
+  }
+}
+
+// Último run bem-sucedido do workflow; `null` quando nunca houve um.
+async function lastDeploy(getJson, workflow) {
+  const { body } = await getJson(
+    `/repos/${REPO}/actions/workflows/${workflow}/runs?status=success&per_page=1`,
+  )
+  if (!Array.isArray(body?.workflow_runs))
+    throw new Error(`resposta de deploys de ${workflow} fora do formato`)
+  const [run] = body.workflow_runs
+  if (!run) return null
+  if (!isText(run.updated_at)) throw new Error(`deploy de ${workflow} sem data`)
+  return {
+    label: "",
+    at: run.updated_at,
+    href: ensureGithubLink(run.html_url, `deploy de ${workflow}`),
+  }
 }
 
 // A busca de issues também devolve PRs; `type:` separa os dois.
@@ -61,23 +104,37 @@ function parseLanguages(body) {
  * chaves de `headers` em minúsculas); lança se a requisição falhar.
  */
 export async function collectStats(getJson, now = new Date()) {
-  const [commits, prTotal, prOpen, issueTotal, issueOpen, languages] =
-    await Promise.all([
-      getJson(`/repos/${REPO}/commits?sha=main&per_page=1`).then(countCommits),
-      countSearch(getJson, "pr"),
-      countSearch(getJson, "pr", "+state:open"),
-      countSearch(getJson, "issue"),
-      countSearch(getJson, "issue", "+state:open"),
-      getJson(`/repos/${REPO}/languages`).then(({ body }) =>
-        parseLanguages(body),
-      ),
-    ])
+  const [
+    commitsInfo,
+    prTotal,
+    prOpen,
+    issueTotal,
+    issueOpen,
+    languages,
+    site,
+    api,
+  ] = await Promise.all([
+    getJson(`/repos/${REPO}/commits?sha=main&per_page=1`).then((response) => ({
+      count: countCommits(response),
+      last: parseLastCommit(response.body),
+    })),
+    countSearch(getJson, "pr"),
+    countSearch(getJson, "pr", "+state:open"),
+    countSearch(getJson, "issue"),
+    countSearch(getJson, "issue", "+state:open"),
+    getJson(`/repos/${REPO}/languages`).then(({ body }) =>
+      parseLanguages(body),
+    ),
+    lastDeploy(getJson, "deploy-frontend.yml"),
+    lastDeploy(getJson, "deploy-api-golang.yml"),
+  ])
   return {
     generated_at: now.toISOString().replace(/\.\d{3}Z$/, "Z"),
-    commits,
+    commits: commitsInfo.count,
     pull_requests: { total: prTotal, open: prOpen },
     issues: { total: issueTotal, open: issueOpen },
     languages,
+    pulse: { commit: commitsInfo.last, site, api },
   }
 }
 
