@@ -39,6 +39,8 @@ Com isso as possibilidades foram crescendo. Percebi que a OCI deixa criar não s
 
 Só nessa hora percebi que escolher Go foi acertado, e eu não tinha pensado nisso antes: com 1 GB de RAM por máquina, um programa em Go vira um [binário único](https://caddyserver.com/docs/architecture), sem interpretador para instalar, e isso é uma preocupação a menos num servidor tão pequeno.
 
+::diagram{name="arquitetura"}
+
 ## Terraform e o pipeline: plan, aprovação e apply
 
 Entre as habilidades que eu pouco uso na prática, uma delas era o Terraform. Já usei em alguns outros projetos, mas sempre fiquei muito preso a um único `apply` em um script só: nada de multicloud, de arquivos com dependências entre eles, de variáveis, de federação de identidade, e tudo isso unido a CI/CD. Por isso, logo de início, a proposta foi fazer um deploy inicial totalmente rodado pelo Actions.
@@ -48,6 +50,8 @@ O Terraform do projeto é básico. São dois módulos: um da OCI, com as duas VM
 Em todo pull request, o CI roda `terraform fmt -check`, `terraform init -backend=false` e `terraform validate`. Isso confere formatação e sintaxe sem credencial nenhuma e sem encostar no state.
 
 O deploy tem dois jobs. O primeiro roda `terraform plan -out=tfplan`, que grava o plano em um arquivo. O segundo só começa depois que eu aprovo no GitHub (o ambiente `production` exige um revisor), baixa esse arquivo e roda `terraform apply` nele. A diferença importa: se o `apply` rodasse sozinho, ele calcularia um plano novo na hora, e a infra poderia ter mudado desde o plano que eu li. Aplicando o arquivo salvo, sobe exatamente o que eu aprovei. Mesmo desenvolvendo sozinho, isso me obriga a ficar de olho na pipeline, sabendo o que está acontecendo, e, se tiver um possível problema, sou o primeiro a saber e posso impedir de subir para prod. (Só porque meu site faz apenas um ping, não quer dizer que não seja um ambiente de prod!)
+
+::diagram{name="infraestrutura"}
 
 Também pensei na concorrência. Se outra pessoa passar a mexer no projeto comigo (ou eu comigo mesmo), dois deploys podem tentar alterar a mesma infra ao mesmo tempo, e os planos se embolam. Há duas travas contra isso. A primeira é o `concurrency` do GitHub Actions (grupo `deploy`, `cancel-in-progress: false`): a segunda execução espera a primeira, e a que está rodando nunca é cancelada no meio de um `apply`. A segunda é o [lock do state](https://developer.hashicorp.com/terraform/language/backend/oci#state-locking): o backend `oci` cria um objeto de lock no bucket durante `plan`, `apply` e `destroy`. E, se o state mudar entre o plano e o apply, o Terraform recusa o plano salvo. Em um teste local com um recurso de laboratório, aplicar um plano antigo depois de outro terminou em `Error: Saved plan is stale`.
 
