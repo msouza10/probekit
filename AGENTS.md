@@ -40,6 +40,49 @@ Regras de comportamento:
 - Nunca apontar um problema sem dizer o que fazer a respeito.
 - Reconhecer o que está **certo** no que o criador escreveu, com o motivo.
 
+## Code Review Rules
+
+Estas regras valem para a revisão de pull requests (o Codex lê esta seção). O Probekit é um repositório **público**: site em React/Vite publicado no Cloudflare Workers, API em Go em VMs na Oracle Cloud, infraestrutura em Terraform e deploy por GitHub Actions. Escreva os comentários em português do Brasil.
+
+### Como revisar
+
+- Comente só problemas **introduzidos por este PR** e que tenham consequência real. Ignore formatação, lint, tipos e o que os testes e o CI já conferem.
+- Cada comentário diz, em poucas linhas: **o que acontece** (o efeito concreto, com o arquivo e a linha), **por que acontece** (o mecanismo) e **como corrigir** (um exemplo curto). Não aponte um problema sem dizer o que fazer.
+- Cite a regra desta seção que justifica o comentário.
+- Se o PR está correto em algum ponto que merecia dúvida, diga em uma linha e por quê.
+
+### Prioridade
+
+- **P0** (bloqueia o merge): expõe segredo, token, IP ou o detalhe de uma exposição aberta; faz um `apply` do Terraform sem o plano revisado ou fora do ambiente `production`; dá acesso a secrets ou a ambiente protegido a código vindo de um PR de fora.
+- **P1** (corrigir antes do merge): comportamento errado em CORS, rate limit por IP real ou TLS; mudança nesses pontos sem teste que exercite o caminho; documento que contradiz o workflow ou o Terraform que descreve; decisão de um ADR aceito reescrita; prefixo de commit que gera a versão errada da release.
+- Não comente nada abaixo de P1.
+
+### Repositório público
+
+- Nenhum segredo, token, IP, porta, caminho interno ou descrição detalhada de uma exposição aberta em código, workflow, documento, issue ou PR. Caminho seguro: citar só o **nome** do secret ou da variável e escrever "restringir acessos" em vez de listar o que está aberto. Por quê: o que é publicado pode ficar em cache ou indexado mesmo depois de apagado.
+
+### Terraform e GitHub Actions (`infra/**`, `.github/workflows/**`)
+
+- O `apply` deve aplicar exatamente o plano gerado e revisado pelo `plan`, e rodar no ambiente `production`, que exige um revisor. Caminho seguro: o `plan` guarda o plano, o job do `apply` o recebe e o aplica. Por quê: é isso que garante que o aprovado é o que roda.
+- `permissions` do job no mínimo necessário, e secrets só em jobs que rodam na `main`. Gatilhos como `pull_request_target` não podem fazer checkout nem executar código do PR.
+- Não crie recurso, abra porta nem alargue regra de rede sem que o PR explique a necessidade.
+
+### API em Go (`backend/api-service-golang/**`)
+
+- Mudança em CORS, em rate limit por IP real ou em TLS precisa de teste que exercite o caminho: origem permitida e bloqueada, IP atrás do proxy, certificado. Por quê: são erros que não quebram o build e só aparecem em produção.
+- A release lê a **mensagem de cada commit** que toca esta pasta, não o título do PR. Confira o prefixo (`feat` gera minor; `fix` e `perf`, patch; `docs`, `chore` e `ci`, nenhuma versão). Corrigir um comportamento errado é `fix`, mesmo que o diff seja grande.
+
+### Frontend e artigos (`frontend/**`)
+
+- Texto de artigo, diagrama ou página que descreve a infraestrutura deve bater com o workflow ou o Terraform que a sustenta. Exemplo de erro já cometido: "a cada 3 horas" para um cron que roda seis vezes ao dia, com intervalo de até 9 horas; ou chamar de "automático" um deploy disparado à mão. Caminho seguro: conferir no `.yml` ou no `.tf` e escrever só o que ele diz.
+- Nenhum valor de URL, chave ou token embutido no código do site. Chamadas a serviços externos devem ir pela API do Probekit, não direto do navegador, quando exigirem credencial ou tiverem limite de uso.
+
+### Documentação (`docs/**`)
+
+- Spec, ADR, plano e runbook explicam; **não guardam estado**. Apontar "pendente", "feito" ou caixas marcadas nesses arquivos: o estado vive na issue e no GitHub Project.
+- Não edite a **decisão** de um ADR aceito (Contexto, Decisão, Alternativas). Só _Status_ e _Validação_ mudam, **com data**; uma decisão nova é um ADR novo.
+- "Verificado" ou "validado" exige data e a evidência. Sem isso, o texto deve dizer que falta confirmar.
+
 ## Skills e MCPs instalados
 
 Gerenciados via `.agents/skills/` (lockfile `skills-lock.json`, instalados pelo CLI `npx skills`) e `.mcp.json`. Atualizar esta lista conforme skills/MCPs forem adicionados ou removidos.

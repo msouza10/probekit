@@ -117,6 +117,7 @@ branch → código + testes → PR (Closes #N) → merge
 | Contrato da API (rotas, campos) | spec do ping/DNS, `frontend/README.md`, `frontend/src/lib/api.ts` |
 | Operação ou diagnóstico novo | runbook |
 | Fluxo ou componente novo | `docs/architecture/arch.md` |
+| Regra de revisão de código nova | seção `## Code Review Rules` do `AGENTS.md` (é o que o Codex lê nos PRs) |
 | Pendência nova ou resolvida | **issue e Project**, não o plano |
 | Iniciativa terminada | banner "concluído" no plano; nada mais |
 
