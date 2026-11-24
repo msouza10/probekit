@@ -6,9 +6,10 @@ import (
 )
 
 type Response struct {
-	Message string `json:"message"`
-	Code    string `json:"code,omitempty"`
-	Version string `json:"version,omitempty"`
+	Message      string `json:"message"`
+	Code         string `json:"code,omitempty"`
+	Version      string `json:"version,omitempty"`
+	OriginRegion string `json:"origin_region,omitempty"`
 }
 
 type ErrorResponse struct {
@@ -17,14 +18,15 @@ type ErrorResponse struct {
 }
 
 type LookupResponse struct {
-	Domain string      `json:"domain"`
-	Addrs  []string    `json:"addrs"`
-	Cname  string      `json:"cname"`
-	Mx     []MXRecord  `json:"mx"`
-	Txt    []string    `json:"txt"`
-	Ns     []string    `json:"ns"`
-	Srv    []SRVRecord `json:"srv"`
-	Ip     []string    `json:"ip"`
+	Domain       string      `json:"domain"`
+	Addrs        []string    `json:"addrs"`
+	Cname        string      `json:"cname"`
+	Mx           []MXRecord  `json:"mx"`
+	Txt          []string    `json:"txt"`
+	Ns           []string    `json:"ns"`
+	Srv          []SRVRecord `json:"srv"`
+	Ip           []string    `json:"ip"`
+	OriginRegion string      `json:"origin_region,omitempty"`
 }
 
 type SRVRecord struct {
@@ -40,15 +42,16 @@ type MXRecord struct {
 }
 
 type PingResponse struct {
-	Target      string  `json:"target"`
-	IPAddr      string  `json:"ip_addr"`
-	PacketsSent uint32  `json:"packets_sent"`
-	PacketsRecv uint32  `json:"packets_recv"`
-	PacketLoss  float64 `json:"packet_loss"`
-	MinRtt      string  `json:"min_rtt"`
-	AvgRtt      string  `json:"avg_rtt"`
-	MaxRtt      string  `json:"max_rtt"`
-	StdDevRtt   string  `json:"jitter"`
+	Target       string  `json:"target"`
+	IPAddr       string  `json:"ip_addr"`
+	PacketsSent  uint32  `json:"packets_sent"`
+	PacketsRecv  uint32  `json:"packets_recv"`
+	PacketLoss   float64 `json:"packet_loss"`
+	MinRtt       string  `json:"min_rtt"`
+	AvgRtt       string  `json:"avg_rtt"`
+	MaxRtt       string  `json:"max_rtt"`
+	StdDevRtt    string  `json:"jitter"`
+	OriginRegion string  `json:"origin_region,omitempty"`
 }
 
 func SetJSON(w http.ResponseWriter, status int, res interface{}) {

@@ -70,7 +70,7 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 - ✅ As páginas de Ping e DNS Lookup chamam a API de verdade (`VITE_API_BASE_URL`, `https://api.probekit.cc` em produção); a simulação de resultados só existe em desenvolvimento, para nunca mostrar dados inventados em produção.
 - ✅ Testes com Vitest (incluindo o cliente da API e as páginas).
 - ✅ **Site no ar** como Cloudflare Worker com assets estáticos (`frontend/wrangler.toml`), nos domínios `probekit.cc` e `www.probekit.cc`, com deploy pelo workflow `deploy-frontend.yml` (ver abaixo); o passo a passo manual com o Wrangler continua no [`runbook`](./docs/runbook-deploy.md).
-- ✅ As páginas de ferramenta mostram a origem do teste ("Sonda: OCI · São Paulo"), com valores fixos em `frontend/src/lib/api.ts` (`PROBE_*`), porque as VMs ficam sempre na mesma região. O campo `origin_region` da API não é mais necessário para isso.
+- ✅ As páginas de ferramenta mostram a origem do teste ("Sonda: OCI · São Paulo"), com valores fixos em `frontend/src/lib/api.ts` (`PROBE_*`) como reserva. A task #88 faz a API devolver o campo `origin_region` (identificador de região da instância, omitido se a variável `ORIGIN_REGION` faltar); quando ele vem, o site mostra o nome amigável da região, e sem ele mantém o texto fixo. Contrato na [spec de ping e DNS](./docs/superpowers/specs/2026-10-01-probekit-ping-dns-feature-design.md).
 - ✅ Rotas inexistentes respondem HTTP 404 (`not_found_handling = "404-page"`), e o build pré-renderiza um HTML por rota (com título, descrição, canonical e dados estruturados próprios). Validado localmente com `wrangler dev` em 2026-10-26 e em produção em 2026-10-27 (`curl`: `/nao-existe` responde 404 com a página "não encontrada" e `noindex`; `/ping` responde 200).
 - ✅ CI em pull request (`ci.yml`, com os jobs Go, NPM e Terraform) e deploy do site pelo workflow `deploy-frontend.yml` quando algo em `frontend/**` entra na `main`, com aprovação do ambiente `production` ([ADR-0008](./docs/adr/0008-deploy-do-site-pelo-github-actions.md); verificado em 2026-10-21 e 2026-10-22).
 
@@ -108,7 +108,7 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 
 O primeiro marco (ping e DNS lookup no ar, com infraestrutura reproduzível) está concluído. O acompanhamento tarefa a tarefa fica em [`docs/superpowers/plans/2026-10-09-probekit-first-deploy.md`](./docs/superpowers/plans/2026-10-09-probekit-first-deploy.md). O que vem a seguir, em ordem:
 
-1. **Backend (Task 3, restante):** devolver `origin_region` nas respostas de ping e DNS lookup, se ainda fizer sentido (o site já mostra a origem com valores fixos).
+1. **Backend (Task 3, restante):** a task #88 devolve `origin_region` nas respostas de ping, DNS lookup e health check; o campo só chega às VMs depois de uma release seguida do Deploy, e o valor exato do identificador ainda precisa ser confirmado numa VM.
 2. **Operação:** teste de derrubar uma VM.
 3. **Endurecimento (Task 13):** restringir a 443 às faixas de IP da Cloudflare, restringir o SSH, distribuir as VMs em fault domains distintos e avaliar *Authenticated Origin Pulls*.
 4. **Próximas ferramentas** do catálogo, definidas conforme as necessidades.

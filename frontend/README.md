@@ -39,7 +39,8 @@ Rotas em [`src/AnimatedRoutes.tsx`](./src/AnimatedRoutes.tsx): `/` (Home), `/pin
 
 As duas páginas chamam a API de verdade por [`src/lib/api.ts`](./src/lib/api.ts) (`runPing` e `runDnsLookup`) e tratam os estados de carregando, sucesso e erro. O contrato da API e o comportamento esperado estão na spec [`docs/superpowers/specs/2026-10-01-probekit-ping-dns-feature-design.md`](../docs/superpowers/specs/2026-10-01-probekit-ping-dns-feature-design.md).
 
-- A origem do teste ("Sonda: OCI · São Paulo") vem de constantes em `src/lib/api.ts` (`PROBE_PROVIDER`, `PROBE_PROVIDER_SHORT`, `PROBE_LOCATION`), porque a API roda sempre na mesma região. Se um dia houver mais de uma sonda, a origem passa a vir da resposta da API.
+- A origem do teste ("Sonda: OCI · São Paulo") vem de constantes em `src/lib/api.ts` (`PROBE_PROVIDER`, `PROBE_PROVIDER_SHORT`, `PROBE_LOCATION`), porque a API roda sempre na mesma região. Quando a resposta da API traz `origin_region`, o site passa a usar esse valor (ver abaixo); se um dia houver mais de uma sonda, é por esse campo que a origem muda.
+- `origin_region` (texto) é um campo **opcional** das respostas de `/api/ping`, `/api/dns-lookup` e `GET /`: traz o identificador de região da instância que fez o teste. Ele **pode não vir** (a API o omite quando a variável `ORIGIN_REGION` do serviço está ausente ou vazia, e a VM só a recebe depois de um Deploy), então o código nunca deve exigi-lo. O site traduz o identificador para um nome amigável com um pequeno mapa (a região de São Paulo vira "São Paulo"), mostra um identificador desconhecido como veio e, sem o campo, usa o texto fixo de `PROBE_LOCATION`. Contrato completo na spec citada acima.
 - Se a API não responder, **em produção** a página mostra o erro. A simulação de resultados (valores aleatórios, marcada como "Simulação local") só existe em desenvolvimento (`import.meta.env.DEV`), para um resultado inventado nunca passar por verdadeiro.
 
 ## Pré-renderização

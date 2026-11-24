@@ -39,7 +39,7 @@ type pingSuccessBody struct {
 // parâmetros ausentes/inválidos, alvo que não resolve e o caminho de sucesso.
 // Roda tudo via mux.ServeHTTP, sem subir um servidor de verdade.
 func TestPing(t *testing.T) {
-	mux := handler.Ping()
+	mux := handler.Ping("")
 
 	t.Run("method not allowed", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/api/ping?target=127.0.0.1", nil)

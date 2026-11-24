@@ -1,11 +1,11 @@
 import { MapPin } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { PROBE_LOCATION, PROBE_PROVIDER_SHORT } from "@/lib/api"
+import { PROBE_PROVIDER_SHORT, regionLabel } from "@/lib/api"
 
 /**
  * Selo que diz de onde sai o teste, com um pino de localização. Antes do
- * primeiro resultado mostra o local fixo da sonda; depois, a região que a API
- * devolveu.
+ * primeiro resultado mostra o local fixo da sonda; depois, o nome amigável da região
+ * que a API devolveu.
  */
 export function OriginStrip({ region }: { region?: string }) {
   return (
@@ -16,7 +16,7 @@ export function OriginStrip({ region }: { region?: string }) {
       <MapPin aria-hidden="true" />
       <span className="text-muted-foreground">Sonda:</span>
       <span className="text-foreground">
-        {PROBE_PROVIDER_SHORT} · {region ?? PROBE_LOCATION}
+        {PROBE_PROVIDER_SHORT} · {regionLabel(region)}
       </span>
     </Badge>
   )

@@ -15,7 +15,7 @@ import (
 // ausente/inválido, domínio que não resolve, alvo privado e o caminho de
 // sucesso contra um domínio público real.
 func TestLookup(t *testing.T) {
-	mux := handler.Lookup()
+	mux := handler.Lookup("")
 
 	t.Run("method not allowed", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, "/api/dns-lookup?domain=example.com", nil)

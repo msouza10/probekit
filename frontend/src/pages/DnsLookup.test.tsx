@@ -5,7 +5,8 @@ import type { DnsLookupResult } from "@/lib/api"
 import { runDnsLookup } from "@/lib/api"
 import DnsLookup from "./DnsLookup"
 
-vi.mock("@/lib/api", () => ({
+vi.mock("@/lib/api", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api")>()),
   PROBE_PROVIDER: "Oracle Cloud",
   PROBE_PROVIDER_SHORT: "OCI",
   PROBE_LOCATION: "São Paulo",
@@ -165,7 +166,7 @@ describe("DnsLookup (comportamento)", () => {
     expect(screen.getByText("OCI · São Paulo")).toBeInTheDocument()
 
     await submit(user, "example.com")
-    expect(await screen.findByText("OCI · sa-saopaulo-1")).toBeInTheDocument()
+    expect(await screen.findByText("OCI · São Paulo")).toBeInTheDocument()
   })
 
   it("com service e proto preenchidos, runDnsLookup recebe os três argumentos", async () => {
