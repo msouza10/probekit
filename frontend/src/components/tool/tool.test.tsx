@@ -9,7 +9,8 @@ import { ResultStatus } from "./ResultStatus"
 import { ToolNotes } from "./ToolNotes"
 import { ToolPage } from "./ToolPage"
 
-vi.mock("@/lib/api", () => ({
+vi.mock("@/lib/api", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api")>()),
   PROBE_PROVIDER_SHORT: "OCI",
   PROBE_LOCATION: "São Paulo",
 }))
@@ -39,11 +40,15 @@ describe("ToolPage", () => {
 })
 
 describe("OriginStrip", () => {
-  it("usa o local fixo e troca pela região da resposta", () => {
+  it("usa o local fixo e troca pelo nome amigável da região", () => {
     const { rerender, container } = render(<OriginStrip />)
     expect(screen.getByText("OCI · São Paulo")).toBeInTheDocument()
-    rerender(<OriginStrip region="sa-saopaulo-1" />)
-    expect(screen.getByText("OCI · sa-saopaulo-1")).toBeInTheDocument()
+    rerender(<OriginStrip region="sa-vinhedo-1" />)
+    expect(screen.getByText("OCI · Vinhedo")).toBeInTheDocument()
+    rerender(<OriginStrip region="gru" />)
+    expect(screen.getByText("OCI · São Paulo")).toBeInTheDocument()
+    rerender(<OriginStrip region="xx-nova-1" />)
+    expect(screen.getByText("OCI · xx-nova-1")).toBeInTheDocument()
     // Selo com ícone de localização decorativo; o texto diz "Sonda:".
     expect(container.querySelector("[data-slot=badge]")).not.toBeNull()
     expect(screen.getByText("Sonda:")).toBeInTheDocument()

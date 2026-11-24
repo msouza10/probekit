@@ -5,7 +5,8 @@ import type { PingResult } from "@/lib/api"
 import { runPing } from "@/lib/api"
 import Ping from "./Ping"
 
-vi.mock("@/lib/api", () => ({
+vi.mock("@/lib/api", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/lib/api")>()),
   PROBE_PROVIDER: "Oracle Cloud",
   PROBE_PROVIDER_SHORT: "OCI",
   PROBE_LOCATION: "São Paulo",
@@ -163,7 +164,7 @@ describe("Ping (comportamento)", () => {
     expect(screen.getByText(/OCI · São Paulo/)).toBeInTheDocument()
 
     await submit(user, "example.com")
-    expect(await screen.findByText(/OCI · sa-saopaulo-1/)).toBeInTheDocument()
+    expect(await screen.findByText(/OCI · São Paulo/)).toBeInTheDocument()
   })
 
   it("erro mostra mensagem e código, e o atalho tenta 1.1.1.1", async () => {

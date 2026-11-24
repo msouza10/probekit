@@ -12,6 +12,7 @@ import (
 var version = "dev"
 
 func main() {
+	originRegion := os.Getenv("ORIGIN_REGION")
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			utils.SetJSON(w, http.StatusMethodNotAllowed, utils.ErrorResponse{
@@ -22,8 +23,9 @@ func main() {
 		}
 
 		res := utils.Response{
-			Message: "OK",
-			Version: version,
+			Message:      "OK",
+			Version:      version,
+			OriginRegion: originRegion,
 		}
 
 		utils.SetJSON(w, http.StatusOK, res)
@@ -72,16 +74,18 @@ func main() {
 
 	log.Println("root endpoint - /")
 
-	http.Handle("/api/ping", WithRateLimit(handler.Ping()))
+	http.Handle("/api/ping", WithRateLimit(handler.Ping(originRegion)))
 	log.Println("ping endpoint - /api/ping?target=<target>&count=<count>&timeout=<timeout>")
 
-	http.Handle("/api/dns-lookup", WithRateLimit(handler.Lookup()))
+	http.Handle("/api/dns-lookup", WithRateLimit(handler.Lookup(originRegion)))
 	log.Println("dns-lookup endpoint - /api/dns-lookup?domain=<domain>")
 
 	certFile, keyFile, err := utils.TLSFilesFromEnv()
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	log.Printf("Origin region: %s", originRegion)
 
 	origins := utils.OriginsFromEnv()
 	log.Printf("CORS allowed origins: %v", origins)

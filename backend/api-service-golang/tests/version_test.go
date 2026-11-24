@@ -43,17 +43,19 @@ func buildServerWithVersion(t *testing.T, version string) string {
 	return bin
 }
 
-// rootBody sobe o binário e devolve o JSON de GET /.
-func rootBody(t *testing.T, bin string) map[string]any {
+// rootBody sobe o binário e devolve o JSON de GET /. As variáveis extras
+// (ex.: "ORIGIN_REGION=...") são acrescentadas ao ambiente do processo.
+func rootBody(t *testing.T, bin string, extraEnv ...string) map[string]any {
 	t.Helper()
 	certPath, keyPath, cert := writeSelfSigned(t)
 	addr := freeAddr(t)
 
-	startServer(t, bin, addr,
-		"ADDR="+addr,
-		"TLS_CERT_FILE="+certPath,
-		"TLS_KEY_FILE="+keyPath,
-	)
+	env := append([]string{
+		"ADDR=" + addr,
+		"TLS_CERT_FILE=" + certPath,
+		"TLS_KEY_FILE=" + keyPath,
+	}, extraEnv...)
+	startServer(t, bin, addr, env...)
 
 	pool := x509.NewCertPool()
 	pool.AddCert(cert)

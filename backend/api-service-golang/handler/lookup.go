@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Lookup() http.Handler {
+func Lookup(originRegion string) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/api/dns-lookup", func(w http.ResponseWriter, r *http.Request) {
@@ -48,7 +48,7 @@ func Lookup() http.Handler {
 
 		// IP
 		ipRecords, _ := net.LookupIP(domain)
-		
+
 		// Block private ip address
 		for _, ip := range ipRecords {
 			if utils.IsBlockedIP(ip) {
@@ -116,14 +116,15 @@ func Lookup() http.Handler {
 		}
 
 		utils.SetJSON(w, http.StatusOK, utils.LookupResponse{
-			Domain: domain,
-			Addrs:  addrs,
-			Cname:  cname,
-			Mx:     mxList,
-			Txt:    txt,
-			Ns:     nsList,
-			Srv:    srvList,
-			Ip:     ipList,
+			Domain:       domain,
+			Addrs:        addrs,
+			Cname:        cname,
+			Mx:           mxList,
+			Txt:          txt,
+			Ns:           nsList,
+			Srv:          srvList,
+			Ip:           ipList,
+			OriginRegion: originRegion,
 		})
 	})
 

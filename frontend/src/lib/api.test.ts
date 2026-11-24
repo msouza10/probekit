@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { runDnsLookup, runPing } from "./api"
+import { PROBE_LOCATION, regionLabel, runDnsLookup, runPing } from "./api"
 
 const pingBody = {
   target: "1.1.1.1",
@@ -172,4 +172,27 @@ describe("runDnsLookup", () => {
     expect(error.code).toBe("backend_unreachable")
     expect(error.error).not.toMatch(/localhost|8080/)
   })
+})
+
+describe("regionLabel", () => {
+  it.each([
+    ["gru", "São Paulo"],
+    ["sa-saopaulo-1", "São Paulo"],
+    ["sa-vinhedo-1", "Vinhedo"],
+    ["  GRU ", "São Paulo"],
+    ["SA-SaoPaulo-1", "São Paulo"],
+  ])("traduz %j para %j", (region, label) => {
+    expect(regionLabel(region)).toBe(label)
+  })
+
+  it("devolve o valor cru (sem espaços nas pontas) quando não conhece", () => {
+    expect(regionLabel("  xx-nova-1 ")).toBe("xx-nova-1")
+  })
+
+  it.each([undefined, "", "   "])(
+    "usa o local fixo quando a região é %j",
+    (region) => {
+      expect(regionLabel(region)).toBe(PROBE_LOCATION)
+    },
+  )
 })

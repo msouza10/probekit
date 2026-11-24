@@ -1,6 +1,8 @@
 # Probekit — feature: ping e DNS lookup
 
 > **Nota de 2026-10-18:** as rotas `/api/ping` e `/api/dns-lookup` e as páginas `/ping` e `/dns-lookup` estão no ar, e o rate limit usa o IP real do cliente (PR #10). O campo `origin_region` descrito abaixo **ainda não é devolvido** pelo backend; o acompanhamento dessa entrega fica no GitHub Project, não neste documento.
+>
+> **Nota de 2026-11-24:** a task #88 passou a devolver o campo `origin_region` em `GET /api/ping`, `GET /api/dns-lookup` e `GET /` (health check). A nota de 2026-10-18 descreve o que valia naquela data. O contrato está em [Contrato do `origin_region`](#contrato-do-origin_region).
 
 ## Contexto
 
@@ -49,6 +51,14 @@ Entregar as duas ferramentas de ponta a ponta: usuário acessa a página da ferr
 - Backend como um único binário Go, pacotes sugeridos: `internal/ping`, `internal/dnslookup`, `internal/validate` (checagem de IP privado), `internal/ratelimit`, `cmd/api` (HTTP server e rotas).
 - Contrato de API em JSON, com um formato de erro consistente entre as rotas: `{"error": "mensagem", "code": "invalid_target" | "rate_limited" | "timeout" | "internal_error"}`.
 - Frontend consome a API via uma camada fina de cliente HTTP (ex: `src/api/probekit.ts`) para não espalhar `fetch` pelas páginas.
+
+## Contrato do `origin_region`
+
+- **Campo:** `origin_region`, texto (string), presente nas respostas de `GET /api/ping`, `GET /api/dns-lookup` e `GET /` (health check).
+- **Origem:** a variável de ambiente `ORIGIN_REGION` do serviço, lida uma vez na subida. O script de deploy (`infra/shellscript/deploy-api-go.sh`) a preenche com o identificador de região da instância, obtido do metadata dela, e a grava na unit do systemd. Como só chega às VMs pelo Deploy ([ADR-0005](../../adr/0005-atualizacao-das-vms-e-deploy-inicial.md)), depois de uma release é preciso rodar o Deploy para o campo aparecer.
+- **Valor:** o identificador de região da instância. O texto exato que o metadata devolve ainda precisa ser confirmado numa VM; o contrato não depende dele, porque o site trata o valor como texto opaco.
+- **Variável ausente ou vazia:** o campo é **omitido** da resposta (não vem `""`) e a API continua de pé.
+- **Exibição no site:** o frontend traduz o identificador para um nome amigável com um pequeno mapa (a região de São Paulo vira "São Paulo"). Identificador desconhecido é mostrado como veio. Sem o campo, o site mostra o texto fixo de `PROBE_LOCATION` ("São Paulo").
 
 ## Testes
 

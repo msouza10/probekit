@@ -39,11 +39,30 @@ export interface ApiError {
   code: string
 }
 
-// Quem hospeda a sonda e onde fica. Valores fixos, porque a API roda sempre na
-// mesma região; `origin_region` na resposta, se vier, não é usado para isso.
+// Quem hospeda a sonda e onde fica. `PROBE_LOCATION` é o texto de reserva
+// quando a resposta não traz `origin_region`.
 export const PROBE_PROVIDER = "Oracle Cloud"
 export const PROBE_PROVIDER_SHORT = "OCI"
 export const PROBE_LOCATION = "São Paulo"
+
+// Nome amigável das regiões da OCI. Aceita a sigla (gru) e o identificador
+// (sa-saopaulo-1), porque o metadata pode devolver qualquer uma das formas.
+const REGION_LABELS: Record<string, string> = {
+  gru: "São Paulo",
+  "sa-saopaulo-1": "São Paulo",
+  "sa-vinhedo-1": "Vinhedo",
+}
+
+/**
+ * Texto do selo de origem. Região conhecida vira o nome amigável; desconhecida
+ * aparece como veio (sem espaços nas pontas); ausente ou vazia cai no local
+ * fixo da sonda.
+ */
+export function regionLabel(region?: string): string {
+  const raw = region?.trim()
+  if (!raw) return PROBE_LOCATION
+  return REGION_LABELS[raw.toLowerCase()] ?? raw
+}
 
 // Em produção VITE_API_BASE_URL aponta para a API (https://api.probekit.cc).
 // Vazio, o caminho fica relativo e o proxy do Vite (dev) encaminha para o Go.

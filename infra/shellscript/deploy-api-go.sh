@@ -13,6 +13,7 @@ UPDATER_PATH="/usr/local/sbin/autodeploy-api-go.sh"
 TLS_CERT_FILE="/etc/probekit/origin-ca.pem"
 TLS_KEY_FILE="/etc/probekit/origin-ca-key.pem"
 CORS_ALLOWED_ORIGINS="https://probekit.cc,https://www.probekit.cc"
+METADATA_ADDRESS="http://169.254.169.254"
 
 
 TMP_DIR=""
@@ -27,6 +28,13 @@ acquire_lock() {
         log "outro deploy em andamento, saindo"
         exit 0
     fi
+}
+
+get_instance_metadata() {
+    local field="$1"
+    curl -H "Authorization: Bearer Oracle" -fsSL \
+        --retry 3 --max-time 5 \
+        "$METADATA_ADDRESS/opc/v2/instance/$field" 2>/dev/null || true
 }
 
 calculate_gid() {
@@ -148,6 +156,9 @@ WorkingDirectory=$APP_DIR
 Environment="TLS_CERT_FILE=$TLS_CERT_FILE"
 Environment="TLS_KEY_FILE=$TLS_KEY_FILE"
 Environment="CORS_ALLOWED_ORIGINS=$CORS_ALLOWED_ORIGINS"
+Environment="ORIGIN_REGION=$ORIGIN_REGION"
+Environment="ORIGIN_HOSTNAME=$ORIGIN_HOSTNAME"
+Environment="ORIGIN_DISPLAY_NAME=$ORIGIN_DISPLAY_NAME"
 ExecStart=$BIN_PATH
 Restart=always
 AmbientCapabilities=CAP_NET_BIND_SERVICE
@@ -244,6 +255,11 @@ main() {
 
     install_dependencies
     allow_icmp
+
+    ORIGIN_REGION=$(get_instance_metadata region)
+    ORIGIN_HOSTNAME=$(get_instance_metadata hostname)
+    ORIGIN_DISPLAY_NAME=$(get_instance_metadata displayName)
+    log "origem: region='${ORIGIN_REGION:-vazio}'"
 
     free_ports 22 443
 
