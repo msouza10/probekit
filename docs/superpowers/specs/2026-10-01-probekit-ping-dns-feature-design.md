@@ -56,7 +56,7 @@ Entregar as duas ferramentas de ponta a ponta: usuário acessa a página da ferr
 
 - **Campo:** `origin_region`, texto (string), presente nas respostas de `GET /api/ping`, `GET /api/dns-lookup` e `GET /` (health check).
 - **Origem:** a variável de ambiente `ORIGIN_REGION` do serviço, lida uma vez na subida. O script de deploy (`infra/shellscript/deploy-api-go.sh`) a preenche com o identificador de região da instância, obtido do metadata dela, e a grava na unit do systemd. Como só chega às VMs pelo Deploy ([ADR-0005](../../adr/0005-atualizacao-das-vms-e-deploy-inicial.md)), depois de uma release é preciso rodar o Deploy para o campo aparecer.
-- **Valor:** o identificador de região da instância. O texto exato que o metadata devolve ainda precisa ser confirmado numa VM; o contrato não depende dele, porque o site trata o valor como texto opaco.
+- **Valor:** o identificador de região da instância. Em 2026-11-24, depois do Deploy da API (versão 1.4.0), `GET /api/ping`, `GET /api/dns-lookup` e `GET /` em produção devolveram `"origin_region": "sa-saopaulo-1"`, e a página `/ping` recebeu o mesmo valor (conferido pelo `curl` e pelo "Ver JSON" da página). Isso vale para a região atual; se a sonda mudar de região, o valor muda junto.
 - **Variável ausente ou vazia:** o campo é **omitido** da resposta (não vem `""`) e a API continua de pé.
 - **Exibição no site:** o frontend traduz o identificador para um nome amigável com um pequeno mapa (a região de São Paulo vira "São Paulo"). Identificador desconhecido é mostrado como veio. Sem o campo, o site mostra o texto fixo de `PROBE_LOCATION` ("São Paulo").
 

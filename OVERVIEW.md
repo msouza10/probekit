@@ -108,7 +108,6 @@ Detalhes completos do acordo de colaboração em `AGENTS.md`. Spec detalhado do 
 
 O primeiro marco (ping e DNS lookup no ar, com infraestrutura reproduzível) está concluído. O acompanhamento tarefa a tarefa fica em [`docs/superpowers/plans/2026-10-09-probekit-first-deploy.md`](./docs/superpowers/plans/2026-10-09-probekit-first-deploy.md). O que vem a seguir, em ordem:
 
-1. **Backend (Task 3, restante):** a task #88 devolve `origin_region` nas respostas de ping, DNS lookup e health check; o campo só chega às VMs depois de uma release seguida do Deploy, e o valor exato do identificador ainda precisa ser confirmado numa VM.
-2. **Operação:** teste de derrubar uma VM.
-3. **Endurecimento (Task 13):** restringir a 443 às faixas de IP da Cloudflare, restringir o SSH, distribuir as VMs em fault domains distintos e avaliar *Authenticated Origin Pulls*.
-4. **Próximas ferramentas** do catálogo, definidas conforme as necessidades.
+1. **Operação:** teste de derrubar uma VM.
+2. **Endurecimento (Task 13):** restringir a 443 às faixas de IP da Cloudflare, restringir o SSH, distribuir as VMs em fault domains distintos e avaliar *Authenticated Origin Pulls*.
+3. **Próximas ferramentas** do catálogo, definidas conforme as necessidades.
