@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <title>Feed de exemplo</title>
+    <link>https://exemplo.com</link>
+    <description>Feed fictício para os testes do coletor</description>
+    <pubDate>Tue, 24 Nov 2026 15:00:00 GMT</pubDate>
+    <item>
+      <title>Free exam voucher for AZ-104</title>
+      <link>https://exemplo.com/posts/1?utm_source=feed</link>
+      <pubDate>Tue, 24 Nov 2026 14:02:00 GMT</pubDate>
+      <dc:creator>Ana</dc:creator>
+      <description><![CDATA[<p>Olá <b>mundo</b></p>]]></description>
+    </item>
+    <item>
+      <title>Post sem data</title>
+      <link>https://exemplo.com/posts/2</link>
+      <description>Resumo sem data</description>
+    </item>
+    <item>
+      <title>Data com fuso</title>
+      <link>https://exemplo.com/posts/3</link>
+      <pubDate>Tue, 24 Nov 2026 11:02:00 -0300</pubDate>
+      <description>Save 50% &amp;amp; more</description>
+    </item>
+    <item>
+      <title>Entrada sem link</title>
+      <description>Esta entrada não tem link e não pode virar item.</description>
+    </item>
+    <item>
+      <title>Entrada com link perigoso</title>
+      <link>javascript:alert(1)</link>
+      <description>O link não é http nem https.</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,44 @@
+# Catálogo de fontes do coletor (feeds públicos).
+# Origem: Sources/RSS_List.txt do VoucherBot (https://github.com/Devathmaj/VoucherBot, Apache-2.0,
+# commit ab4dc19, lido em 2026-11-26). Tiradas daqui: the_register, techtarget_aws, techtarget_cloud
+# (404 ou sem itens na medição de 2026-11-24) e suse_c_blog. `vendor_hint` vem do campo `vendor` de
+# voucherbot/database/bootstrap.py. `blog:cisco_newsroom` e `rss:cisco_newsroom` apontam para a mesma URL.
+sources:
+  - {id: "blog:aws_training_and_certification_blog", name: "AWS Training and Certification Blog", kind: blog, url: "https://aws.amazon.com/blogs/training-and-certification/feed/", vendor_hint: "aws"}
+  - {id: "blog:aws_training_announcements", name: "AWS Training Announcements", kind: blog, url: "https://aws.amazon.com/blogs/training-and-certification/category/post-types/announcements/feed/", vendor_hint: "aws"}
+  - {id: "rss:aws_builder", name: "AWS Builder", kind: rss, url: "https://builder.aws.com/rss.xml", vendor_hint: "aws"}
+  - {id: "blog:microsoft_learn_blog", name: "Microsoft Learn Blog", kind: blog, url: "https://techcommunity.microsoft.com/t5/s/gxcuf89792/rss/Community?interaction.style=blog&labels=Microsoft+Learn+Blog", vendor_hint: "microsoft"}
+  - {id: "blog:google_cloud_blog", name: "Google Cloud Blog", kind: blog, url: "https://cloudblog.withgoogle.com/rss/", vendor_hint: "google cloud"}
+  - {id: "blog:cisco_newsroom", name: "Cisco Newsroom", kind: blog, url: "https://newsroom.cisco.com/c/services/i/servlets/newsroom/rssfeed.json", vendor_hint: "cisco"}
+  - {id: "blog:red_hat_blog", name: "Red Hat Blog", kind: blog, url: "https://www.redhat.com/en/rss/blog", vendor_hint: "red hat"}
+  - {id: "blog:linux_foundation_blog", name: "Linux Foundation Blog", kind: blog, url: "https://www.linuxfoundation.org/blog/rss.xml", vendor_hint: "linux foundation"}
+  - {id: "rss:linux.com", name: "Linux.com", kind: rss, url: "https://www.linux.com/feed/", vendor_hint: "linux foundation"}
+  - {id: "forum:microsoft_learn_qanda_voucher_search", name: "Microsoft Learn Q&A Voucher Search", kind: forum, url: "https://learn.microsoft.com/api/search/rss?search=voucher+certification+exam&locale=en-us", vendor_hint: "microsoft"}
+  - {id: "forum:google_cloud_training_group", name: "Google Cloud Training Group", kind: forum, url: "https://discuss.google.dev/c/google-cloud/cloud-announcements/172.rss", vendor_hint: "google cloud"}
+  - {id: "blog:microsoft_events", name: "Microsoft Events", kind: blog, url: "https://techcommunity.microsoft.com/t5/s/gxcuf89792/rss/board?board.id=azure-events", vendor_hint: "microsoft"}
+  - {id: "blog:microsoft_azure_blog", name: "Microsoft Azure Blog", kind: blog, url: "https://techcommunity.microsoft.com/t5/s/gxcuf89792/rss/board?board.id=Azure", vendor_hint: "microsoft"}
+  - {id: "blog:microsoft_security_blog", name: "Microsoft Security Blog", kind: blog, url: "https://techcommunity.microsoft.com/t5/s/gxcuf89792/rss/board?board.id=microsoft-security-blog", vendor_hint: "microsoft"}
+  - {id: "blog:microsoft_ai_platform_blog", name: "Microsoft AI Platform Blog", kind: blog, url: "https://techcommunity.microsoft.com/t5/s/gxcuf89792/rss/Community?interaction.style=blog", vendor_hint: "microsoft"}
+  - {id: "rss:tutorials_dojo", name: "Tutorials Dojo", kind: rss, url: "https://tutorialsdojo.com/feed/", vendor_hint: "tutorials dojo"}
+  - {id: "rss:packet_pilot", name: "Packet Pilot", kind: rss, url: "https://packetpilot.com/feed/", vendor_hint: "packet pilot"}
+  - {id: "rss:microsoft_blog", name: "Microsoft Blog", kind: rss, url: "https://blogs.microsoft.com/feed", vendor_hint: "microsoft"}
+  - {id: "rss:cisco_newsroom", name: "Cisco Newsroom", kind: rss, url: "https://newsroom.cisco.com/c/services/i/servlets/newsroom/rssfeed.json", vendor_hint: "cisco"}
+  - {id: "rss:cisco_newsroom_security", name: "Cisco Newsroom Security", kind: rss, url: "https://newsroom.cisco.com/c/services/i/servlets/newsroom/rssfeed.json?feed=security", vendor_hint: "cisco"}
+  - {id: "rss:cisco_newsroom_press", name: "Cisco Newsroom Press", kind: rss, url: "https://newsroom.cisco.com/c/services/i/servlets/newsroom/rssfeed.json?feed=press-releases", vendor_hint: "cisco"}
+  - {id: "blog:oracle_university_blog", name: "Oracle University Blog", kind: blog, url: "https://feeds.libsyn.com/459162/rss", vendor_hint: "oracle"}
+  - {id: "rss:petri_it", name: "Petri IT", kind: rss, url: "https://petri.com/feed/", vendor_hint: "petri it"}
+  - {id: "rss:infoq", name: "InfoQ", kind: rss, url: "https://feed.infoq.com", vendor_hint: "infoq"}
+  - {id: "rss:certiport_exam_updates", name: "Certiport Exam Updates", kind: rss, url: "https://certiport.pearsonvue.com/Support/Exam-content-updates.aspx?rss=exam-content-updates", vendor_hint: "certiport"}
+  - {id: "rss:databricks_learning_events", name: "Databricks Learning Events", kind: rss, url: "https://community.databricks.com/rss/board?board.id=databricks-community-events", vendor_hint: "databricks"}
+  - {id: "blog:hashicorp_blog", name: "HashiCorp Blog", kind: blog, url: "https://www.hashicorp.com/blog/feed.xml", vendor_hint: "hashicorp"}
+  - {id: "blog:linux_foundation_training_blog", name: "Linux Foundation Training Blog", kind: blog, url: "https://training.linuxfoundation.org/feed/", vendor_hint: "linux foundation"}
+  - {id: "blog:cncf_blog", name: "CNCF Blog", kind: blog, url: "https://www.cncf.io/blog/feed/", vendor_hint: "linux foundation"}
+  - {id: "rss:lf_events", name: "LF Events", kind: rss, url: "https://events.linuxfoundation.org/feed/", vendor_hint: "linux foundation"}
+  - {id: "blog:vmware_vmtn_blog", name: "VMware VMTN Blog", kind: blog, url: "https://blogs.vmware.com/vmtn/feed/", vendor_hint: "vmware"}
+  - {id: "blog:elastic_blog", name: "Elastic Blog", kind: blog, url: "https://www.elastic.co/blog/feed", vendor_hint: "elastic"}
+  - {id: "blog:canonical_blog", name: "Canonical Blog", kind: blog, url: "https://canonical.com/blog/feed", vendor_hint: "canonical"}
+  - {id: "blog:ubuntu_blog", name: "Ubuntu Blog", kind: blog, url: "https://ubuntu.com/blog/feed", vendor_hint: "canonical"}
+  - {id: "blog:sas_training_blog", name: "SAS Training Blog", kind: blog, url: "https://blogs.sas.com/content/sastraining/feed/", vendor_hint: "sas"}
+  - {id: "blog:docker_blog", name: "Docker Blog", kind: blog, url: "https://www.docker.com/blog/feed/", vendor_hint: "docker"}
+  - {id: "blog:neo4j_blog", name: "Neo4j Blog", kind: blog, url: "https://neo4j.com/blog/feed/", vendor_hint: "neo4j"}
+  - {id: "rss:confluent_blog", name: "Confluent Blog", kind: rss, url: "https://www.confluent.io/feed/", vendor_hint: "confluent"}

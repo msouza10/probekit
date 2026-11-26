@@ -1,0 +1,55 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "probekit-voucher-collector"
+version = "0.1.0"
+description = "Coletor de promoções de certificações de TI (feeds públicos, análise por LLM, Cosmos DB)."
+requires-python = ">=3.12"
+dependencies = [
+    "azure-cosmos==4.17.1",
+    "azure-identity==1.27.0",
+    "beautifulsoup4==4.15.0",
+    "feedparser==6.0.14",
+    "google-genai==3.6.1",
+    "groq==1.7.0",
+    "httpx==0.28.1",
+    "lxml==6.1.3",
+    "pydantic==2.14.4",
+    "PyYAML==6.0.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==9.2.0",
+    "ruff==0.17.6",
+]
+
+[tool.setuptools.packages.find]
+include = ["voucher_collector*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "cosmos: precisa de um Cosmos DB de verdade (só roda com COSMOS_ENDPOINT definido)",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.ruff.lint.per-file-ignores]
+# Os testes têm títulos longos em português e descrevem um caso por linha.
+"tests/*" = ["E501"]
+# O prompt do VoucherBot tem linhas longas por natureza.
+"voucher_collector/analyzer.py" = ["E501"]
+# Código trazido do VoucherBot e mantido como veio (Optional[X], ordem dos imports), para o diff
+# contra o original continuar pequeno. As mudanças estão listadas no topo de cada arquivo.
+"voucher_collector/models.py" = ["UP045", "I001"]
+"voucher_collector/schema.py" = ["UP045", "I001"]
+"voucher_collector/dedup.py" = ["UP035", "I001"]
