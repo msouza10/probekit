@@ -7,7 +7,7 @@ date: 2026-10-27
 
 ![Meme de um código HelloWorld("print") e, abaixo, uma figura de capuz com raios de luz saindo dos olhos](/articles/hello-world.webp)
 
-Se você já está pensando "para que um site de ping, se existe o comando `ping`?", pode ficar tranquilo: eu também pensei. Sei o quanto a ideia parece estúpida e redundante. Mas vamos por partes, porque o ping nunca foi o ponto.
+Se você já está pensando "para que um site de ping, se existe o comando `ping`?", pode ficar tranquilo: eu também pensei. Eu precisava de algo que me permitisse experimentar com infraestrutura e backend de forma prática. Mas vamos por partes, porque o ping nunca foi o ponto.
 
 ## O problema que eu queria resolver
 
@@ -27,9 +27,11 @@ As primeiras linhas foram de quebrar a cabeça: entender como funcionam as bibli
 
 ## Colocar no ar sem gastar dinheiro
 
-Com a API funcionando veio a pergunta seguinte: beleza, agora preciso colocar isso para rodar. Só que eu tinha ambição de engenheiro de plataforma e orçamento de estagiário (sem a bolsa). Foi assim, passo a passo, até o que existe hoje: um laboratório completo, quase todo gratuito, rodando com Terraform, GitHub Actions, Go, TypeScript e mais um monte de coisa. O frontend foi desenvolvido com ajuda de IA, e eu fiquei com o foco em infraestrutura e backend.
+Com a API funcionando veio a pergunta seguinte: beleza, agora preciso colocar isso para rodar. Só que eu tinha ambição de engenheiro de big tech e orçamento de estagiário (sem a bolsa). Foi assim, passo a passo, até o que existe hoje: um laboratório no ar, quase todo gratuito, rodando com Terraform, GitHub Actions, Go, TypeScript e mais um monte de coisa. O frontend foi desenvolvido com ajuda de IA, e eu fiquei com o foco em infraestrutura e backend.
 
-O primeiro passo foi entender melhor o que cada cloud oferece de graça. E acredite: todas oferecem alguma coisa, você só precisa ficar ligado nos limites e até quando é grátis. Pesquisando, lembrei que eu já tinha uma conta na Oracle Cloud com uma VM [Always Free](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm) rodando.
+O primeiro passo foi pesquisar os recursos gratuitos de cada cloud e seus limites, incluindo o que era permanente e o que era só um período de teste. E acredite: encontrei várias opções interessantes, algumas com limites mensais bem generosos.
+
+Nessa pesquisa, lembrei que eu já tinha uma conta na Oracle Cloud com uma VM [Always Free](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm) rodando.
 
 Se você já pesquisou sobre o assunto, sabe que a Oracle consegue liberar máquinas ARM bem parrudas de graça (is real!). Só que precisa correr atrás, e não é tão simples. Eu mesmo não consegui: criei minha conta na região de São Paulo, que é bem concorrida, e não consegui criar uma máquina assim. Além disso, há regras a seguir. A página atual da Oracle fala em 2 OCPUs e 12 GB de memória para contas Always Free, e avisa que instâncias ociosas podem ser recuperadas. O ponto é: eu tinha uma conta na OCI, uma VM e um sonho.
 
@@ -37,31 +39,31 @@ Nesse momento comecei a pensar melhor e a olhar o que tinha ao meu alcance. Eu j
 
 Com isso as possibilidades foram crescendo. Percebi que a OCI deixa criar não só uma máquina, mas duas, e decidi colocar as duas. Não são as ARM que eu tinha tentado conseguir: são as duas `VM.Standard.E2.1.Micro` (AMD), que a Oracle também libera no Always Free, com 1 GB de memória cada. A conta fecha porque a OCI também oferece [um Network Load Balancer no Always Free](https://docs.oracle.com/en-us/iaas/Content/FreeTier/freetier_topic-Always_Free_Resources.htm). Não vou contar tudo sobre ele agora (a decisão está no [ADR-0001](https://github.com/msouza10/probekit/blob/main/docs/adr/0001-oci-network-load-balancer.md)), mas essa parte foi aproveitar o que eu tinha para montar algo do zero e mostrar algumas habilidades.
 
-Só nessa hora percebi que escolher Go foi acertado, e eu não tinha pensado nisso antes: com 1 GB de RAM por máquina, um programa em Go vira um [binário único](https://caddyserver.com/docs/architecture), sem interpretador para instalar, e isso é uma preocupação a menos num servidor tão pequeno.
+Na hora de publicar, apareceu outra conveniência do Go: eu conseguia distribuir a API como um binário, sem instalar um interpretador nas VMs. Isso simplificou o deploy.
 
 ::diagram{name="arquitetura"}
 
 ## Terraform e o pipeline: plan, aprovação e apply
 
-Entre as habilidades que eu pouco uso na prática, uma delas era o Terraform. Já usei em alguns outros projetos, mas sempre fiquei muito preso a um único `apply` em um script só: nada de multicloud, de arquivos com dependências entre eles, de variáveis, de federação de identidade, e tudo isso unido a CI/CD. Por isso, logo de início, a proposta foi fazer um deploy inicial totalmente rodado pelo Actions.
+Eu já tinha usado Terraform em outros projetos, mas queria ir além de rodar um `apply` local. No Probekit, a proposta foi provisionar a infraestrutura pelo GitHub Actions, com uma etapa para revisar o que seria alterado antes de aplicar.
 
-O Terraform do projeto é básico. São dois módulos: um da OCI, com as duas VMs, a rede e o NLB, e um da Cloudflare, com o DNS. O módulo da Cloudflare recebe o IP do NLB como saída do módulo da OCI, então o registro da API aponta sozinho para o balanceador. O state fica em um bucket da OCI, e não na minha máquina, para o pipeline também conseguir rodar `plan` e `apply`. De quebra, consigo dormir tranquilo, sem medo de perder tudo o que já foi feito na minha infra.
+São dois módulos: um da OCI, com as duas VMs, a rede e o NLB, e um da Cloudflare, com o DNS. O módulo da Cloudflare recebe o IP do NLB como saída do módulo da OCI, então o registro da API aponta para o balanceador. O state, que registra os recursos gerenciados pelo Terraform, fica em um bucket da OCI para também ser acessado pelo pipeline.
 
-Em todo pull request, o CI roda `terraform fmt -check`, `terraform init -backend=false` e `terraform validate`. Isso confere formatação e sintaxe sem credencial nenhuma e sem encostar no state.
+Nos pull requests, o CI confere a formatação e valida a configuração do Terraform, sem acessar o state. O deploy da infraestrutura é disparado manualmente no Actions e tem duas etapas: gerar o plano e aplicá-lo depois da aprovação no ambiente `production`.
 
-O deploy tem dois jobs. O primeiro roda `terraform plan -out=tfplan`, que grava o plano em um arquivo. O segundo só começa depois que eu aprovo no GitHub (o ambiente `production` exige um revisor), baixa esse arquivo e roda `terraform apply` nele. A diferença importa: se o `apply` rodasse sozinho, ele calcularia um plano novo na hora, e a infra poderia ter mudado desde o plano que eu li. Aplicando o arquivo salvo, sobe exatamente o que eu aprovei. Mesmo desenvolvendo sozinho, isso me obriga a ficar de olho na pipeline, sabendo o que está acontecendo, e, se tiver um possível problema, sou o primeiro a saber e posso impedir de subir para prod. (Só porque meu site faz apenas um ping, não quer dizer que não seja um ambiente de prod!)
+O detalhe que achei mais interessante foi salvar o plano em um arquivo com `terraform plan -out=tfplan`. Depois da aprovação, o segundo job aplica esse mesmo arquivo. Rodar `terraform apply` sem ele geraria um plano novo; com o arquivo salvo, a aplicação usa o plano que eu revisei. Mesmo desenvolvendo sozinho, quis praticar essa revisão antes de alterar o ambiente que está no ar. Só porque meu site faz apenas um ping, não quer dizer que eu não precise cuidar dele!
 
 ::diagram{name="infraestrutura"}
 
-Também pensei na concorrência. Se outra pessoa passar a mexer no projeto comigo (ou eu comigo mesmo), dois deploys podem tentar alterar a mesma infra ao mesmo tempo, e os planos se embolam. Há duas travas contra isso. A primeira é o `concurrency` do GitHub Actions (grupo `deploy`, `cancel-in-progress: false`): a segunda execução espera a primeira, e a que está rodando nunca é cancelada no meio de um `apply`. A segunda é o [lock do state](https://developer.hashicorp.com/terraform/language/backend/oci#state-locking): o backend `oci` cria um objeto de lock no bucket durante `plan`, `apply` e `destroy`. E, se o state mudar entre o plano e o apply, o Terraform recusa o plano salvo. Em um teste local com um recurso de laboratório, aplicar um plano antigo depois de outro terminou em `Error: Saved plan is stale`.
+Também configurei o workflow para não executar dois deploys ao mesmo tempo. O backend OCI do Terraform oferece outra proteção: o [lock do state](https://developer.hashicorp.com/terraform/language/backend/oci#state-locking), que impede operações simultâneas sobre o mesmo state. Se ele mudar entre a geração e a aplicação do plano, o Terraform pode recusar o arquivo antigo. Vi isso em um teste local com um recurso de laboratório: a tentativa terminou em `Error: Saved plan is stale`.
 
-Um cuidado com o arquivo do plano: segundo a [documentação do Terraform](https://developer.hashicorp.com/terraform/cli/commands/plan), ele pode guardar dados sensíveis em texto puro, mesmo quando a saída do terminal os esconde. Como viaja entre os jobs como artefato do GitHub, eu o cifro com `openssl` (AES-256) e deixo o artefato durar só um dia. A senha vem do Infisical, que o workflow acessa por OIDC, com um token temporário do GitHub e sem nenhuma credencial fixa guardada. A chave SSH e o certificado TLS ficam em secrets do ambiente `production` e só chegam ao job depois da aprovação. A chave da OCI está também no `plan`, porque ele precisa dela e roda sem aprovação. As decisões estão no [ADR-0007](https://github.com/msouza10/probekit/blob/main/docs/adr/0007-gestao-de-segredos-com-infisical.md).
+Outro aprendizado foi que o arquivo do plano [pode conter dados sensíveis](https://developer.hashicorp.com/terraform/cli/commands/plan), mesmo quando eles aparecem ocultos no terminal. Como ele passa de um job para outro como artefato do GitHub, o workflow o cifra antes do envio e limita sua retenção a um dia. A senha de criptografia vem do Infisical, acessado por OIDC: o job usa uma identidade temporária do GitHub para se autenticar. Registrei essa escolha e a separação dos secrets entre as etapas no [ADR-0007](https://github.com/msouza10/probekit/blob/main/docs/adr/0007-gestao-de-segredos-com-infisical.md).
 
 ## O backend: a biblioteca de ping e o ICMP sem root
 
-No backend, o ping usa a biblioteca [pro-bing](https://github.com/prometheus-community/pro-bing), da comunidade do Prometheus. Antes de mandar qualquer pacote, o handler resolve o nome que recebeu e confere se algum dos IPs cai em faixa privada ou reservada. Isso vale também para um hostname que aponte para um IP privado, e é o que faz o Probekit recusar um `192.168.x.x`, isso impede que a ferramenta seja utilizada para realizar testes contra endereços privados e reduz o risco de acesso indevido à rede interna pela API.
+No backend, o ping usa a biblioteca [pro-bing](https://github.com/prometheus-community/pro-bing), da comunidade do Prometheus. Antes de mandar qualquer pacote, o handler resolve o nome que recebeu e confere se algum dos IPs cai em faixa privada ou reservada. Isso vale também para um hostname que aponte para um IP privado. É por isso que o Probekit recusa um `192.168.x.x`: a validação restringe os destinos aceitos e reduz o risco de acesso indevido à rede interna pela API.
 
-A biblioteca tem uma exigência que vem do Linux. Segundo o [README do pro-bing](https://github.com/prometheus-community/pro-bing#linux), ela tenta fazer um ping "sem privilégio", o que no Linux só funciona se o grupo do processo estiver na faixa definida em `net.ipv4.ping_group_range`. A outra saída é `SetPrivileged(true)` com `setcap cap_net_raw` no binário. O projeto usa o `sysctl`: no CI ele libera a faixa inteira para os testes rodarem, e nas VMs o script de deploy libera só o grupo do usuário que roda a API, nada que um bom script shell nao resolva para mim né.
+A biblioteca tem uma exigência que vem do Linux. Segundo o [README do pro-bing](https://github.com/prometheus-community/pro-bing#linux), ela tenta fazer um ping "sem privilégio", o que no Linux só funciona se o grupo do processo estiver na faixa definida em `net.ipv4.ping_group_range`. A outra saída é `SetPrivileged(true)` com `setcap cap_net_raw` no binário. O projeto usa o `sysctl`: no CI ele libera a faixa inteira para os testes rodarem, e nas VMs o script de deploy libera só o grupo do usuário que roda a API, nada que um bom script shell não resolva, né?
 
 ## Então, por que um ping na web?
 
@@ -69,7 +71,7 @@ Voltando à pergunta do começo: a única coisa diferente num ping na web é de 
 
 Ele também não enxerga a sua rede de casa: endereço privado, como o `192.168.x.x` do roteador, é recusado. Para isso, fica com o `ping` do terminal mesmo.
 
-Mas o ponto mais importante não é esse. Quando construí o Probekit, não foi simplesmente para fazer ping: o site em si é só uma interface para uma ferramenta. Foi para ter um playground meu, onde eu monto, desmonto, adiciono peças novas e altero o que quiser, enquanto mantenho uma plataforma no ar, usando as clouds e as tecnologias diferentes, documentando tudo isso e ao mesmo tempo adicionando features que acho que podem ser legais de desenvolver, ou desenvolvendo só por desenvolver. O objetivo real é ir construindo conhecimento e base nas tecnologias que quero aprender.
+Mas o ponto mais importante não é esse. Quando construí o Probekit, não foi simplesmente para fazer ping: o site em si é só uma interface para uma ferramenta. Eu queria um playground meu, onde pudesse montar, desmontar e experimentar enquanto mantenho uma plataforma no ar. As próximas ferramentas podem nascer de uma necessidade ou só da vontade de aprender alguma coisa. A ideia é registrar as escolhas, entender suas consequências e construir uma base nas tecnologias que quero usar.
 
 Se você quiser ver como tudo isso funciona por dentro, o código e as decisões estão no [repositório](https://github.com/msouza10/probekit). E, se quiser testar o ping, é só abrir o [probekit.cc](https://probekit.cc) e tentar com um domínio seu.
 
