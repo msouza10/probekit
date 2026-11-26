@@ -21,7 +21,8 @@
 - Nenhum segredo, IP ou nome de recurso interno no repositório: só os **nomes** das variáveis (`GROQ_API_KEY`, `GEMINI_API_KEY`, `COSMOS_ENDPOINT`, `COSMOS_DATABASE`, `COSMOS_CONTAINER`, `MAX_LLM_CALLS`, `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, `AZURE_CLIENT_CERTIFICATE_PATH`).
 - Código trazido do VoucherBot (Apache-2.0) mantém o aviso de origem, a cópia da licença em `THIRD_PARTY/` e a nota do que foi modificado, em cada arquivo.
 - A rota nova **não** compartilha o contador de requisições de `/api/ping` e `/api/dns-lookup`. Os testes atuais continuam passando.
-- Terraform e workflows são do criador: as tasks dele descrevem o resultado, não o código. O Python do coletor é do criador (aprendizado); o assistente ensina e escreve os testes.
+- Terraform e workflows são do criador: as tasks dele descrevem o resultado, não o código. O Python do coletor foi **delegado ao assistente em 2026-11-26** (o criador começou a escrevê-lo como aprendizado e passou a tarefa); os testes de todas as partes já existem e são o contrato.
+- Workflows novos: `permissions` mínimas (`packages: write` só no job que publica a imagem), nenhum `pull_request_target`, segredos só em jobs que rodam na `main`. O `apply` do Azure aplica o **plano revisado**, no ambiente `production`. Um job novo no CI **não tem filtro de pasta** e só entra na regra `protection-main` depois de ter rodado uma vez: a regra exige os checks pelo nome, e um check que não roda deixa o merge esperando para sempre.
 
 ## Foco da revisão
 
@@ -34,6 +35,9 @@
 7. **Rota que gasta a cota de ping, e CORS:** a Home não pode consumir o limite de quem só abriu o site. Task 15.
 8. **Link inseguro e texto com HTML vindo de terceiros:** nunca vira link nem HTML. Task 17.
 9. **Aviso da Home que desloca o layout:** o CLS da Home não pode piorar. Task 18.
+10. **Check novo na regra da `main` antes de o job existir, ou com filtro de pasta:** trava todos os PRs. Tasks 12 e 21.
+11. **Imagem privada no GHCR:** o Container Apps Job não consegue baixá-la sem credencial. Task 12.
+12. **Coleta parada sem ninguém ver:** a página só mostra uma "última coleta" que envelhece. Task 25.
 
 ## Ciclo padrão das tasks de código
 
@@ -54,7 +58,10 @@ backend/voucher-collector-python/
                       validate.py schema.py analyzer.py items.py store.py job.py
   tests/  (um arquivo por módulo) + fixtures/
 backend/api-service-golang/  voucher/ (snapshot, tipos, Cosmos)  handler/vouchers.go
-infra/terraform/azure/       (Cosmos, Container Apps, identidades, orçamento)
+infra/terraform/azure/       (raiz própria, com estado próprio: Cosmos, Container Apps, identidades, orçamento)
+.github/workflows/           ci.yml (jobs Python e Docker), build-collector.yml, deploy-azure.yml,
+                             rollback-collector.yml, check-collector-freshness.yml
+.github/dependabot.yml
 frontend/src/                lib/api.ts, lib/vouchers.ts, pages/Voucher.tsx,
                              components/voucher/*, components/LatestVoucher.tsx
 ```
@@ -68,9 +75,16 @@ T4 ─▶ T5 ─▶ T6 ───────────────────
 T15 (só o contrato) ─▶ T16 (precisa de T2)
 T17 ─▶ T18 (só o contrato; testam com a API falsa)
 T14, T16, T18 ─▶ T19
+
+Workflows (Tasks 21 a 25):
+T4..T11 ─▶ T21 (job Python no CI)        T2 ─▶ T21 (valida também o Terraform do Azure)
+T21 ─▶ T12 (imagem, build e job Docker)
+T1, T2 ─▶ T22 (plan e apply do Azure) ─▶ T13 (o apply do job passa por ele)
+T13 ─▶ T23 (rollback)        T13, T16 ─▶ T25 (alerta de coleta parada)
+T24 (dependabot): sem dependência
 ```
 
-As Tasks 15, 17 e 18 não esperam a nuvem: usam o contrato da ADR-0015 e uma fonte falsa.
+As Tasks 15, 17 e 18 não esperam a nuvem: usam o contrato da ADR-0015 e uma fonte falsa. As Tasks 21 a 25 são workflows e ficam com o criador; o assistente revisa. A Task 21 pode começar já: o Python existe e os testes passam.
 
 ---
 
@@ -80,7 +94,7 @@ As Tasks 15, 17 e 18 não esperam a nuvem: usam o contrato da ADR-0015 e uma fon
 
 **Files:** Create `docs/adr/0016-terraform-na-azure.md` (modelo de `docs/adr/0000-exemple-adr.md`).
 
-**Resultado:** decidir (a) como o workflow do GitHub se autentica na Azure para o Terraform (a [ADR-0014](../../adr/0014-leitura-dos-descontos-pela-api-go.md) deixou isso em aberto), (b) onde fica o estado do Terraform da Azure e (c) a assinatura, o grupo de recursos e o alerta de orçamento. As alternativas e o motivo da não escolha entram no ADR; só nomes de segredos, nunca valores.
+**Resultado:** decidir (a) como o workflow do GitHub se autentica na Azure para o Terraform (a [ADR-0014](../../adr/0014-leitura-dos-descontos-pela-api-go.md) deixou isso em aberto; a recomendação é OIDC, sem segredo guardado, com as IDs em variáveis do ambiente); (b) **uma raiz ou duas**: `infra/terraform/azure` com estado próprio (recomendado: a conta do Cosmos só aceita o free tier na criação, e o "Deploy API" também faz SSH nas VMs) ou um módulo da raiz atual; (c) a assinatura, o grupo de recursos e o alerta de orçamento; (d) **como a tag nova da imagem chega ao job**: variável do Terraform alterada por PR, `az containerapp job update` direto do build (e então o Terraform precisa de `ignore_changes` na imagem), ou o build disparando o `apply`; (e) **onde ficam as chaves do LLM**: passá-las ao Terraform como variável coloca o valor no **estado**, então o ADR confirma a criptografia e o acesso ao bucket do estado, ou escolhe outro caminho; (f) como o certificado do Entra da API Go chega às VMs (Task 16). As alternativas e o motivo da não escolha entram no ADR; só nomes de segredos, nunca valores.
 
 **Conferir:** `python3 .claude/skills/probekit-docs/scripts/check_links.py` sem links novos quebrados.
 
@@ -88,7 +102,7 @@ As Tasks 15, 17 e 18 não esperam a nuvem: usam o contrato da ADR-0015 e uma fon
 
 **Dono:** Criador · **Área:** infra, pipeline
 
-**Files:** Create `infra/terraform/azure/` (módulo no padrão de `infra/terraform/oci` e `cloudflare`); Modify o workflow que hoje roda `plan` e `apply` para incluir o módulo, mantendo a regra do projeto (o `apply` aplica o plano revisado, no ambiente `production`); Modify `.github/workflows/ci.yml` (o job `Terraform` valida o módulo novo).
+**Files:** Create `infra/terraform/azure/` (uma **raiz própria**, com `providers`, `backend` e estado próprios, se a ADR-0016 confirmar a recomendação). O workflow de `plan` e `apply` é a Task 22 e a validação no CI é a Task 21.
 
 **Resultado:** conta Cosmos DB for NoSQL **com free tier marcado na criação** (não dá para marcar depois), banco e contêiner `/pk` com throughput dentro de 1 000 RU/s (usar o mínimo que o portal aceitar), consistência Session, alerta de orçamento. As chaves da conta ficam ligadas por enquanto.
 
@@ -110,12 +124,12 @@ As Tasks 15, 17 e 18 não esperam a nuvem: usam o contrato da ADR-0015 e uma fon
 
 ### Task 4: Coletor — esqueleto, origem e deduplicação
 
-**Dono:** Criador (Python) · testes do assistente · **Área:** pipeline, api
+**Dono:** Assistente (Python delegado pelo criador em 2026-11-26) · testes já escritos · **Área:** pipeline, api
 
 **Files:**
 - Create: `backend/voucher-collector-python/pyproject.toml`, `THIRD_PARTY/LICENSE-VoucherBot` e `THIRD_PARTY/README.md` (origem, repositório e data da leitura), `voucher_collector/models.py`, `voucher_collector/dedup.py`
 - Test: `tests/test_dedup.py`
-- Modify: `.github/workflows/ci.yml` (job `Python`: instala, `ruff check`, `pytest`); o criador atualiza o ruleset `protection-main` para exigir o novo check.
+- O job `Python` do CI e o check na regra `protection-main` são a Task 21.
 
 **Interfaces — Produces:**
 ```python
@@ -141,7 +155,7 @@ def deduplicate_batch(posts: Sequence[NormalizedPost]) -> list[NormalizedPost]
 
 ### Task 5: Coletor — pontuação, fontes e política HTTP
 
-**Dono:** Criador · testes do assistente · **Área:** pipeline
+**Dono:** Assistente (Python delegado pelo criador em 2026-11-26) · testes já escritos · **Área:** pipeline
 
 **Files:** Create `voucher_collector/scoring.py`, `sources.py`, `http_policy.py`, `sources.yaml`; Test `tests/test_scoring.py`, `test_sources.py`, `test_http_policy.py`.
 
@@ -169,7 +183,7 @@ async def polite_get(url: str, *, accept: str | None = None, timeout: float = 15
 
 ### Task 6: Coletor — leitura de feeds
 
-**Dono:** Criador · testes do assistente · **Área:** pipeline
+**Dono:** Assistente (Python delegado pelo criador em 2026-11-26) · testes já escritos · **Área:** pipeline
 
 **Files:** Create `voucher_collector/rss.py`; Test `tests/test_rss.py`, fixtures `tests/fixtures/{feed.xml,feed.json,pagina.html}`.
 
@@ -189,7 +203,7 @@ async def collect(source: Source, limit: int) -> list[NormalizedPost]
 
 ### Task 7: Coletor — esquema do LLM e validação
 
-**Dono:** Criador · testes do assistente · **Área:** pipeline, segurança
+**Dono:** Assistente (Python delegado pelo criador em 2026-11-26) · testes já escritos · **Área:** pipeline, segurança
 
 **Files:** Create `voucher_collector/schema.py`, `validate.py`; Test `tests/test_validate.py`, `tests/test_schema.py`.
 
@@ -210,7 +224,7 @@ def sanitize(event: ExtractedEvent) -> ExtractedEvent        # aplica as regras 
 
 ### Task 8: Coletor — analisador de LLM
 
-**Dono:** Criador · testes do assistente · **Área:** pipeline
+**Dono:** Assistente (Python delegado pelo criador em 2026-11-26) · testes já escritos · **Área:** pipeline
 
 **Files:** Create `voucher_collector/analyzer.py`; Test `tests/test_analyzer.py`; Modify `THIRD_PARTY/README.md`.
 
@@ -231,7 +245,7 @@ async def analyze_post(title: str, snippet: str, budget: CallBudget, providers: 
 
 ### Task 9: Coletor — montagem do item e ciclo da análise
 
-**Dono:** Criador · testes do assistente · **Área:** pipeline
+**Dono:** Assistente (Python delegado pelo criador em 2026-11-26) · testes já escritos · **Área:** pipeline
 
 **Files:** Create `voucher_collector/items.py`; Test `tests/test_items.py`.
 
@@ -252,7 +266,7 @@ def is_visible_to_api(item: dict) -> bool        # as regras de visibilidade da 
 
 ### Task 10: Coletor — armazenamento no Cosmos
 
-**Dono:** Criador · testes do assistente · **Área:** pipeline, infra
+**Dono:** Assistente (Python delegado pelo criador em 2026-11-26) · testes já escritos · **Área:** pipeline, infra
 
 **Files:** Create `voucher_collector/store.py`; Test `tests/test_store.py` (com `InMemoryStore`) e `tests/test_store_cosmos.py` (integração, marcada `@pytest.mark.cosmos`, só roda com `COSMOS_ENDPOINT` definido).
 
@@ -273,7 +287,7 @@ class CosmosStore:
 
 ### Task 11: Coletor — o job
 
-**Dono:** Criador · testes do assistente · **Área:** pipeline
+**Dono:** Assistente (Python delegado pelo criador em 2026-11-26) · testes já escritos · **Área:** pipeline
 
 **Files:** Create `voucher_collector/job.py`; Test `tests/test_job.py`.
 
@@ -295,21 +309,25 @@ def main() -> int          # lê as variáveis de ambiente; 0 para ok e partial,
 
 **Conferir:** `python -m pytest -q` passa na pasta; rodar `python -m voucher_collector.job` com `MAX_LLM_CALLS=0` contra o contêiner do projeto grava itens `pending` (sem chamar o LLM) e o `run`; uma segunda execução não aumenta a contagem de itens.
 
-### Task 12: Imagem e publicação no GHCR
+### Task 12: Imagem do coletor e publicação no GHCR
 
 **Dono:** Criador · **Área:** pipeline
 
-**Files:** Create `backend/voucher-collector-python/Dockerfile`, `.dockerignore`, `.github/workflows/build-collector.yml`.
+**Files:** Create `backend/voucher-collector-python/Dockerfile`, `.dockerignore`, `.github/workflows/build-collector.yml`; Modify `.github/workflows/ci.yml` (job `Docker`).
 
-**Resultado:** a imagem roda como usuário sem privilégios, sem segredo (nem `.env`) copiado para dentro, com dependências travadas, e o comando padrão é `python -m voucher_collector.job`. O workflow constrói e publica no GHCR, **público**, com tag pelo SHA do commit, só quando muda `backend/voucher-collector-python/**` na `main`, com `permissions` mínimas (escrita em pacotes) e sem `pull_request_target`.
+**Resultado:**
+- A imagem roda como usuário sem privilégios, sem segredo (nem `.env`) dentro, com as dependências do `pyproject.toml` (versões travadas) e o `sources.yaml` ao lado do pacote; o comando padrão é `python -m voucher_collector.job`.
+- `build-collector.yml`: roda só quando muda `backend/voucher-collector-python/**` (ou o próprio workflow) na `main`; **roda os testes antes de publicar**, como o `build-api-golang.yml`; publica no GHCR com tag pelo **SHA do commit**, nunca `latest`; `permissions: packages: write` **só no job que publica**; nenhum `pull_request_target`.
+- CI: o job `Docker` do `ci.yml` faz o `docker build` **sem publicar**, em todo PR (sem filtro de pasta). O check `Docker` só entra na regra `protection-main` depois de ter rodado uma vez.
+- **Passo manual, uma vez:** o primeiro pacote publicado nasce **privado**. Torná-lo **público** é na página do pacote no GitHub (um workflow não consegue), e isso entra no `docs/runbook-vouchers.md`. Sem isso o Container Apps Job não baixa a imagem sem credencial.
 
-**Conferir:** `docker build` local funciona; `docker run --rm <imagem>` sem variáveis sai com código 2 (Task 11); a imagem **publicada** baixa sem login (`docker pull` de uma sessão deslogada); `docker history` não mostra nenhuma chave.
+**Conferir:** `docker build` local funciona; `docker run --rm <imagem>` sem variáveis sai com código 2 e imprime só os **nomes** das variáveis que faltam; o PR mostra o check `Docker`; depois do merge, a imagem aparece no GHCR com a tag do SHA; a imagem **publicada** baixa sem login (`docker pull` de uma sessão deslogada); `docker history` não mostra nenhuma chave.
 
 ### Task 13: Container Apps Job, identidade e papéis (Terraform)
 
 **Dono:** Criador · **Área:** infra
 
-**Files:** Modify `infra/terraform/azure/`; Modify o workflow de deploy conforme a ADR-0016 da Task 1.
+**Files:** Modify `infra/terraform/azure/`. O `apply` passa pelo workflow da Task 22; a forma de a tag nova da imagem chegar ao job é a decisão (d) da ADR-0016.
 
 **Resultado:** ambiente Container Apps (Consumption), job `Schedule` com `0 * * * *`, 0,25 vCPU e 0,5 GiB, teto de tempo da réplica bem abaixo de 1 hora (sugestão: 900 s), limite de tentativas 1, imagem pelo SHA, _secrets_ `GROQ_API_KEY` e `GEMINI_API_KEY` por `secretref`, as demais variáveis como configuração, identidade gerenciada com o papel _Data Contributor_ restrito ao contêiner, logs no destino padrão.
 
@@ -358,7 +376,7 @@ func Vouchers(s *Snapshot) http.Handler                           // GET /api/vo
 
 **Dono:** Criador · **Área:** api, infra
 
-**Files:** (commit com prefixo `feat(api):`) Create `voucher/cosmos.go` (+ teste de integração opcional); Modify `go.mod`, `main.go` (variáveis `COSMOS_ENDPOINT`, `COSMOS_DATABASE`, `COSMOS_CONTAINER`; se `COSMOS_ENDPOINT` estiver vazio, a rota **não** é registrada e o log diz por quê); Modify `infra/shellscript/deploy-api-go.sh` (e `infra/shellscript/tests/`); Modify `infra/terraform/azure/` (app registration, certificado, papel _Data Reader_ no contêiner).
+**Files:** (commit com prefixo `feat(api):`) Create `voucher/cosmos.go` (+ teste de integração opcional); Modify `go.mod`, `main.go` (variáveis `COSMOS_ENDPOINT`, `COSMOS_DATABASE`, `COSMOS_CONTAINER`; se `COSMOS_ENDPOINT` estiver vazio, a rota **não** é registrada e o log diz por quê); Modify `infra/shellscript/deploy-api-go.sh` (e `infra/shellscript/tests/`); Modify `.github/workflows/deploy-api-golang.yml` (o certificado do Entra viaja como o certificado TLS: secret do ambiente `production`, `scp` e o script de deploy); Modify `infra/terraform/azure/` (app registration, certificado, papel _Data Reader_ no contêiner).
 
 **Interfaces — Consumes:** `Source`. **Produces:** `func NewCosmosSource(endpoint, database, container string, cred azcore.TokenCredential) (*CosmosSource, error)`.
 
@@ -418,3 +436,55 @@ export function isSafeLink(url: string): boolean        // `isSafeUrl` e só htt
 - [ ] Propor novos pesos e um novo corte; ajustar os testes com exemplos reais (títulos de itens verdadeiros e falsos); medir de novo quantos itens por dia vão ao LLM.
 - [ ] Ajustar o corte de `confidence` olhando itens `done` com valores próximos de 0,5.
 - [ ] Registrar na ADR-0015 (_Validação_, com data) o corte novo e o motivo.
+
+### Task 21: CI — job Python e validação do Terraform do Azure
+
+**Dono:** Criador · **Área:** pipeline
+
+**Files:** Modify `.github/workflows/ci.yml`; depois, a regra `protection-main` (feito no GitHub, não no repositório).
+
+**Resultado:** um job `Python` que roda em **todo** PR para a `main`, como `Go`, `Terraform` e `NPM` (sem filtro de pasta): instala `backend/voucher-collector-python` com `pip install -e ".[dev]"` e roda `ruff check` e `pytest`. O job `Terraform` passa a validar também a raiz `infra/terraform/azure` (`init -backend=false` e `validate`; o `fmt -recursive` já cobre as subpastas), quando a Task 2 existir.
+
+**Por que sem filtro de pasta:** a regra da `main` exige os checks pelo nome. Um check que não roda no PR deixa o merge esperando para sempre.
+
+**Conferir:** um PR de teste mostra os checks `Go`, `Terraform`, `NPM` e `Python`, todos passando, inclusive num PR que mexe só em `frontend/`. **Só depois** o check `Python` entra na regra `protection-main`.
+
+### Task 22: Workflow de plan e apply do Terraform na Azure
+
+**Dono:** Criador · **Área:** infra, pipeline
+
+**Files:** Create `.github/workflows/deploy-azure.yml`.
+
+**Resultado:** um workflow só para `infra/terraform/azure` (não o `deploy-api-golang.yml`, que também faz SSH nas VMs). Mesmo desenho do atual: `plan` no ambiente `plan`, plano guardado **criptografado** como artefato, `apply` no ambiente `production` (com revisor) aplicando **exatamente** aquele plano. Entra na Azure como a ADR-0016 decidir (recomendado: OIDC). `permissions` mínimas, `concurrency` própria para dois `apply` não correrem juntos, nenhum `pull_request_target`.
+
+**Conferir:** o `plan` roda sem nenhum segredo da Azure guardado no repositório; o `apply` só começa depois da aprovação; rodar duas vezes seguidas sem mudança dá `No changes`; o artefato do plano some em 1 dia.
+
+### Task 23: Rollback da imagem do coletor
+
+**Dono:** Criador · **Área:** pipeline
+
+**Files:** Create `.github/workflows/rollback-collector.yml` (ou, se a ADR-0016 escolher a tag como variável do Terraform, uma entrada `workflow_dispatch` do `deploy-azure.yml`).
+
+**Resultado:** voltar o job para uma tag (SHA) anterior da imagem, no ambiente `production`, sem refazer o build. Segue o padrão dos `rollback-*` existentes (um job `check` e um `rollback`).
+
+**Conferir:** rodar com o SHA anterior deixa o job apontando para ele; uma execução manual do job termina com sucesso; uma tag que não existe no GHCR falha **antes** de mudar qualquer coisa.
+
+### Task 24: Dependabot
+
+**Dono:** Criador · **Área:** pipeline
+
+**Files:** Create `.github/dependabot.yml`.
+
+**Resultado:** atualizações semanais para `pip` e `docker` (`/backend/voucher-collector-python`), `gomod` (`/backend/api-service-golang`), `npm` (`/frontend`), `github-actions` (`/`) e `terraform` (`/infra/terraform` e `/infra/terraform/azure`), cada um com limite baixo de PRs abertos. O coletor trava as versões com `==`; sem o bot elas envelhecem sem ninguém ver.
+
+**Conferir:** a página _Insights → Dependency graph → Dependabot_ lista os seis ecossistemas; o CI roda nos PRs do bot.
+
+### Task 25: Alerta de coleta parada
+
+**Dono:** Criador · **Área:** pipeline
+
+**Files:** Create `.github/workflows/check-collector-freshness.yml`.
+
+**Resultado:** um workflow agendado (a cada 3 horas, mais `workflow_dispatch`) que lê `last_collected_at` de `GET /api/vouchers?limit=1` na API pública e **falha** se a última coleta tem mais de 3 horas (o job roda de hora em hora) ou se a API responde erro. A falha é o alerta (o GitHub avisa por e-mail). `permissions: contents: read`, nenhum segredo: só a URL pública.
+
+**Conferir:** contra a API em produção passa; com o limite de idade em 0 hora falha, com uma mensagem que diz a idade da última coleta.
