@@ -105,6 +105,12 @@ const fixedPages: Record<string, PageMeta> = {
     path: "/arquitetura",
     image: pageImage("arquitetura"),
   },
+  "/voucher": {
+    title: `Vouchers de certificações · ${SITE_NAME}`,
+    description:
+      "Descontos e vouchers de certificações de TI (AWS, Microsoft, Google e outros), coletados de hora em hora dos blogs e feeds oficiais.",
+    path: "/voucher",
+  },
   "/sobre": {
     title: `Sobre · ${SITE_NAME}`,
     description:

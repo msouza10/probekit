@@ -33,6 +33,7 @@ describe("metaFor", () => {
       "/ping",
       "/dns-lookup",
       "/arquitetura",
+      "/voucher",
       "/sobre",
     ])
     expect(new Set(paths.map((path) => metaFor(path).title)).size).toBe(

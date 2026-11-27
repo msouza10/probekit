@@ -16,6 +16,7 @@ const DnsLookup = lazy(() => import("./pages/DnsLookup"))
 const NotFound = lazy(() => import("./pages/NotFound"))
 const Ping = lazy(() => import("./pages/Ping"))
 const Sobre = lazy(() => import("./pages/Sobre"))
+const Voucher = lazy(() => import("./pages/Voucher"))
 
 function isPingResult(value: unknown): value is PingResult {
   if (typeof value !== "object" || value === null) return false
@@ -70,6 +71,7 @@ export function AnimatedRoutes() {
             <Route path="/ping" element={<PingRoute />} />
             <Route path="/dns-lookup" element={<DnsLookup />} />
             <Route path="/arquitetura" element={<Arquitetura />} />
+            <Route path="/voucher" element={<Voucher />} />
             <Route path="/sobre" element={<Sobre />} />
             {/* A seção só existe quando há pelo menos um artigo. */}
             {articles.length > 0 ? (

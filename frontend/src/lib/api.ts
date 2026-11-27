@@ -34,6 +34,31 @@ export interface DnsLookupResult {
   origin_region?: string
 }
 
+export interface VoucherItem {
+  id: string
+  url: string
+  title: string
+  vendor: string | null
+  promotion_name: string | null
+  promotion_type: string
+  discount_text: string | null
+  discount_percent: number | null
+  certifications: string[]
+  voucher_code: string | null
+  start_date: string | null
+  end_date: string | null
+  regions: string[]
+  published_at: string | null
+  source_name: string
+}
+
+export interface VouchersResponse {
+  last_collected_at: string
+  generated_at: string
+  items: VoucherItem[]
+  next_cursor: string | null
+}
+
 export interface ApiError {
   error: string
   code: string
@@ -134,6 +159,34 @@ export async function runDnsLookup(
     }
 
     return data as DnsLookupResult
+  } catch (err: unknown) {
+    if (typeof err === "object" && err !== null && "code" in err) {
+      throw err as ApiError
+    }
+    throw { ...BACKEND_UNREACHABLE }
+  }
+}
+
+export async function getVouchers(
+  opts: { limit?: number; cursor?: string } = {},
+): Promise<VouchersResponse> {
+  const params = new URLSearchParams()
+  if (opts.limit !== undefined) params.set("limit", String(opts.limit))
+  if (opts.cursor) params.set("cursor", opts.cursor)
+  const query = params.toString()
+
+  try {
+    const res = await fetch(apiUrl(`/api/vouchers${query ? `?${query}` : ""}`))
+    const data = await res.json()
+
+    if (!res.ok) {
+      throw {
+        error: data.error || "Falha ao buscar os vouchers",
+        code: data.code || "unknown_error",
+      } as ApiError
+    }
+
+    return data as VouchersResponse
   } catch (err: unknown) {
     if (typeof err === "object" && err !== null && "code" in err) {
       throw err as ApiError

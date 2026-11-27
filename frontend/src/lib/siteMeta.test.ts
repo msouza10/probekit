@@ -17,7 +17,14 @@ const article = (extra: Partial<ArticleMeta> = {}): ArticleMeta => ({
   ...extra,
 })
 
-const fixedPaths = ["/", "/ping", "/dns-lookup", "/arquitetura", "/sobre"]
+const fixedPaths = [
+  "/",
+  "/ping",
+  "/dns-lookup",
+  "/arquitetura",
+  "/voucher",
+  "/sobre",
+]
 
 describe("buildPages", () => {
   it("sem artigos tem só as páginas fixas, sem /artigos", () => {

@@ -29,6 +29,7 @@ describe("sitemapEntries", () => {
       "/ping",
       "/dns-lookup",
       "/arquitetura",
+      "/voucher",
       "/sobre",
       "/artigos",
       "/artigos/latencia-do-ping",
