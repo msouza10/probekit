@@ -2,7 +2,7 @@
 
 > **Para quem for executar:** use `superpowers:executing-plans` (ou `superpowers:subagent-driven-development`), task por task. As caixas (`- [ ]`) são o roteiro de execução; o estado oficial de cada task está na **issue** e no GitHub Project (ver [`docs/README.md`](../../README.md)). Commit, push e PR são do criador.
 
-**Goal:** o Probekit ganha a página `/voucher` e um aviso fechável na Home com as promoções de certificação de TI coletadas de hora em hora de 38 feeds públicos, analisadas por LLM e guardadas com histórico permanente.
+**Goal:** o Probekit ganha a página `/voucher` e um destaque na Home com o último voucher ativo, a partir das promoções de certificação de TI coletadas de hora em hora de 38 feeds públicos, analisadas por LLM e guardadas com histórico permanente.
 
 **Architecture:** um coletor Python (adaptado do VoucherBot) roda como Azure Container Apps Job agendado e grava itens no Cosmos DB (free tier). A API Go mantém um instantâneo em memória dos itens mais recentes e o serve em `GET /api/vouchers`. O site lê só a API.
 
@@ -63,7 +63,7 @@ infra/terraform/azure/       (raiz própria, com estado próprio: Cosmos, Contai
                              rollback-collector.yml, check-collector-freshness.yml
 .github/dependabot.yml
 frontend/src/                lib/api.ts, lib/vouchers.ts, pages/Voucher.tsx,
-                             components/voucher/*, components/LatestVoucher.tsx
+                             components/voucher/*, components/VoucherSpotlight.tsx
 ```
 
 ## Ordem e dependências
@@ -408,13 +408,13 @@ export function isSafeLink(url: string): boolean        // `isSafeUrl` e só htt
 
 **Dono:** Assistente · **Área:** frontend
 
-**Files:** Create `components/LatestVoucher.tsx` (+ teste); Modify `pages/Home.tsx` (+ teste); `lib/vouchers.ts`.
+**Files:** Create `lib/useFeaturedVoucher.ts`, `components/VoucherLine.tsx` (a linha do herói: o rótulo "Voucher ativo" e um selo sem frase com logo, "−50%" e carimbo do prazo), `components/VoucherSpotlight.tsx` (seção com o ingresso completo, abaixo da primeira tela) e `components/voucher/ticketParts.tsx` (as peças do ingresso, compartilhadas com a lista) (+ testes); Modify `pages/Home.tsx` (+ teste); `lib/vouchers.ts`.
 
-**Interfaces — Produces:** `pickBannerItem(items: VoucherItem[]): VoucherItem | null` (o primeiro com `vendor` e `discount_text`); `bannerText(item: VoucherItem): string` (por exemplo `"AWS · 50% de desconto · até 30/11"`); chave `probekit:voucher-dismissed` no `localStorage` (dentro de `try/catch`).
+**Interfaces — Produces:** `pickBannerItem(items: VoucherItem[], today: Date): VoucherItem | null` (o primeiro com `vendor` e `discount_text` **que ainda está ativo**); `useFeaturedVoucher(): { item, today } | null`, que busca uma vez e alimenta a linha do herói e a seção (cada uma recebe `featured` por props); `pillText(item, today): string` (rótulo acessível do selo da linha) e `remainingShort(days): string` ("hoje", "amanhã", "5 dias"). Sem botão de fechar e sem `localStorage`.
 
-**Testes:** nada aparece se a API falha ou se nenhum item tem fornecedor e desconto; o texto usa "até dd/mm" quando há `end_date` e a data da publicação quando não há; o link vai para `/voucher#<id>`; fechar grava o `id` e esconde; **o mesmo** `id` fechado não volta e um `id` novo volta; `localStorage` que lança erro não quebra a Home; a linha reserva a altura (`min-h`) e o fade respeita `prefers-reduced-motion`.
+**Testes:** nada aparece se a API falha, se a lista é vazia, se nenhum item tem fornecedor e desconto ou se todos acabaram; o destaque é o mais recente **ativo** (se o mais novo acabou, o próximo que vale); no dia seguinte ao término ele some, no último dia ainda aparece; o título leva a `/voucher#<id>` e há o link para `/voucher`; título com HTML aparece como texto; não há botão nem uso de `localStorage`; na Home há uma busca só para os dois lugares, a linha fica no herói, logo depois do "Último artigo" e fora do fluxo, e a seção depois de "O que já funciona"; a Home segue inteira sem eles.
 
-**Conferir:** `npm test` passa; **antes e depois**, medir o CLS da Home no Lighthouse (`chrome-devtools`), registrar os dois valores na PR, e o depois não pode ser pior.
+**Conferir:** `npm test` passa; **antes e depois**, medir o CLS da Home no Lighthouse (`chrome-devtools`), registrar os dois valores na PR, e o depois não pode ser pior. A seção fica abaixo da primeira tela de propósito (logo após o herói, o CLS a 500 px de largura passou de 0,03 para 0,22).
 
 ### Task 19: Documentação
 
