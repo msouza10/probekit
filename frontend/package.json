@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:real": "MOCK_VOUCHERS=0 vite",
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx && node scripts/prerender.mjs",
     "lint": "oxlint",
     "preview": "vite preview",

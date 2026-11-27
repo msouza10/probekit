@@ -5,6 +5,7 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vitest/config"
 import { diagramNames } from "./src/components/article/diagramNames.ts"
 import { articlesPlugin } from "./vite/articlesPlugin.ts"
+import { mockVouchersPlugin } from "./vite/mockVouchers.ts"
 import { publicImageSize } from "./vite/publicImageSize.ts"
 
 const rootDir = path.dirname(fileURLToPath(import.meta.url))
@@ -18,6 +19,9 @@ export default defineConfig(({ isSsrBuild }) => ({
       diagramNames,
       imageSize: publicImageSize(path.resolve(rootDir, "./public")),
     }),
+    // API falsa de /api/vouchers no `npm run dev`, enquanto o backend Go não
+    // serve a rota. Para usar a API de verdade: `npm run dev:real`.
+    ...(process.env.MOCK_VOUCHERS === "0" ? [] : [mockVouchersPlugin()]),
   ],
   resolve: {
     alias: {
