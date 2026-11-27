@@ -27,7 +27,7 @@ describe("Header", () => {
     expect(link).toHaveAttribute("href", "/")
   })
 
-  it("mostra o rótulo da busca só a partir de md (640px não quebra)", () => {
+  it("mostra o rótulo da busca só a partir de 960px (com Vouchers no menu, em 768–920px o cabeçalho estourava a largura)", () => {
     render(
       <MemoryRouter>
         <Header />
@@ -37,8 +37,50 @@ describe("Header", () => {
     expect(button).toHaveAttribute("aria-label", "Buscar ferramentas")
     const label = within(button).getByText("Buscar ferramenta…")
     expect(label.tagName).toBe("SPAN")
-    expect(label).toHaveClass("hidden", "md:inline")
+    expect(label).toHaveClass("hidden", "min-[960px]:inline")
+    expect(label).not.toHaveClass("md:inline")
     expect(label).not.toHaveClass("sm:inline")
+  })
+
+  it("entre 640 e 1023px o menu de cinco itens cabe: itens mais juntos e sem o ícone do GitHub (o rodapé tem o link)", () => {
+    render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+    const nav = screen.getByRole("navigation", { name: "Navegação principal" })
+
+    // Espaçamento menor abaixo de lg, o normal a partir dele.
+    for (const link of within(nav).getAllByRole("link")) {
+      expect(link).toHaveClass("px-2", "lg:px-3")
+    }
+    expect(
+      within(nav).getByRole("button", { name: "Ferramentas" }),
+    ).toHaveClass("px-2", "lg:px-3")
+    // O ícone some só na faixa sm..lg; no celular (duas linhas) e no desktop aparece.
+    expect(
+      screen.getByRole("link", { name: "Código fonte no GitHub" }),
+    ).toHaveClass("md:max-lg:hidden")
+  })
+
+  it("o cabeçalho de linha única começa em md (768px); de 640 a 767px ele fica em duas linhas, como no celular", () => {
+    const { container } = render(
+      <MemoryRouter>
+        <Header />
+      </MemoryRouter>,
+    )
+    const header = container.querySelector("header")!
+
+    expect(header).toHaveClass(
+      "md:flex",
+      "md:items-center",
+      "md:justify-between",
+    )
+    expect(header).not.toHaveClass("sm:flex")
+    // O ícone do GitHub some só na faixa em que a linha única fica apertada.
+    expect(
+      screen.getByRole("link", { name: "Código fonte no GitHub" }),
+    ).toHaveClass("md:max-lg:hidden")
   })
 
   it("renders a link to the Sobre page", () => {
@@ -94,7 +136,7 @@ describe("Header navegação", () => {
     expect(document.body.textContent).not.toMatch(/artigos|linha do tempo/i)
   })
 
-  it("com artigos, oferece o link Artigos entre Arquitetura e Sobre", () => {
+  it("com artigos, oferece o link Artigos depois de Arquitetura", () => {
     catalog.list = [{ slug: "um-artigo" }]
     render(
       <MemoryRouter>
@@ -107,6 +149,7 @@ describe("Header navegação", () => {
     expect(links.map((link) => link.textContent)).toEqual([
       "Arquitetura",
       "Artigos",
+      "Vouchers",
       "Sobre",
     ])
     expect(within(nav).getByRole("link", { name: "Artigos" })).toHaveAttribute(
@@ -115,14 +158,14 @@ describe("Header navegação", () => {
     )
   })
 
-  it("a navegação principal tem Ferramentas, Arquitetura e Sobre", () => {
+  it("a navegação principal tem Ferramentas, Arquitetura, Vouchers e Sobre", () => {
     render(
       <MemoryRouter>
         <Header />
       </MemoryRouter>,
     )
     const nav = screen.getByRole("navigation", { name: "Navegação principal" })
-    expect(within(nav).getAllByRole("link")).toHaveLength(2)
+    expect(within(nav).getAllByRole("link")).toHaveLength(3)
     expect(within(nav).getAllByRole("button")).toHaveLength(1)
   })
 })

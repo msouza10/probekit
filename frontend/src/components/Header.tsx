@@ -13,7 +13,7 @@ const normalize = (value: string) =>
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
 const navLink =
-  "rounded-md px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+  "rounded-md px-2 py-2.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground lg:px-3"
 const menuRow =
   "block rounded-md px-3 py-3 hover:bg-muted focus-visible:bg-muted"
 const implementedTools = tools.filter((tool) => tool.status !== "Planejado")
@@ -36,8 +36,8 @@ export function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 -mx-4 grid h-[var(--header-height)] grid-cols-[1fr_auto] content-center gap-x-3 gap-y-1 border-b border-border bg-background px-4 sm:-mx-8 sm:flex sm:items-center sm:justify-between sm:px-8">
-      <div className="contents sm:flex sm:items-center sm:gap-8">
+    <header className="sticky top-0 z-40 -mx-4 grid h-[var(--header-height)] grid-cols-[1fr_auto] content-center gap-x-3 gap-y-1 border-b border-border bg-background px-4 sm:-mx-8 sm:px-8 md:flex md:items-center md:justify-between">
+      <div className="contents md:flex md:items-center md:gap-8">
         <Link
           to="/"
           className="inline-flex items-center gap-2 font-serif text-subheading font-medium tracking-tight text-foreground"
@@ -53,7 +53,7 @@ export function Header() {
           Probekit
         </Link>
         <nav
-          className="col-span-2 row-start-2 -ml-3 flex items-center gap-1 sm:ml-0"
+          className="col-span-2 row-start-2 -ml-3 flex items-center gap-1 md:ml-0"
           aria-label="Navegação principal"
         >
           <Popover.Root open={menuOpen} onOpenChange={setMenuOpen}>
@@ -129,6 +129,14 @@ export function Header() {
             </NavLink>
           ) : null}
           <NavLink
+            to="/voucher"
+            className={({ isActive }) =>
+              `${navLink} ${isActive ? "bg-muted text-foreground" : ""}`
+            }
+          >
+            Vouchers
+          </NavLink>
+          <NavLink
             to="/sobre"
             className={({ isActive }) =>
               `${navLink} ${isActive ? "bg-muted text-foreground" : ""}`
@@ -138,7 +146,7 @@ export function Header() {
           </NavLink>
         </nav>
       </div>
-      <div className="col-start-2 row-start-1 flex items-center gap-1.5 sm:gap-2">
+      <div className="col-start-2 row-start-1 flex items-center gap-1.5 md:gap-2">
         <Dialog.Root
           open={searchOpen}
           onOpenChange={(open) => {
@@ -151,7 +159,9 @@ export function Header() {
             className="flex h-10 items-center gap-2 rounded-md border border-border px-3 text-xs text-muted-foreground hover:border-input hover:text-foreground"
           >
             <Search className="h-4 w-4" />
-            <span className="hidden md:inline">Buscar ferramenta…</span>
+            <span className="hidden min-[960px]:inline">
+              Buscar ferramenta…
+            </span>
           </Dialog.Trigger>
           <Dialog.Portal>
             <Dialog.Overlay className="fixed inset-0 z-70 bg-bench/60" />
@@ -245,7 +255,7 @@ export function Header() {
           target="_blank"
           rel="noreferrer"
           aria-label="Código fonte no GitHub"
-          className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground max-[360px]:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground max-[360px]:hidden md:max-lg:hidden"
         >
           <GithubIcon className="h-4 w-4" />
         </a>

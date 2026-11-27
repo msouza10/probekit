@@ -1,6 +1,8 @@
 import { ArrowRight } from "lucide-react"
 import { Link } from "react-router-dom"
 import { AsciiOwl } from "@/components/AsciiOwl"
+import { VoucherLine } from "@/components/VoucherLine"
+import { VoucherSpotlight } from "@/components/VoucherSpotlight"
 import { QuickPing } from "@/components/QuickPing"
 import { RepoPulse } from "@/components/RepoPulse"
 import { Reveal } from "@/components/Reveal"
@@ -10,6 +12,7 @@ import {
 } from "@/components/LatestArticle"
 import LogoCloudBlock from "@/components/ui/logo-cloud-3"
 import { articles } from "@/lib/articles"
+import { useFeaturedVoucher } from "@/lib/useFeaturedVoucher"
 import { tools } from "@/lib/tools"
 
 const repository = "https://github.com/msouza10/probekit"
@@ -29,13 +32,15 @@ function ExternalLink({ href, children }: { href: string; children: string }) {
 export function Home() {
   // O catálogo vem do mais novo para o mais antigo; sem artigo, nada aparece.
   const latest = articles[0]
+  // Uma busca só alimenta a faixa do topo e a seção.
+  const featured = useFeaturedVoucher()
   return (
     <main className="flex flex-col gap-16 pt-8 pb-8 sm:gap-28 sm:pt-20 lg:pt-24">
       <section
         aria-labelledby="home-title"
-        className="flex flex-col gap-10 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] lg:items-center lg:gap-x-12"
+        className="mb-6 flex flex-col gap-10 sm:mb-0 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,32rem)] lg:items-center lg:gap-x-12"
       >
-        <div className="flex flex-col gap-6">
+        <div className="relative flex flex-col gap-6">
           <Reveal>
             <h1
               id="home-title"
@@ -62,6 +67,14 @@ export function Home() {
             <Reveal delay={0.32}>
               <LatestArticleLine article={latest} />
             </Reveal>
+          ) : null}
+          {/* Logo abaixo do "Último artigo", fora do fluxo, na folga até a próxima
+              seção (no celular o herói ganha 24 px de margem para ela caber):
+              aparece quando a API responde sem empurrar nada (CLS). */}
+          {featured ? (
+            <div className="absolute top-full left-0 mt-5 max-w-full">
+              <VoucherLine featured={featured} />
+            </div>
           ) : null}
         </div>
         <AsciiOwl />
@@ -111,6 +124,10 @@ export function Home() {
           aqui quando estiverem rodando.
         </p>
       </section>
+
+      {/* O ingresso completo, abaixo da primeira tela, onde aparecer não desloca
+          nada que já esteja à vista (CLS). */}
+      {featured ? <VoucherSpotlight featured={featured} /> : null}
 
       <div className={latest ? "grid sm:grid-cols-2 sm:gap-x-12" : undefined}>
         <section aria-labelledby="fechamento-title" className="sm:h-full">

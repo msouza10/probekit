@@ -217,8 +217,14 @@ describe("Home", () => {
     const fetchSpy = vi.spyOn(globalThis, "fetch")
     renderHome()
     const urls = fetchSpy.mock.calls.map(([input]) => String(input))
+    // Ping e DNS nunca disparam sozinhos. O aviso de voucher só lê a lista
+    // (GET /api/vouchers) e é testado em Home.voucher.test.tsx.
     expect(
-      urls.filter((url) => !url.startsWith("https://api.github.com/")),
+      urls.filter(
+        (url) =>
+          !url.startsWith("https://api.github.com/") &&
+          !url.includes("/api/vouchers"),
+      ),
     ).toEqual([])
   })
 
@@ -322,8 +328,14 @@ describe("Home e o artigo mais recente", () => {
     renderHome()
     const urls = fetchSpy.mock.calls.map(([input]) => String(input))
 
+    // Ping e DNS nunca disparam sozinhos. O aviso de voucher só lê a lista
+    // (GET /api/vouchers) e é testado em Home.voucher.test.tsx.
     expect(
-      urls.filter((url) => !url.startsWith("https://api.github.com/")),
+      urls.filter(
+        (url) =>
+          !url.startsWith("https://api.github.com/") &&
+          !url.includes("/api/vouchers"),
+      ),
     ).toEqual([])
   })
 })
